@@ -12,12 +12,27 @@ As of 2013, Ruby is almost equivalent to Python:
 Advantages of Python:
 
 - part of the LSB
-- much more used. Probably the main reason why Ruby is used is RoR.
-- no single punctuation character variables:
 
-    - `$:` for require path
+- much more used. Probably the main reason why Ruby is used is RoR.
+
+- Ruby uses many punctuation characters (often based on `sh` or `perl`)
+    where names would be saner.
+
+    - `$:` for `require` path
+    - `@`  for class instance variables
+    - `?`, `!` and `=` allowed as method name suffixes
 
 - no .each do
+
+- constant case matters inside modules.
+
+        module m
+            I = 1
+            i = 2
+        end
+
+        #m::i #error
+        m::I
 
 Disadvantages of Python:
 
@@ -45,7 +60,7 @@ Meet the rvm dependencies:
     rvm requirements
 
 This seems to generate instructions to the system's package manager
-to install dependencies.
+to install dependencif()es.
 
 Install a specific version of Ruby:
 
@@ -87,3 +102,9 @@ Sample output:
 
 Gems installed from now on with `gem install <gemname>` will go there,
 and be visible only to the given Ruby version.
+
+#sources
+
+- <http://rubylearning.com/satishtalim/tutorial.html>
+
+    Good intro tutorial.

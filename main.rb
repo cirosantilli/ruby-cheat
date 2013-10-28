@@ -25,21 +25,47 @@
     # Newlines dispense semicolon `;`
     # Semicolon `;` needed for multiple statements on a single line.
 
-    1 + 1; 1 + 1
+        1 + 1; 1 + 1
 
     # If a `+` is encountered at the end of line, then the line continues:
 
-    1 +
-    1 == 2 or raise
+        1 +
+        1 == 2 or raise
 
     # Spaces may disambiguate certain statements. See function
 
+##identifier chars
+
+    # Most of the rules are like for C: `a-zA-Z0-9_`, not start in `0-9`, canse sensitive.
+
+    # But:
+
+    # - method names can end in `?`, `!` or `=`. This has no syntatical value,
+    #   but each has a very well defined and followed convention.
+
+    # - variable names that start with an Upper case letter are considered constants..
+    #   Attempting to modify them leads to a warning by default.
+
+            ii = 0
+            ii = 1
+
+            # Ok: definition
+            Ii = 0
+            # Warning: modifying constant
+            #Ii = 1
+
+    # - class names must start with an upper case character, or an error is generated.
+
+        # Error:
+
+            #class c end
+
 ##built-in variables
 
-    puts("RUBY_VERSION = #{RUBY_VERSION}")
-    puts("RUBY_PATCHLEVEL = #{RUBY_PATCHLEVEL}")
-    puts("__FILE__ = #{__FILE__}")
-    puts("__LINE__ = #{__LINE__}")
+        puts("RUBY_VERSION = #{RUBY_VERSION}")
+        puts("RUBY_PATCHLEVEL = #{RUBY_PATCHLEVEL}")
+        puts("__FILE__ = #{__FILE__}")
+        puts("__LINE__ = #{__LINE__}")
 
 ##string
 
@@ -158,6 +184,12 @@ ANY_STRING_OK
 
         ['ab', 'cd'].join(' ') == 'ab cd' or raise
 
+    # Special syntax for an array of strings literal:
+
+        ss = %w{ ab cd ef }
+        ss[0] == 'ab' or raise
+        ss[1] == 'cd' or raise
+
 ##range
 
     # Different from Array.
@@ -221,6 +253,17 @@ ANY_STRING_OK
             not defined? not_yet_defined or raise
             not_yet_defined = 1
             defined? not_yet_defined or raise
+
+##loops
+
+    ##for in loop
+
+        #is = (1..3)
+        #j = 0
+        #(1..3).each do |i|
+            #is[j] == i or raise
+            #j += 1
+        #end
 
 ##function
 
@@ -314,6 +357,64 @@ ANY_STRING_OK
 
             f -1 == f(-1) or raise
 
+    ##allowed characters
+
+        # Besides the usual alphanumeric characters,
+        # the last character of a method name can also be either a question mark `?`
+        # bang `!` or equals sign `=`.
+
+        # `?` and `!` have no syntaxical value, and their meaning is
+        # fixed by convention only. `=` also has a slight sintaxical meaning.
+
+        # ?: the method returns True or False. It queries the state of an object.
+
+            $i = 0
+            def zero?()
+                $i == 0
+            end
+
+            zero?() or raise
+
+        # !: this is the in-place version of a method.
+
+            def inc()
+                $i + 1
+            end
+
+            def inc!()
+                $i += 1
+            end
+
+            $i = 0
+            inc() == 1
+            $i == 0
+            inc!() == 1
+            $i == 1
+
+        # =: indicates a set method, specially to differenciate from the get method.
+
+            class EqualSuffix
+                def initialize(i)
+                    @int = i
+                end
+                def int()
+                    @int
+                end
+                def int=(i)
+                    @int = i
+                end
+            end
+
+            o = EqualSuffix.new(1)
+            o.int() == 1 or raise
+            o.int=(2)
+            o.int() == 2 or raise
+
+        # `=` gives the method a new possible setter syntax:
+
+            o.int = 3
+            o.int() == 3 or raise
+
     ##global variable
 
             $i = 1
@@ -347,29 +448,38 @@ ANY_STRING_OK
             # Error: `i` undefined.
             #f()
 
-##loops
-
-    ##for in loop
-
-        #is = (1..3)
-        #j = 0
-        #(1..3).each do |i|
-            #is[j] == i or raise
-            #j += 1
-        #end
-
 ##class
+
+    # Everyting is an object, including integers and floats:
+
+        1.class   == Fixnum or raise
+        1.object_id
+        1.1.class == Float  or raise
+        nil.class == NilClass  or raise
+        nil.object_id
+
+    # Define a class:
 
         class C
 
-            @@class_i
+            @@class_i = 1
 
             def initialize(i)
                 @member_i = i
             end
 
             def method()
-                @member_i
+                # Call another method of the instance:
+
+                    self.method2() == 2 or raise
+
+                # Access an instance variable:
+
+                    @member_i
+            end
+
+            def method2()
+                2
             end
 
             def C.class_method()
@@ -395,9 +505,66 @@ ANY_STRING_OK
 
             C.class_method() == 1 or raise
 
-        # Error: cannot access class methods directly from instances:
+        # Error: cannot access class methods or members directly from instances:
 
             #c.class_method() == 1 or raise
+            #c.class_i == 1 or raise
+
+    # Operator overload:
+
+        class OperatorOverload
+            def +(i)
+                2
+            end
+        end
+
+        OperatorOverload.new() + OperatorOverload.new() == 2
+
+    ##inheritance
+
+            class Base
+                def base_method()
+                    return 1
+                end
+            end
+
+            class Derived < Base
+                def derived_method()
+                    return 2
+                end
+            end
+
+            d = Derived.new()
+
+    ##reflection
+
+            class ReflectionBase
+                def m_base()
+                end
+            end
+
+            class ReflectionDerived < ReflectionBase
+                def ReflectionDerived.c()
+                end
+
+                def m()
+                end
+            end
+
+        # class:
+
+            ReflectionDerived.new().class == ReflectionDerived
+            ReflectionDerived.class == Class
+
+        # Too verbose:
+
+            #puts ReflectionDerived.methods.sort
+            #puts ReflectionDerived.instance_methods
+
+        # Exclude inherited methods:
+
+            puts "instance_methods = "
+            puts ReflectionDerived.instance_methods(false).sort
 
 ##module
 
@@ -409,15 +576,39 @@ ANY_STRING_OK
                 1
             end
 
+            class C
+                def f()
+                    1
+                end
+            end
+
+            # Error: must be uppercase:
+            #class c
+            #end
+
             i = 1
+            I = 2
+            # Error:
+            #M.i = 3
+            #M.I = 3
 
         end
 
         M.f() == 1 or raise
+        M::f() == 1 or raise
 
-    # Error: not possible to access variables in a module directly, only functions:
+        #M.C.new().f == 1 or raise
+        M::C.new().f == 1 or raise
+
+    # Dot `.` and double colon `:` are the same execpt for constants,
+    # in which case only the semicolon works if the constant starts with upper case.
 
         #M.i == 1 or raise
+        #M.I == 1 or raise
+        #M::i == 2 or raise
+        M::I == 2 or raise
+        # Warning: modifying already initialized constant.
+        #M::I = 3
 
     # Error: cannot add variables to the module after its creation:
 
@@ -432,6 +623,10 @@ ANY_STRING_OK
         end
         M.f() == 1 or raise
         M.g() == 1 or raise
+
+    ##include
+
+        # Inheritance like effect with modules.
 
 ##block
 
@@ -472,7 +667,7 @@ ANY_STRING_OK
 
         #require 'main2'
 
-        puts('require rearch path:')
+        puts('require search path:')
         puts($:)
 
 ##require_relative
@@ -562,6 +757,10 @@ ANY_STRING_OK
         puts s
 
 ##process
+
+    ##id of current process
+
+            print "$$ = #{$$}"
 
     ##backticks
 
