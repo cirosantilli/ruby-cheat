@@ -2,45 +2,84 @@ Ruby cheatsheets and mini projects.
 
 Interactive REPL interface: `irb`.
 
-# ruby vs python
+#ruby vs python
 
 As of 2013, Ruby is almost equivalent to Python:
 
 - interpreted
 - dynamically typed
+- large cross platform stdlib
 
 Advantages of Python:
 
 - part of the LSB
 
-- much more used. Probably the main reason why Ruby is used is RoR.
+- much more used. Probably the major reason why Ruby is used is RoR.
 
 - Ruby uses many punctuation characters (often based on `sh` or `perl`)
-    where names would be saner.
+    where using actual names would be saner.
 
     - `$:` for `require` path
     - `@`  for class instance variables
     - `?`, `!` and `=` allowed as method name suffixes
 
-- no .each do
+- `.each do` looks insane
 
-- constant case matters inside modules.
+- identifier first letter case matters:
 
-        module m
-            I = 1
-            i = 2
-        end
-
-        #m::i #error
-        m::I
+        i = 0
+        i = 1
+        I = 0
+        I = 1 #warning
 
 Disadvantages of Python:
 
-- confusing global functions: `len` vs `split`.
+- confusing global functions in places where methods would be adequate: `len` vs `split`.
+
+- statements that could be functions such as `print` (corrected in Python 3),
+    `del`, `in`, etc.
+
+- Ruby built-in types look more like objects than Python's.
+
+- Ruby have some important tools on its stdlib, including:
+
+    - erb: a ruby/HTML template language, much like PHP.
+    - rake: a Makefile system.
+
+    In Python, those tools are lacking a good implementation as of 2013.
 
 It is a shame that the FOSS community must be divided yet again.
 
-# rvm
+#programs that use ruby
+
+The most notable ones are:
+
+- ruby on rails. Major importance to the Ruby language.
+
+    Powers:
+
+    - Github
+    - parts of Twitter
+
+- rake
+- GRUB2. [This](http://www.amazon.co.uk/Ruby-Grub-Abi-Burlingham/dp/1848120346) is the reason why!
+- puppet
+- Mac homebrew
+
+#gem
+
+A gem is like a Python package: an interface which allows to install and publish
+Ruby projects.
+
+It is recommended that you use Bundler instead of gem to install gems,
+since bundler also takes care of dependency issues.
+
+The de-facto standard web interface for gems is `rubygems.org`,
+which is open source rails application.
+
+Gem metadata is specified on a `.gemspec` file.
+
+#rvm
 
 Ruby version manager.
 
@@ -102,6 +141,58 @@ Sample output:
 
 Gems installed from now on with `gem install <gemname>` will go there,
 and be visible only to the given Ruby version.
+
+#rack
+
+Standard Ruby SGI interface.
+
+Action to run specified in a `config.ru` file. This is called a *rackup file*.
+
+#unicorn
+
+Rack HTTP server.
+
+Must be run from  directory that contains a `config.ru` file,
+for example a root of a rails template.
+
+Can be used both for production and tests.
+
+    unicorn
+
+Run test rails server:
+
+    bundle exec unicorn -p 3000
+
+#foreman
+
+Foreman is a tool to facilitate web app deployment.
+
+foreman configuration is found on a file named `Procfile`.
+
+The `Procfile` is used by the application called `foreman`.
+
+The line:
+
+    web: gunicorn main:app
+
+Simply says that web servers should run the command `gunicorn main:app`
+(gunicorn is a Python WSGI server).
+
+Sample one web app, one worker and one clock dyno:
+
+    web: gunicorn hello:app
+    worker: python worker.py
+    clock: python clock.py
+
+To test the project locally you can use:
+
+    foreman start
+
+This will run all the commands in the procfile.
+
+To set environment variables for a project only, foreman adds all environment
+variables in the `.env` file to the running environment.
+This file contains local only information, and should not be uploaded.
 
 #sources
 
