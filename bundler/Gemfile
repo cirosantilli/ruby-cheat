@@ -1,0 +1,26 @@
+# Which URL will provide the Gems.
+source 'https://rubygems.org'
+
+# Require a ruby version.
+# If the version is not met, abort.
+# Does not change the current ruby in rvm.
+ruby '>= 2'
+
+# Require an engine (Ruby implementation):
+#ruby '1.9.3', :engine => 'jruby', :engine_version => '1.6.7'
+
+# Install exact version.
+gem 'rails', '4.0.0'
+
+# Install the latest version after given version.
+gem 'uglifier', '>= 1.3.0'
+
+# `~>` installs the latest version that does not increase the before last version number.
+# Examples:
+# - `~> 2.0.3` is identical to `>= 2.0.3` and `< 2.1`.
+# - `~> 2.1` is identical to `>= 2.1` and `< 3.0`.
+# - `~> 2.2.beta` will match prerelease versions like `2.2.beta.12`.
+gem 'sass-rails', '~> 4.0.0'
+
+# It is possible to get gems from git repositories:
+#gem 'nokogiri', :git => 'git://github.com/tenderlove/nokogiri.git', :branch => '1.4'

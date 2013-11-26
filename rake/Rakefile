@@ -1,0 +1,181 @@
+##tasks
+
+  ##task
+
+    # General task.
+
+    # Single prerequisite:
+
+      task({:a => :b}) do
+        puts "a"
+      end
+
+    # No prerequisite:
+
+      task(:b) do
+        puts "b"
+      end
+
+    # Does nothing:
+
+      task(:lazy)
+
+    # can ommit the `do end` pair.
+
+    # ERROR: circular dependency. Only fails if this taks is to be run.
+
+      task(:circ => :circ)
+
+    # Multiple parallel prerequisites:
+
+      task({:c => [:d, :e]}) do
+        puts "c"
+      end
+
+      task(:d) do
+        puts "d"
+      end
+
+      task(:e) do
+        puts "e"
+      end
+
+    # Multiple parallel prerequisites and does nothing:
+
+      task({:de => [:d, :e]})
+
+    # The following will be named `a_str`:
+
+      task("a_str") do
+        puts "a_str"
+      end
+
+    # The following will be named 1:
+
+      task(1) do
+        puts 1
+      end
+
+    # If there are multiple tasks with the same name, all are run:
+
+      task(:multi) do
+        puts "multiple_symbol"
+      end
+
+      task("multi") do
+        puts "multiple_str"
+      end
+
+    # Taks context:
+
+      task({:ctx => [:a, :b]}) do |t|
+        puts "name = " + t.name()
+        puts "prerequisites = " + t.prerequisites.to_s()
+      end
+
+    # Call one task from another explicitly.
+
+      task :before do
+        puts "before"
+        Rake::Task[:after].invoke
+      end
+
+      task :after do
+        puts "after"
+      end
+
+    ##namespace
+
+      # Creates namespaces for tasts.
+
+      # Those do not affect File tasks.
+
+      # Tasks within namesapces can be called from command line or
+      # from other taks dependencies as `namespace::taskname`.
+
+        namespace("nm1") do
+          task(:t) do
+            puts "nm1:t"
+          end
+
+          # Not possible to call only with `nm1_only`.
+          task(:nm1_only) do
+            puts "nm1:nm1_only"
+          end
+        end
+
+        namespace("nm2") do
+          task(:t) do
+            puts "nm2:t"
+          end
+
+          # Depends on the other task in the same scope:
+
+          task(:t2 => :t) do
+            puts "t2"
+          end
+
+          # This is how we refer to the task on the outter scope:
+          # TODO error
+
+          task(:t_out => "::t") do
+            puts "nm2:t_out"
+          end
+        end
+
+        task(:t) do puts "t" end
+
+        task({:nm => ["nm1:t", "nm2:t"]})
+
+  ##desc
+
+    # Creates a comment for the next create task.
+
+    # It will now appear when running `rake -T`.
+
+      desc("Comment for next task.")
+      task(:t)
+
+      namespace("nm_comment") do
+        desc("Comment inside namespce.")
+        task(:t)
+      end
+
+##rules
+
+  ##sh
+
+    # Execute command on default shell.
+
+      #sh("ls")
+
+  ##file
+
+    # Creates a task that will create a file.
+
+    # Like make, rake checks timestamps.
+
+    # Both sides of the map are supposed to be files or directories.
+
+      file({"a.tmp" => "tmp"}) do
+        sh("echo a > tmp/a.tmp")
+      end
+
+  ##directory
+
+    # Creates a task htat creates a directory:
+
+      directory("tmp")
+
+##command line args
+
+  # It is possible to pass command line arguments to tasks.
+
+  #TODO
+
+##applications
+
+    task :clean do
+      require 'fileutils'
+      FileUtils.rm_rf 'tmp'
+    end
