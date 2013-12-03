@@ -32,7 +32,7 @@ require 'tempfile'
   # If a `+` is encountered at the end of line, then the line continues:
 
     1 +
-    1 == 2 or raise()
+    1 == 2 or raise
 
   # Spaces may disambiguate certain statements. See function
 
@@ -65,16 +65,24 @@ require 'tempfile'
 
       #class c end
 
-##built-in variables
+##variables
 
-    puts("RUBY_VERSION = #{RUBY_VERSION}")
-    puts("RUBY_PATCHLEVEL = #{RUBY_PATCHLEVEL}")
-    puts("__FILE__ = #{__FILE__}")
-    puts("__LINE__ = #{__LINE__}")
+    not defined? not_yet_defined or raise
+    a = 1
+    defined? a or raise
+
+  ##built-in variables
+
+      puts("RUBY_VERSION = #{RUBY_VERSION}")
+      puts("RUBY_PATCHLEVEL = #{RUBY_PATCHLEVEL}")
+      puts("__FILE__ = #{__FILE__}")
+      puts("__LINE__ = #{__LINE__}")
 
 ##object
 
   # Base class of all types.
+
+  # Also note that it includes the Kernel module.
 
   ##inspect
 
@@ -87,6 +95,12 @@ require 'tempfile'
     # more adapted for debugging than end-user display.
 
     # Same as Python `repr` relative to `str`.
+
+##kernel
+
+  # Included by the Object class.
+
+  # It contains therefore many *built-in* methods such as print, puts, Array, etc.
 
 ##string
 
@@ -101,12 +115,12 @@ require 'tempfile'
 
       # The percent allows to use any delimier character:
 
-        'a' == %<a> or raise()
-        'a' == %!a! or raise()
+        'a' == %<a> or raise
+        'a' == %!a! or raise
 
       # Must be an special char:
 
-        #'a' == %bab or raise()
+        #'a' == %bab or raise
 
       # `q` is optional. Other modifiers exist:
 
@@ -114,9 +128,9 @@ require 'tempfile'
       # - `x` for backtick executes
 
         s = 'a'
-        '#{s}' == %q!#{s}! or raise()
-        "#{s}" == %Q!#{s}! or raise()
-        %x<ruby -e "print 1"> == '1' or raise()
+        '#{s}' == %q!#{s}! or raise
+        "#{s}" == %Q!#{s}! or raise
+        %x<ruby -e "print 1"> == '1' or raise
 
   ##compare strings
 
@@ -126,43 +140,43 @@ require 'tempfile'
 
     # `==` and `eql?` are the same and compare by content
 
-      s1 == s2 or raise()
-      s1 != s3 or raise()
-      s1.eql?(s2) or raise()
-      not s1.eql?(s3) or raise()
+      s1 == s2 or raise
+      s1 != s3 or raise
+      s1.eql?(s2) or raise
+      not s1.eql?(s3) or raise
 
     # `equal?` compares by instance:
 
-      not s1.equal?(s2) or raise()
+      not s1.equal?(s2) or raise
 
   # Concatenate:
 
-    'a' + 'b' == 'ab' or raise()
+    'a' + 'b' == 'ab' or raise
 
   ##format
 
       s = 'bc'
-      "a#{s}d" == 'abcd' or raise()
+      "a#{s}d" == 'abcd' or raise
 
     # Only works for double quoted strings:
 
       s = 'a'
-      '#{s}' == '#' + '{s}' or raise()
+      '#{s}' == '#' + '{s}' or raise
 
     # Arbitrary delimier:
 
       s = "a"
-      '#{s}' == '#' + '{s}' or raise()
+      '#{s}' == '#' + '{s}' or raise
 
     # Escape:
 
       s = 'a'
-      "\#{s}" == '#' + '{s}' or raise()
+      "\#{s}" == '#' + '{s}' or raise
 
     # Brackets required:
 
       s = 'a'
-      "#s" == '#s' or raise()
+      "#s" == '#s' or raise
 
     # Brackets not required for instance and class variables:
 
@@ -175,16 +189,16 @@ require 'tempfile'
           "#@@i#@i"
         end
       end
-      c = C.new()
-      c.method() == "01" or raise()
+      c = C.new
+      c.method() == "01" or raise
 
     # Anything can be formatted (TODO what does it have to implement?)
 
-      "#{1}"          == '1' or raise()
-      "#{[1, 2, 3]}"  == '[1, 2, 3]' or raise()
-      "#{1..3}"       == '1..3' or raise()
+      "#{1}"          == '1' or raise
+      "#{[1, 2, 3]}"  == '[1, 2, 3]' or raise
+      "#{1..3}"       == '1..3' or raise
       h = {1=>'one', 2=>'two'}
-      "#{h}"          == '{1=>"one", 2=>"two"}' or raise()
+      "#{h}"          == '{1=>"one", 2=>"two"}' or raise
 
   ##heredoc
 
@@ -192,13 +206,13 @@ require 'tempfile'
 a
 b
 EOF
-    s == "a\nb\n" or raise()
+    s == "a\nb\n" or raise
 
     s = <<ANY_STRING_OK
 a
 ANY_STRING_OK
 
-    s == "a\n" or raise()
+    s == "a\n" or raise
 
 ##symbols
 
@@ -217,12 +231,12 @@ ANY_STRING_OK
     #:1
     :s1
 
-    not "abc".equal?("abc") or raise()
-    :abc.equal?(:abc) or raise()
+    not "abc".equal?("abc") or raise
+    :abc.equal?(:abc) or raise
 
   # Strings are different from symbols.
 
-    "abc" != :abc or raise()
+    "abc" != :abc or raise
 
 ##list
 
@@ -233,71 +247,71 @@ ANY_STRING_OK
   # Contains any number of objects of any type.
 
     is = [0, 'a', 'abc']
-    is[0] == 0 or raise()
-    is[1] == 'a' or raise()
+    is[0] == 0 or raise
+    is[1] == 'a' or raise
 
   # Also possible to create via explicit constructor:
 
-    Array.new()        == [] or raise()
-    Array.new(3)       == [nil, nil, nil] or raise()
-    Array.new(3, true) == [true, true, true] or raise()
+    Array.new        == [] or raise
+    Array.new(3)       == [nil, nil, nil] or raise
+    Array.new(3, true) == [true, true, true] or raise
 
   # The following works because the `[]` operator overload can have any number of arguments:
 
-    Array.[](1, 2) == [1, 2] or raise()
-    Array[1, 2]    == [1, 2] or raise()
+    Array.[](1, 2) == [1, 2] or raise
+    Array[1, 2]    == [1, 2] or raise
 
   # Special syntax for an array of strings literal:
 
     ss = %w{ ab cd ef }
-    ss == ['ab', 'cd', 'ef'] or raise()
+    ss == ['ab', 'cd', 'ef'] or raise
 
   # Range array:
 
-    (0..2).to_a() == [0, 1, 2] or raise()
-    Array(0..2)   == [0, 1, 2] or raise()
+    (0..2).to_a() == [0, 1, 2] or raise
+    Array(0..2)   == [0, 1, 2] or raise
 
   # Length:
 
-    [0, 1, 2].length() == 3 or raise()
+    [0, 1, 2].length() == 3 or raise
 
   # Unpack:
 
     i, j = [0, 1]
-    i == 0 or raise()
-    j == 1 or raise()
+    i == 0 or raise
+    j == 1 or raise
 
   # Array to string:
 
-    ['ab', 'cd'].join(' ') == 'ab cd' or raise()
+    ['ab', 'cd'].join(' ') == 'ab cd' or raise
 
   # Slice: specifies the `[start, number of args]`:
 
     a = [0, 1, 2, 3]
-    a[0, 2] == [0, 1] or raise()
-    a[0, 3] == [0, 1, 2] or raise()
-    a[1, 2] == [1, 2] or raise()
+    a[0, 2] == [0, 1] or raise
+    a[0, 3] == [0, 1, 2] or raise
+    a[1, 2] == [1, 2] or raise
 
   ##append inplace ##<<
 
       a = [1]
-      a << 2 == [1, 2] or raise()
-      a == [1, 2] or raise()
+      a << 2 == [1, 2] or raise
+      a == [1, 2] or raise
 
     # Returns reference to the array:
 
       a = [1]
       b = a << 2
       b[0] = -1
-      b == [-1, 2] or raise()
+      b == [-1, 2] or raise
 
   ##concatenate
 
     # Create new array.
 
       a = [0, 1]
-      a + [2, 3] == (0..3).to_a or raise()
-      a == [0, 1] or raise()
+      a + [2, 3] == (0..3).to_a or raise
+      a == [0, 1] or raise
 
 ##range
 
@@ -311,25 +325,25 @@ ANY_STRING_OK
 
   # Convert to array:
 
-    (1..3).to_a == [1, 2, 3] or raise()
+    (1..3).to_a == [1, 2, 3] or raise
 
   # Triple dot excludes end:
 
-    (1...3).to_a == [1, 2] or raise()
+    (1...3).to_a == [1, 2] or raise
 
   # Possible on chars and strings:
 
-    ('a'..'c').to_a == ['a', 'b', 'c'] or raise()
-    ('aa'..'ac').to_a == ['aa', 'ab', 'ac'] or raise()
+    ('a'..'c').to_a == ['a', 'b', 'c'] or raise
+    ('aa'..'ac').to_a == ['aa', 'ab', 'ac'] or raise
 
   # Range test:
 
-    (1..3) === 2 or raise()
-    (1..3) != 2 or raise()
+    (1..3) === 2 or raise
+    (1..3) != 2 or raise
 
   # Not reflexive:
 
-    not 2 === (1..3) or raise()
+    not 2 === (1..3) or raise
 
 ##map
 
@@ -338,8 +352,8 @@ ANY_STRING_OK
 ##hash
 
     m = {1=>'one', 2=>'two'}
-    m[1] == 'one' or raise()
-    m[2] == 'two' or raise()
+    m[1] == 'one' or raise
+    m[2] == 'two' or raise
 
   # It is possible to ommit the `{}` when inside a function call:
 
@@ -347,8 +361,8 @@ ANY_STRING_OK
       h[1]
     end
 
-    f(1=>'one', 2=>'two') == 'one' or raise()
-    f 1=>'one', 2=>'two'  == 'one' or raise()
+    f(1=>'one', 2=>'two') == 'one' or raise
+    f 1=>'one', 2=>'two'  == 'one' or raise
 
   # A new syntax was added in 1.9 for hashes with symbol keys.
   # See what symbol is if you don't know yet.
@@ -356,7 +370,7 @@ ANY_STRING_OK
     if RUBY_VERSION >= '1.9'
       m  = {:a=>1, :b=>2}
       m2 = {a: 1, b: 2}
-      m == m2 or raise()
+      m == m2 or raise
     end
 
   ##hash foreach iteration
@@ -368,19 +382,68 @@ ANY_STRING_OK
       i = 0
       m.each() do |k, v|
         if RUBY_VERSION >= '1.9'
-          k == keys[i] or raise()
+          k == keys[i] or raise
         end
-        m[k] == v or raise()
+        m[k] == v or raise
         i += 1
       end
 
+  # Non existing keys simply return nil value, no exception:
+
+    x = {a: 1}
+    x[:b] == nil or raise
+
+  # It is possible to change the default via the explicit constructor:
+
+    x = Hash.new(1)
+    x[:a] == 1 or raise
+
+  ##get ##fetch
+
+    # Python get is called fetch: get val or given default if not present.
+
+      h = {a: 1, b: 2}
+      h.fetch(:a, 3) == 1 or raise
+      h.fetch(:d, 3) == 3 or raise
+
 ##operators
+
+  ##|| vs or
+
+    # TODO
+
+  ##||= ##or equals
+
+    # Assign only if var is neither nil nor false.
+
+    # Same as `x || x = y`.
+
+      x = nil
+      x ||= 1
+      x == 1 or raise
+
+      x = false
+      x ||= 2
+      x == 2 or raise
+
+      x = 3
+      x ||= 4
+      x == 3 or raise
+
+    # *Not* the same as `x = x || y`, because the assign only happens if var is neither nil nor false,
+    # but an assign always happens for `x = x || y`.
+
+    # Confusing, since this is different from the rest of the `+=` family, which always assigns.
+
+      h = Hash.new(1)
+      h[:a] ||= 2
+      h.size == 0 or raise
 
   ##defined?
 
-      not defined? not_yet_defined or raise()
+      not defined? not_yet_defined or raise
       not_yet_defined = 1
-      defined? not_yet_defined or raise()
+      defined? not_yet_defined or raise
 
 ##loops
 
@@ -392,11 +455,11 @@ ANY_STRING_OK
       j = 0
       is = (0..2).to_a
       while i < 3 do
-        is[j] == i or raise()
+        is[j] == i or raise
         i += 1
         j += 1
       end
-      j == 3 or raise()
+      j == 3 or raise
 
     # `do` is optional:
 
@@ -404,26 +467,26 @@ ANY_STRING_OK
       j = 0
       is = Array(0..2)
       while i < 3
-        is[j] == i or raise()
+        is[j] == i or raise
         i += 1
         j += 1
       end
-      j == 3 or raise()
+      j == 3 or raise
 
 
     # While modifier for single statement:
 
       i = 0
       i += 1 while i < 3
-      i == 3 or raise()
+      i == 3 or raise
 
     # Single statement only:
 
       j = 0
       i = 0
       j += 1; i += 1 while i < 3
-      i == 3 or raise()
-      j == 1 or raise()
+      i == 3 or raise
+      j == 1 or raise
 
     # While modifier multiple statements:
 
@@ -431,11 +494,11 @@ ANY_STRING_OK
       j = 0
       is = (0..2).to_a
       begin
-        is[j] == i or raise()
+        is[j] == i or raise
         i += 1
         j += 1
       end while i < 3
-      j == 3 or raise()
+      j == 3 or raise
 
   ##until
 
@@ -445,11 +508,11 @@ ANY_STRING_OK
       j = 0
       is = (0..2).to_a
       until i == 3 do
-        is[j] == i or raise()
+        is[j] == i or raise
         i += 1
         j += 1
       end
-      j == 3 or raise()
+      j == 3 or raise
 
   ##for in
 
@@ -462,7 +525,7 @@ ANY_STRING_OK
         js[k] == j
         k += 1
       end
-      k == ijs.length or raise()
+      k == ijs.length or raise
 
     # Do is optional
 
@@ -472,7 +535,7 @@ ANY_STRING_OK
         is[k] == i
         j += 1
       end
-      j == is.length or raise()
+      j == is.length or raise
 
     ##each
 
@@ -481,10 +544,10 @@ ANY_STRING_OK
         $is = [0, 1, 2]
         $i = 0
         is.each() {
-          $is[$i] == $i or raise()
+          $is[$i] == $i or raise
           $i += 1
         }
-        j == 2 or raise()
+        j == 2 or raise
 
       # If no loop variables will be needed, the `||` can be omitted:
 
@@ -492,7 +555,7 @@ ANY_STRING_OK
         (1..3).each() do
           i += 1
         end
-        i == 3 or raise()
+        i == 3 or raise
 
 ##range
 
@@ -504,10 +567,10 @@ ANY_STRING_OK
       is = [1, 2, 3]
       j = 0
       (1..3).each() do |i|
-        is[j] == i or raise()
+        is[j] == i or raise
         j += 1
       end
-      j == 3 or raise()
+      j == 3 or raise
 
   ##step
 
@@ -516,20 +579,20 @@ ANY_STRING_OK
       is = [1, 3, 5]
       j = 0
       (1..5).step(2) do |i|
-        is[j] == i or raise()
+        is[j] == i or raise
         j += 1
       end
-      j == 3 or raise()
+      j == 3 or raise
 
   ##times
 
       is = [0, 1, 2]
       j = 0
       3.times() do |i|
-        is[j] == i or raise()
+        is[j] == i or raise
         j += 1
       end
-      j == 3 or raise()
+      j == 3 or raise
 
 ##function
 
@@ -540,16 +603,16 @@ ANY_STRING_OK
   ##multiple return values
 
       i, j = 1, 2
-      i == 1 or raise()
-      j == 2 or raise()
+      i == 1 or raise
+      j == 2 or raise
 
       i, j = 0, 0
       def f()
         return 1, 2
       end
       i, j = f()
-      i == 1 or raise()
-      j == 2 or raise()
+      i == 1 or raise
+      j == 2 or raise
 
     # TODO why syntax error:
 
@@ -562,32 +625,32 @@ ANY_STRING_OK
       def f
         1
       end
-      f() == 1 or raise()
+      f() == 1 or raise
 
       def f()
         1
       end
-      f() == 1 or raise()
+      f() == 1 or raise
 
       def f i
         i
       end
-      f(1) == 1 or raise()
+      f(1) == 1 or raise
 
       def f(i)
         i
       end
-      f(1) == 1 or raise()
+      f(1) == 1 or raise
 
       def f i, j
         i + j
       end
-      f(1, 1) == 2 or raise()
+      f(1, 1) == 2 or raise
 
       def f i = 1, j = 2
         i + j
       end
-      f() == 3 or raise()
+      f() == 3 or raise
 
   ##call
 
@@ -599,8 +662,8 @@ ANY_STRING_OK
         i + j
       end
 
-      f(1, 1) == 2 or raise()
-      (f 1, 1) == 2 or raise()
+      f(1, 1) == 2 or raise
+      (f 1, 1) == 2 or raise
 
     # Special characters used for literals such as `"` for strings
     # don't need to be separated from the function name in a call:
@@ -609,13 +672,13 @@ ANY_STRING_OK
        return i
       end
 
-      f"abc" == "abc" or raise()
-      f:abc == :abc or raise()
+      f"abc" == "abc" or raise
+      f:abc == :abc or raise
 
     # TODO why does this give a syntax error:
 
-      #f{a: 1} == {a: 1} or raise()
-      f({a: 1}) == {a: 1} or raise()
+      #f{a: 1} == {a: 1} or raise
+      f({a: 1}) == {a: 1} or raise
 
 
   ##parenthesis omission ambiguity
@@ -630,9 +693,9 @@ ANY_STRING_OK
         i
       end
 
-      f-1 == f() - 1 or raise()
+      f-1 == f() - 1 or raise
 
-      f -1 == f(-1) or raise()
+      f -1 == f(-1) or raise
 
   ##allowed characters
 
@@ -650,7 +713,7 @@ ANY_STRING_OK
         $i == 0
       end
 
-      zero?() or raise()
+      zero?() or raise
 
     # !: this is the in-place version of a method.
 
@@ -683,20 +746,20 @@ ANY_STRING_OK
       end
 
       o = EqualSuffix.new(1)
-      o.int() == 1 or raise()
+      o.int() == 1 or raise
 
       o.int=(2)
-      o.int() == 2 or raise()
+      o.int() == 2 or raise
 
     # `=` gives the method a new possible shorthand setter syntax:
 
       o.int = 3
-      o.int() == 3 or raise()
+      o.int() == 3 or raise
 
     # Also works for compound operations:
 
       o.int += 1
-      o.int() == 4 or raise()
+      o.int() == 4 or raise
 
   ##variable length argument list #nargs
 
@@ -708,7 +771,7 @@ ANY_STRING_OK
         total
       end
 
-      sum(1, 2, 3) == 6 or raise()
+      sum(1, 2, 3) == 6 or raise
 
   ##splat ##unpack argument list
 
@@ -724,7 +787,7 @@ ANY_STRING_OK
         total
       end
 
-      sum(*[1, 2, 3]) == 6 or raise()
+      sum(*[1, 2, 3]) == 6 or raise
 
       def sum(i, *is)
         total = i
@@ -738,34 +801,38 @@ ANY_STRING_OK
 
       $i = 1
       i = 2
-      $i == 1 or raise()
+      $i == 1 or raise
 
       $i = 1
       def f()
         $i
       end
-      f() == $i or raise()
+      f() == 1 or raise
 
       $i = 1
       def f()
         $i = 2
       end
       f()
-      $i == 2 or raise()
+      $i == 2 or raise
 
       i = 1
       def f()
         $i = 2
       end
       f()
-      i == 1 or raise()
+      i == 1 or raise
 
       i = 1
       def f()
         i
       end
-      # Error: `i` undefined.
-      #f()
+      begin
+        f()
+      rescue NameError
+      else
+        raise
+      end
 
   ##overload
 
@@ -781,15 +848,35 @@ ANY_STRING_OK
 
       #f()
 
+  ##lambda
+
+    # Function without name.
+
+    # Differences from Procs:
+    #
+    # - enforces correct number of arguments
+    # - an explicit return statement does not stop caller (unlike Procs).
+
+      f = lambda {|x| x + 1 }
+      f.call(1) == 2 or raise
+
 ##class
 
   # Everyting is an object, including integers and floats:
 
-    1.class()   == Fixnum or raise()
-    1.object_id()
-    1.1.class() == Float  or raise()
-    nil.class() == NilClass  or raise()
-    nil.object_id()
+    1.class   == Fixnum or raise
+    1.object_id
+    1.1.class == Float  or raise
+    nil.class == NilClass  or raise
+    nil.object_id
+
+  ##class attribute
+
+    # It is possible to obtain the class of an object via the class attribute.
+
+      class C
+      end
+      C.new.class == C or raise
 
   # Define a class:
 
@@ -804,8 +891,8 @@ ANY_STRING_OK
 
         # Call another method of the instance:
 
-          method2() == 2 or raise()
-          self.method2() == 2 or raise()
+          method2() == 2 or raise
+          self.method2() == 2 or raise
 
         # Access an instance variable:
 
@@ -825,7 +912,7 @@ ANY_STRING_OK
   # In Ruby, Classes are also (constant) objects. `new` is just a method of that object:
 
     c = C.new(1)
-    c.method() == 1 or raise()
+    c.method() == 1 or raise
 
   # The constructor is private: TODO how to make other methods private?
 
@@ -842,15 +929,15 @@ ANY_STRING_OK
   # Any statement can on in a class.
 
     class C
-      true or raise()
+      true or raise
     end
 
   ##get set methods
 
     # Error: it is not possible to access instance members directly:
 
-      #c.member_i == 1 or raise()
-      #c.@member_i == 1 or raise()
+      #c.member_i == 1 or raise
+      #c.@member_i == 1 or raise
 
     # However, if there are getter and setter functions, it is possible to
     # emulate the syntax of public member access:
@@ -869,34 +956,95 @@ ANY_STRING_OK
 
     # For the getter, it works because of parenthesis omission:
 
-      o = GetSet.new()
+      o = GetSet.new
 
-      o.i() == 1 or raise()
-      o.i   == 1 or raise()
+      o.i() == 1 or raise
+      o.i   == 1 or raise
 
     # For the setter, the suffix `=` allows the following special syntax:
 
       o.i = 2
-      o.i == 2 or raise()
+      o.i == 2 or raise
 
     # Which is the same as:
 
       o.i=(2)
 
-  # It is possible to extend a class by adding new methods to an existing class:
+    ##attr_reader ##attr_writer ##attr_accessor
 
-    class C
-      def initialize()
-        @j = 1
-      end
-      def method3()
-        return 3
+      # Create getter, setter or both for member variables in a single line.
+
+        class AttrAccess
+          attr_reader :read
+          attr_writer :write
+          attr_accessor :both
+
+          def initialize
+            @read = 0
+            @write = 1
+            @both = 2
+          end
+        end
+
+        a = AttrAccess.new
+
+        a.read == 0 or raise
+        begin
+          a.read = -1
+        rescue NoMethodError
+        else
+          raise
+        end
+
+        begin
+          a.write
+        rescue NoMethodError
+        else
+          raise
+        end
+        a.write = -1 or raise
+
+        a.both = -1
+        a.both == -1 or raise
+
+  # It is possible to extend a class by adding new methods to an existing class
+  # after its initial declaration.
+
+    class AddMethod
+      def m0()
+        0
       end
     end
 
-    c = C.new()
-    c.method2() == 2 or raise()
-    c.method3() == 3 or raise()
+    class AddMethod
+      def m1()
+        1
+      end
+    end
+
+    c = AddMethod.new
+    c.m0() == 0 or raise
+    c.m1() == 1 or raise
+
+  # It is possible to add methods to specific instances of a class.
+  # This is exactly what happens when creating static class methods.
+
+    class AddMethodToInstance
+    end
+
+    c = AddMethodToInstance.new
+    def c.m0
+      0
+    end
+    c.m0 == 0 or raise
+
+    d = AddMethodToInstance.new
+    begin
+      d.m0
+    rescue NameError
+    else
+      raise
+    end
 
   # Trying to do it outside defines a new class method:
 
@@ -904,88 +1052,95 @@ ANY_STRING_OK
       return 4
     end
 
-    C.method4() == 4 or raise() # ERROR
+    C.method4() == 4 or raise # ERROR
 
-  ##class methods and variables
+  ##self
+
+      class Self
+        # Inside the class scope, self is the class.
+        #
+        self == Self or raise
+
+        # Inside instance methods, self is the instance.
+        #
+        def f
+          self.class == Self or raise
+        end
+      end
+      Self.new.f
+
+  ##class methods and variables ##static
 
       class ClassMethod
 
         @class_i   = 1
         @@class_i2 = 2
 
-        def ClassMethod.class_method()
-          @class_i   == 1 or raise()
-          @@class_i2 == 2 or raise()
-          class_method2() == 2 or raise()
-          return 1
+        def private_klass_method
+          0
         end
 
-        def ClassMethod.class_method2()
+        begin
+          private_klass_method
+        rescue NameError
+        else
+          raise
+        end
+
+        def self.class_method
+          @class_i   == 1 or raise
+          @@class_i2 == 2 or raise
+          class_method2 == 2 or raise
+
+          begin
+            private_klass_method
+          rescue NameError
+          else
+            raise
+          end
+
+          1
+        end
+
+        # Better with self, to avoid repetition.
+        #
+        def ClassMethod.class_method2
           return 2
         end
 
-        def self.self_method()
-          @class_i   == 1 or raise()
-          @@class_i2 == 2 or raise()
-          class_method2() == 2 or raise()
-          self_method2()  == 2 or raise()
-          return 1
+        # Exact same as `ClassMethod`, but less repetition.
+        #
+        def self.class_method2
+          2
         end
 
-        def self.self_method2()
-          return 2
+        # Exact same as `self.`, but even less repetition for multiple methods.
+        #
+        class << self
+          def class_method3
+            3
+          end
         end
 
         def initialize()
           ClassMethod.class_method()
           #class_method()             #=> ERROR
-          #@class_i   == 1 or raise() #=> ERROR: @class_i is the instance member
-          @@class_i2 == 2 or raise()
+          #@class_i   == 1 or raise #=> ERROR: @class_i is the instance member
+          @@class_i2 == 2 or raise
         end
       end
 
-      #ClassMethod.class_i2        == 2 or raise()     #=> ERROR
-      #ClassMethod.@@class_i2      == 2 or raise()     #=> ERROR
-      #ClassMethod.class_i         == 2 or raise()     #=> ERROR
-      #ClassMethod.@class_i        == 2 or raise()     #=> ERROR
-      ClassMethod.class_method()  == 1 or raise()
-      ClassMethod.self_method()   == 1 or raise()
+      #ClassMethod.class_i2        == 2 or raise     #=> ERROR
+      #ClassMethod.@@class_i2      == 2 or raise     #=> ERROR
+      #ClassMethod.class_i         == 2 or raise     #=> ERROR
+      #ClassMethod.@class_i        == 2 or raise     #=> ERROR
+      ClassMethod.class_method   == 1 or raise
+      ClassMethod.class_method2  == 2 or raise
+      ClassMethod.class_method3  == 3 or raise
 
-      c = ClassMethod.new()
-      #c.class_method() == 1 or raise()           #=> ERROR
-      #c.class_i2 == 1 or raise()                 #=> ERROR
-
-  ##static
-
-    # There are no real static methods, only methods of class objects.
-
-      class Static
-
-        # With `self` is better.
-        #
-        def Static.static0
-          0
-        end
-
-        # self == Static, but better since less code repetition
-        #
-        def self.static1
-          1
-        end
-
-        # Useful idiom when there will be many static methods.
-        #
-        class << self
-          def static2
-            2
-          end
-        end
-
-      end
-
-      Static.static0 == 0 or raise()
-      Static.static1 == 1 or raise()
-      Static.static2 == 2 or raise()
+      c = ClassMethod.new
+      #c.class_method() == 1 or raise           #=> ERROR
+      #c.class_i2 == 1 or raise                 #=> ERROR
 
   ##operator overload:
 
@@ -1001,12 +1156,12 @@ ANY_STRING_OK
 
       end
 
-      o = OperatorOverload.new()
+      o = OperatorOverload.new
 
     # Sugared versions exist because they are operators:
 
-      o + o   == :sum         or raise()
-      o[1]    == :square_bra  or raise()
+      o + o   == :sum         or raise
+      o[1]    == :square_bra  or raise
 
     # But un-sugared versions also exist for all operator overloads:
 
@@ -1027,14 +1182,14 @@ ANY_STRING_OK
 
       end
 
-      o = OperatorOverloadNargs.new()
+      o = OperatorOverloadNargs.new
 
-      o.+(1, 2, 3)  == :sum or raise()
-      o.[](1, 2, 3) == :square_bra or raise()
+      o.+(1, 2, 3)  == :sum or raise
+      o.[](1, 2, 3) == :square_bra or raise
 
     # Square brackets also has a sugared version for multiple arguments:
 
-      o[1, 2, 3] == :square_bra or raise()
+      o[1, 2, 3] == :square_bra or raise
 
   ##inheritance
 
@@ -1050,7 +1205,7 @@ ANY_STRING_OK
         end
       end
 
-      d = Derived.new()
+      d = Derived.new
 
     ##multiple inheritance
 
@@ -1078,7 +1233,7 @@ ANY_STRING_OK
           end
         end
 
-        Derived.new(1).i == 1 or raise()
+        Derived.new(1).i == 1 or raise
 
     ##superclass
 
@@ -1094,11 +1249,11 @@ ANY_STRING_OK
           end
         end
 
-        Derived.superclass == Base or raise()
+        Derived.superclass == Base or raise
 
       # All classes derive from `Object`:
 
-        Base.superclass == Object or raise()
+        Base.superclass == Object or raise
 
   ##reflection
 
@@ -1117,7 +1272,7 @@ ANY_STRING_OK
 
     # class:
 
-      ReflectionDerived.new().class() == ReflectionDerived
+      ReflectionDerived.new.class() == ReflectionDerived
       ReflectionDerived.class() == Class
 
     # Too verbose:
@@ -1142,11 +1297,11 @@ ANY_STRING_OK
           2
         end
       end
-      a.to_i == 2 or raise()
+      a.to_i == 2 or raise
 
       # New object: no more specialization.
       a = '1'
-      a.to_i == 1 or raise()
+      a.to_i == 1 or raise
 
     # Common application: define static methods.
 
@@ -1157,7 +1312,7 @@ ANY_STRING_OK
           end
         end
       end
-      Static.static == 0 or raise()
+      Static.static == 0 or raise
 
 ##module
 
@@ -1180,7 +1335,18 @@ ANY_STRING_OK
         # Error:
         #I
         M::I
+        self::I
         1
+      end
+
+      def self.f1()
+        1
+      end
+
+      class << self
+        def f1_2()
+          1
+        end
       end
 
       def f2()
@@ -1195,28 +1361,31 @@ ANY_STRING_OK
 
     end
 
-    M.f() == 1 or raise()
-    M::f() == 1 or raise()
+    M.f() == 1 or raise
+    M::f() == 1 or raise
+
+    M.f1() == 1 or raise
+    M.f1_2() == 1 or raise
 
   # Inner methods are invisible:
 
-    #M::f2() == 2 or raise()
-    #f2() == 2 or raise()
+    #M::f2() == 2 or raise
+    #f2() == 2 or raise
 
   # Dot `.` and double colon `:` are the same except for constants,
-  # in which case only the semicolon works:
+  # in which case only the colon works:
 
-    #M.i == 1 or raise()
-    #M.I == 1 or raise()
-    #M::i == 2 or raise()
-    M::I == 2 or raise()
+    #M.i == 1 or raise
+    #M.I == 1 or raise
+    #M::i == 2 or raise
+    M::I == 2 or raise
     # Warning: modifying already initialized constant.
     #M::I = 3
 
   # Classes are constant objects so:
 
-    #M.C.new().f() == 1 or raise()
-    M::C.new().f() == 1 or raise()
+    #M.C.new.f() == 1 or raise
+    M::C.new.f() == 1 or raise
 
   # Error: cannot add variables to the module after its creation:
 
@@ -1235,8 +1404,8 @@ ANY_STRING_OK
         1
       end
     end
-    Extend.f0() == 0 or raise()
-    Extend.f1() == 1 or raise()
+    Extend.f0() == 0 or raise
+    Extend.f1() == 1 or raise
 
   ##include
 
@@ -1261,10 +1430,10 @@ ANY_STRING_OK
         end
       end
 
-      IncludeClass.new().f1() == 1 or raise()
-      IncludeClass.new().f2() == 2 or raise()
+      IncludeClass.new.f1() == 1 or raise
+      IncludeClass.new.f2() == 2 or raise
       # Error: undefined
-      #IncludeClass.new().f3()
+      #IncludeClass.new.f3()
 
   ##extend
 
@@ -1274,7 +1443,7 @@ ANY_STRING_OK
         extend IncludeModule
       end
 
-      ExtendClass.f2() == 2 or raise()
+      ExtendClass.f2() == 2 or raise
 
     # ERROR: undefined
 
@@ -1297,8 +1466,8 @@ ANY_STRING_OK
 
     def f()
       # This calls the block:
-      yield() == 2 or raise()
-      yield() == 2 or raise()
+      yield() == 2 or raise
+      yield() == 2 or raise
     end
 
     i = 0
@@ -1308,10 +1477,10 @@ ANY_STRING_OK
       # ERROR: cannot use return here.
       #return 2
 
-      # This value will be returned however:
+      # This value will be returned.
       2
     }
-    i == 2 or raise()
+    i == 2 or raise
 
   # Do version:
 
@@ -1321,7 +1490,7 @@ ANY_STRING_OK
       #return 2 # ERROR
       2
     end
-    i == 2 or raise()
+    i == 2 or raise
 
   # There seems to not be any semantical difference between the two of them,
   # except precedence and different usage convention: <http://stackoverflow.com/questions/2122380/using-do-block-vs-brackets>
@@ -1332,7 +1501,7 @@ ANY_STRING_OK
   # a simple function as argument:
 
     def f(func)
-      func() == 2 or raise()
+      func() == 2 or raise
     end
 
     i = 1
@@ -1342,9 +1511,9 @@ ANY_STRING_OK
       i += 1
       2
     end
-    i == 1 or raise()
+    i == 1 or raise
 
-  # Pass values:
+  # Blok arguments:
 
     $i = 0
     def f(i, j)
@@ -1352,7 +1521,7 @@ ANY_STRING_OK
       yield(i, j)
     end
     f(1, 2) { |i, j| $i += i * j }
-    $i == 4 or raise()
+    $i == 4 or raise
 
   # Get values:
 
@@ -1362,7 +1531,7 @@ ANY_STRING_OK
       $i += yield()
     end
     f() { 1 }
-    $i == 2 or raise()
+    $i == 2 or raise
 
   ##block context
 
@@ -1403,25 +1572,25 @@ ANY_STRING_OK
         end
       end
 
-      o = C.new()
+      o = C.new
       o.method_yield() do
         #method()           #=> undefined
-        @class_i   == -1 or raise()
-        @@class_i2 ==  2 or raise()
+        @class_i   == -1 or raise
+        @@class_i2 ==  2 or raise
         #class_method()     #=> undefined
         #self_method()      #=> undefined
       end
 
       C.class_method_yield() do
-        @class_i   == -1 or raise()
-        @@class_i2 ==  2 or raise()
+        @class_i   == -1 or raise
+        @@class_i2 ==  2 or raise
         #class_method()     #=> undefined
         #self_method()      #=> undefined
       end
 
       C.self_method_yield() do
-        @class_i   == -1 or raise()
-        @@class_i2 ==  2 or raise()
+        @class_i   == -1 or raise
+        @@class_i2 ==  2 or raise
         #class_method()     #=> undefined
         #self_method()      #=> undefined
       end
@@ -1461,8 +1630,8 @@ ANY_STRING_OK
         end
       end
 
-      f()       == 0 or raise()
-      f() { 1 } == 1 or raise()
+      f()       == 0 or raise
+      f() { 1 } == 1 or raise
 
   ##ampersand syntax
 
@@ -1475,20 +1644,20 @@ ANY_STRING_OK
         i += 1
         2
       end
-      i == 1 or raise()
+      i == 1 or raise
 
       i = 0
       f() {
         i += 1
         2
       }
-      i == 1 or raise()
+      i == 1 or raise
 
     # With arguments:
 
       def f(i, j, &code)
         i == 1
-        code.call() == 2 or raise()
+        code.call() == 2 or raise
         j == 3
       end
       i = 0
@@ -1507,7 +1676,6 @@ ANY_STRING_OK
 
       #def f(&code, &code2) end
 
-
 ##proc
 
   # Short for procedure. Has corresponding class `Proc`.
@@ -1520,22 +1688,22 @@ ANY_STRING_OK
       code.call() == 2 or raise
     end
 
-    p = Proc.new() do
+    p = Proc.new do
       i += 1
       2
     end
     i = 0
     f(p)
-    i == 1 or raise()
+    i == 1 or raise
 
   # Temporary Proc:
 
     i = 0
-    f(Proc.new() do
+    f(Proc.new do
       i += 1
       2
     end)
-    i == 1 or raise()
+    i == 1 or raise
 
   # Pass multiple procs:
 
@@ -1544,40 +1712,124 @@ ANY_STRING_OK
       code2.call() == 2 or raise
     end
 
-    p = Proc.new() do
+    p = Proc.new do
       i += 1
       2
     end
 
     i = 0
     f(p, p)
-    i == 2 or raise()
+    i == 2 or raise
 
-  # Every block is a proc:
+  ##return statement inside procs
 
-    def f(&code)
-      code.class() == Proc or raise()
+    #http://stackoverflow.com/questions/17800629/unexpected-return-localjumperror
+
+    g = Proc.new do
+      return 1
     end
 
-    f() do
+    def f(g)
+      g.call()
+      2
     end
+
+    #TODO
+    #f(g) == 2 or raise
 
   ##proc vs block
 
-    # Proc is more versitile:
+    # Every block is a proc:
+
+      def f(&code)
+        code.class() == Proc or raise
+      end
+
+    # Procs are more versitile:
 
     # - reuse a block of code multiple times.
     # - method will have one or more callbacks.
 
     # The downside of Proc is that it is more verbose.
 
-##lambda
+##dsl #metaprogramming
 
-  #TODO
+  # Domain Specific Language
 
-##method
+  # Ruby features allow APIs to furnish interfaces that *look* like new languages,
+  # but are just plain Ruby.
 
-  #TODO
+  # This is why people talk about *metaprogramming*, which makes sense if you consider
+  # that you really are creating a new language via your Ruby interface.
+
+  # They are not however real new languages, just very sugared Ruby APIs.
+
+  # One impotant example is a Rakefile
+
+    #task a: :b do
+      #sh "echo a"
+    #end
+
+  # It looks like a new language because:
+  # - the `sh` method is only efined insded the `do` block,
+  # - it was not required on global scope and
+  # - it is not clear that it is class method:
+
+  # The main lanauge feature used to implement such Ruby DSL is `instance_eval`,
+  # or `class_eval`
+
+##instance_eval ##class_eval
+
+  # Useful for DSL like interfaces.
+
+  # instance_eval: Evaluates inside the same scope as instances of the class.
+
+    class InstanceEval
+      def initialize
+        @i = 1
+      end
+
+      def takes_proc(&proc)
+        instance_eval(&proc)
+      end
+
+      def self.f
+        0
+      end
+    end
+
+  # The instance here is the object of the class:
+
+    InstanceEval.new.instance_eval { @i } == 1 or raise
+    InstanceEval.new.takes_proc    { @i } == 1 or raise
+
+  # The instance here is the class:
+
+    InstanceEval.instance_eval do
+      def self.g
+        f
+      end
+    end
+
+    InstanceEval.g == 0 or raise
+
+  # class_eval: evaluates inside the given instance, i.e., the class object.
+
+    class ClassEval
+      def initialize
+        @i = 1
+      end
+    end
+
+    ClassEval.class_eval do
+      def f
+        @i
+      end
+    end
+
+    ClassEval.new.f == 1 or raise
+
+##instance_exec ##class_exec
 
 ##require and friends
 
@@ -1604,18 +1856,18 @@ ANY_STRING_OK
         main2_i
       rescue NameError
       else
-        raise()
+        raise
       end
 
-      Main2_const == 2 or raise()
+      Main2_const == 2 or raise
 
-      main2_f() == 2 or raise()
-      Main2.f() == 2 or raise()
-      AnyName.f() == 2 or raise()
+      main2_f() == 2 or raise
+      Main2.f() == 2 or raise
+      AnyName.f() == 2 or raise
 
     # Requires of requires are also required:
 
-      main3_f() == 3 or raise()
+      main3_f() == 3 or raise
 
   ##autoload
 
@@ -1627,7 +1879,7 @@ ANY_STRING_OK
 
       #autoload_relative :AutoloadConst, 'autoload_test'
 
-      #AutoloadConst == 1 or raise()
+      #AutoloadConst == 1 or raise
 
     # AutoloadConst2 was not loaded:
 
@@ -1635,7 +1887,7 @@ ANY_STRING_OK
         #autoload :autoload_non_const, 'autoload_test'
       #rescue NameError
       #else
-        #raise()
+        #raise
       #end
 
     # Only constants can be autoloaded.
@@ -1644,16 +1896,16 @@ ANY_STRING_OK
         #autoload :autoload_non_const, 'autoload_test'
       #rescue NameError
       #else
-        #raise()
+        #raise
       #end
 
-##exception
+##exception ##raise ##rescue
 
     begin
       raise(NameError)
     rescue NameError
     else
-      raise()
+      raise
     end
 
   # Empty rescue rescues all:
@@ -1661,7 +1913,7 @@ ANY_STRING_OK
     begin
       raise(TypeError)
     rescue NameError
-      raise()
+      raise
     rescue
     end
 
@@ -1672,13 +1924,17 @@ ANY_STRING_OK
         raise(1)
       rescue TypeError
       else
-        raise()
+        raise
       end
     end
 
+##throw ##catch
+
+  #Vs raise rescue: <http://stackoverflow.com/questions/51021/what-is-the-difference-between-raising-exceptions-vs-throwing-exceptions-in-ruby>
+
 ##math
 
-    Math.sqrt(9) == 3 or raise()
+    Math.sqrt(9) == 3 or raise
 
 ##command line arguments
 
@@ -1756,30 +2012,43 @@ ANY_STRING_OK
 
   # File and pathname operations.
 
+  # Generate a temporaty file path for tests:
+
+    file = Tempfile.new('abc')
+    path = file.path
+    file.unlink
+
   ##path operations
 
     ##join
 
-        File.join("a", "b", "c") == "a" + File::SEPARATOR + "b" + File::SEPARATOR + "c" or raise()
+        File.join("a", "b", "c") == "a" + File::SEPARATOR + "b" + File::SEPARATOR + "c" or raise
 
     ##basename
 
-        File.basename(File.join("a", "b", "c")) == "c" or raise()
+        File.basename(File.join("a", "b", "c")) == "c" or raise
+
+    ##exists
+
+      # Do not confound with `exist?` which is only for directories!
+
+        not File.exists?(path) or raise
+        file = File.new(path, 'w')
+        file.close
+        File.exists?(path) or raise
+        File.unlink(path)
+        not File.exists?(path) or raise
 
   ##open ##write ##read ##write
 
     # Must use `'b'` if there will be non ascii chars.
-
-      file = Tempfile.new('abc')
-      path = file.path
-      file.unlink
 
       data = 'abc'
 
       File.open(path, 'w') do |f|
         f.write(data)
       end
-      File.read(path) == data or raise()
+      File.read(path) == data or raise
 
     ##linewise
 
@@ -1789,7 +2058,7 @@ ANY_STRING_OK
             data_read += line
         end
         file.close
-        data_read == data or raise()
+        data_read == data or raise
 
       File.unlink(path)
 
@@ -1798,6 +2067,19 @@ ANY_STRING_OK
   ##list directory ##ls
 
       Dir.entries(".")
+
+  ##rmdir
+
+    # Remove empty directory. For non empty, consider `fileutils.rm_rf`.
+
+      #Dir.rmdir(".")
+
+##fileutils
+
+  ##rm_rf
+
+      require 'fileutils'
+      #FileUtils.rm_rf(dir)
 
 ##Tempfile
 
@@ -1824,7 +2106,11 @@ ANY_STRING_OK
 
       n = 1
       o = `ruby -e 'print #{n}'`
-      o == '1' or raise()
+      o == '1' or raise
+
+    # Sets the `$?` variable.
+
+      # puts $?.exitstatus
 
   ##popen3
 

@@ -79,6 +79,17 @@ which is open source rails application.
 
 Gem metadata is specified on a `.gemspec` file.
 
+For gem documentation, the most widely used option is <http://rubydoc.info>,
+which is YARD based.
+
+#rdoc
+
+stdlib tool to generate documentation from comments.
+
+Does not have many features.
+
+Also consider the more advanced YARD tool.
+
 #rvm
 
 Ruby version manager.

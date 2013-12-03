@@ -3,7 +3,9 @@ source 'https://rubygems.org'
 
 # Require a ruby version.
 # If the version is not met, abort.
-# Does not change the current ruby in rvm.
+#
+# rvm can use that to automatically change ruby version when entering
+# a directory with such a Gemfile.
 ruby '>= 2'
 
 # Require an engine (Ruby implementation):
@@ -24,3 +26,6 @@ gem 'sass-rails', '~> 4.0.0'
 
 # It is possible to get gems from git repositories:
 #gem 'nokogiri', :git => 'git://github.com/tenderlove/nokogiri.git', :branch => '1.4'
+
+# Cannot do `require_relative` from here. One possible alternative is a brute `instance_eval` + File.read:
+#instance_eval(File.read(File.join(File.dirname(__FILE__), 'Gemfile_dbms')))
