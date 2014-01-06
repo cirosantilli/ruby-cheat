@@ -214,29 +214,86 @@ ANY_STRING_OK
 
     s == "a\n" or raise
 
+    s = <<-MINUS_MEANS_TERMINATOR_CAN_HAVE_SPACE
+a
+b
+    MINUS_MEANS_TERMINATOR_CAN_HAVE_SPACE
+    s == "a\nb\n" or raise
+
+  ##gsub
+
+    # Regex find and replace.
+
+    # Numbered capture groups:
+
+      "a0".gsub(/a(.)/, 'b\1') == "b0" or raise
+
+    # Named capture groups:
+
+      "a0".gsub(/a(?<name>.)/, 'b\k<name>') == "b0" or raise
+
+    # Hash case by case replace:
+
+      "abcd".gsub(/../, {'ab'=>'01', 'cd'=>'23'}) == "0123" or raise
+
+    # Block match replace:
+
+      "a0".gsub(/\d/) {|s| (s.to_i + 1).to_s } == "a1" or raise
+
+  ##scan
+
+    # Make an array of all regexp matches on the string.
+
+      "a0-b1-c2".scan(/(\w)(\d)/) == [['a', '0'], ['b', '1'], ['c', '2']] or raise
+
+##regexp
+
+  # Like in Perl, regexps have literals in Ruby.
+
+  # There eis not however a `s//` substitution function special syntax:
+  # regular functions such as the string gsub method are used for that.
+
+  # Also check regexp methods present on the string class such as
+  # gsub, scan,
+
+    /a./.class == Regexp or raise
+
+  ##=~
+
+    # Non full matches work:
+
+      /a./ =~ "a0c" or raise
+
+  ##!~
+
+    # Negation of `=~`:
+
+      /a/ !~ "b" or raise
+
 ##symbols
 
   # Similar to strings but:
   #
   # - single instance
-  # - immuatable
+  # - immutable
   # - fast comparison by pointer
   #
   # A common usage is as dict keys.
   #
   # <http://stackoverflow.com/questions/6337897/what-is-the-colon-operator-in-ruby>
 
-  # Like variables, symbol names cannot start with digits:
-
-    #:1
-    :s1
-
-    not "abc".equal?("abc") or raise
-    :abc.equal?(:abc) or raise
-
   # Strings are different from symbols.
 
     "abc" != :abc or raise
+
+  # Symbols are immutable, single instance and fast to compare, strings are not:
+
+    (not "abc".equal?("abc")) or raise
+    :abc.equal?(:abc) or raise
+
+  # Literals can include invalid id chars by using the following syntax:
+
+    (:'a$b').to_s == 'a$b' or raise
 
 ##list
 
@@ -312,6 +369,23 @@ ANY_STRING_OK
       a = [0, 1]
       a + [2, 3] == (0..3).to_a or raise
       a == [0, 1] or raise
+
+  ##map method
+
+    # Creates a new array of modified elements.
+
+      a = (0..2).to_a
+      a.map { |x| x + 1 } == (1..3).to_a or raise
+      a == (0..2).to_a or raise
+
+    # In place version. Returns the modified map itself.
+
+      a = (0..2).to_a
+      b = a.map! { |x| x + 1 }
+      b == (1..3).to_a or raise
+      a == (1..3).to_a or raise
+      b[0] = 0
+      a == [0, 2, 3] or raise
 
 ##range
 
@@ -557,6 +631,14 @@ ANY_STRING_OK
         end
         i == 3 or raise
 
+    ##each_with_index
+
+        a = []
+        [0, 2, 1].each_with_index do |x, index|
+          a << index
+        end
+        a == (0..2).to_a or raise
+
 ##range
 
   # This discusses ways to loop consecutive sequences of numbers,
@@ -594,7 +676,7 @@ ANY_STRING_OK
       end
       j == 3 or raise
 
-##function
+##method ##function
 
   ##return value
 
@@ -797,6 +879,18 @@ ANY_STRING_OK
         total
       end
 
+  ##kwargs
+
+    # Does not exist in ruby.
+
+    # Similar syntax can be achieved however by passing a dictionary and omiting braces.
+
+      def f(d)
+      end
+
+      f({a:1, b:2})
+      f(a:1, b:2)
+
   ##global variable
 
       $i = 1
@@ -859,6 +953,58 @@ ANY_STRING_OK
 
       f = lambda {|x| x + 1 }
       f.call(1) == 2 or raise
+
+    if RUBY_VERSION >= '1.9'
+      ##-> ##stabby lambda
+
+        # Exact same as lambda, but new notation.
+
+          f = ->(x) { x + 1 }
+          f.call(1) == 2 or raise
+
+        # Parenthesis is optional:
+
+          f = -> x  { x + 1 }
+          f.call(1) == 2 or raise
+
+          f = ->x  { x + 1 }
+          f.call(1) == 2 or raise
+    end
+
+##alias
+
+  # Ruby keyword.
+
+  # Creates a new name for an existing method.
+
+    def f
+      0
+    end
+
+  # Weird no comma syntax because it is a keyword:
+
+    alias :g :f
+
+    g == 0 or raise
+
+##alias_method
+
+  # Method of the `Module` class, so can only be used inside modules or classes (which inherit from modules).
+
+  # Vs alias keyword: <http://stackoverflow.com/questions/4763121/should-i-use-alias-or-alias-method>
+
+  # The main difference is that `alias_method` is a method and not a keyword,
+  # so more standard things can be done to it.
+
+    class AliasMethod
+      def f
+        0
+      end
+
+      alias_method :g, :f
+    end
+
+    AliasMethod.new.g == 0 or raise
 
 ##class
 
@@ -1235,6 +1381,43 @@ ANY_STRING_OK
 
         Derived.new(1).i == 1 or raise
 
+      # Without it, the base class constructor is not called at all.
+
+        class DerivedNoSuper < Base
+          def initialize(i)
+          end
+        end
+
+        DerivedNoSuper.new(1).i == nil or raise
+
+      # Common argument forwarding patterns:
+
+        class DerivedForwardingBase
+          attr_accessor :base, :opts, :args
+          def initialize(base, opts, *args)
+            @base = base
+            @args = args
+            @opts = opts
+          end
+        end
+
+        class DerivedForwarding < DerivedForwardingBase
+          attr_accessor :derived_only, :derived_only_opt
+          def initialize(base, derived_only, opts, *args)
+            @derived_only = derived_only
+            @derived_only_opt = opts.delete(:derived_only_opt)
+            # Use derived arguments here.
+            super(base, opts, *args)
+          end
+        end
+
+        o = DerivedForwarding.new(0, 1, {base:2, derived_only_opt:3}, 4, 5)
+        o.base == 0 or raise
+        o.derived_only == 1 or raise
+        o.opts == {base:2} or raise
+        o.derived_only_opt == 3 or raise
+        o.args == [4, 5] or raise
+
     ##superclass
 
         class Base
@@ -1258,32 +1441,53 @@ ANY_STRING_OK
   ##reflection
 
       class ReflectionBase
-        def m_base()
+        def m_base
         end
       end
 
       class ReflectionDerived < ReflectionBase
-        def ReflectionDerived.c()
+        def ReflectionDerived.c
         end
 
-        def m()
+        def m
         end
       end
 
     # class:
 
-      ReflectionDerived.new.class() == ReflectionDerived
-      ReflectionDerived.class() == Class
-
-    # Too verbose:
+      ReflectionDerived.new.class == ReflectionDerived
+      ReflectionDerived.class == Class
 
       #puts ReflectionDerived.methods.sort
+
+    # All methods, including direved:
+
       #puts ReflectionDerived.instance_methods
+
+    ##respond_to
+
+      # TODO
+
+        ReflectionDerived.new.respond_to?(:m) or raise
 
     # Exclude inherited methods:
 
       puts "instance_methods = "
       puts ReflectionDerived.instance_methods(false).sort
+
+    ##send
+
+      # Inherited from object.
+
+      # Call method by symbol.
+
+        class Send
+          def add(a, b)
+            a + b
+          end
+        end
+
+        Send.new.send(:add, 1, 2) == 3 or raise
 
   ##<< for classes
 
@@ -1394,18 +1598,31 @@ ANY_STRING_OK
   # Can add new functions to the module after its creation:
 
     module Extend
-      def Extend.f0()
+      def self.f0()
         0
       end
     end
 
     module Extend
-      def Extend.f1()
+      def self.f1()
         1
       end
     end
+
+    def Extend::f2()
+      2
+    end
+
+    class Extend::C
+      def self.f0
+        0
+      end
+    end
+
     Extend.f0() == 0 or raise
     Extend.f1() == 1 or raise
+    Extend.f2() == 2 or raise
+    Extend::C.f0() == 0 or raise
 
   ##include
 
@@ -1675,6 +1892,19 @@ ANY_STRING_OK
     # `code2` is the last. `code` is not:
 
       #def f(&code, &code2) end
+
+    ##ampersand block
+
+        class AmpersandBlock
+          attr_accessor :i
+          def initialize(i)
+            @i = i
+          end
+        end
+
+        a = [0, 1, 2]
+        a2 = a.map { |x| AmpersandBlock.new(x) }
+        a2.map(&:i) == a or raise
 
 ##proc
 
@@ -2098,7 +2328,7 @@ ANY_STRING_OK
 
   ##id of current process
 
-      print "$$ = #{$$}"
+      puts "$$ = #{$$}"
 
   ##backticks
 
@@ -2115,3 +2345,13 @@ ANY_STRING_OK
   ##popen3
 
     # More general process IO.
+
+  ##current user ##uid
+
+      puts "Process.euid = " + Process.euid.to_s
+
+##time date
+
+  # Current time as ISO string (from year to second):
+
+    puts "Time.now = " + Time.now.to_s

@@ -2,6 +2,95 @@ Ruby cheatsheets and mini projects.
 
 Interactive REPL interface: `irb`.
 
+#rvm
+
+Ruby version manager.
+
+Similar to Python virtualenv.
+
+The best way to install ruby, do that you can manage mutiple versions easily.
+
+Recognizes Gemfile's `ruby` lines and automatically changes the ruby version to match it.
+
+Manage multiple Ruby versions on a single system.
+Run programs in specific environments.
+
+Install rvm:
+
+    curl -L https://get.rvm.io | bash -s stable
+
+This added `~/.rvm/bin` to the `$PATH`.
+
+Next do:
+
+    source /home/ubuntu/.rvm/scripts/rvm
+
+to update your current shell state.
+
+Meet the rvm dependencies:
+
+    rvm requirements
+
+This seems to generate instructions to the system's package manager
+to install dependency programs, such as build tools.
+
+Install a specific version of Ruby:
+
+    rvm install 1.9.2
+
+This may download and compile its source, so it may take some time.
+
+The ruby interpreter is installed only for the current user under `~/.rvm/bin/`.
+
+Install the latest version of Ruby:
+
+    rvm install ruby
+
+Use ruby interpreter 1.9.2:
+
+    rvm use 1.9.2
+    ruby -v
+
+Use ruby named `ruby` and make it the default:
+
+    rvm use ruby --default
+    ruby -v
+
+View installed interpreter versions, current and default one:
+
+    rvm list
+
+Make the `gem` command install gems for current ruby installation:
+
+    rvm rubygem current
+
+Show the install directory current gems:
+
+    rvm gemdir
+
+Sample output:
+
+    /home/ciro/.rvm/gems/ruby-2.0.0-p247
+
+Gems installed from now on with `gem install <gemname>` will go there,
+and be visible only to the given Ruby version.
+
+#gem
+
+A gem is like a Python package: an interface which allows to install and publish
+Ruby projects.
+
+It is recommended that you use Bundler instead of gem to install gems,
+since bundler also takes care of dependency issues.
+
+The de-facto standard web interface for gems is `rubygems.org`,
+which is open source rails application.
+
+Gem metadata is specified on a `.gemspec` file.
+
+For gem documentation, the most widely used option is <http://rubydoc.info>,
+which is YARD based.
+
 #ruby vs python
 
 As of 2013, Ruby is almost equivalent to Python:
@@ -12,9 +101,11 @@ As of 2013, Ruby is almost equivalent to Python:
 
 Advantages of Python:
 
-- part of the LSB
+- part of the LSB.
 
-- much more used. Probably the major reason why Ruby is used is RoR.
+- much more used. Ruby is only used because of RoR.
+
+    Python is more useful in every other application domain.
 
 - Ruby uses many punctuation characters (often based on `sh` or `perl`)
     where using actual names would be saner.
@@ -23,7 +114,18 @@ Advantages of Python:
     - `@`  for class instance variables
     - `?`, `!` and `=` allowed as method name suffixes
 
-- `.each do` looks insane
+- many convenience function which are too easily derivable from others.
+
+    This means that programmers have to learn more language primitives:
+
+    - `if` vs `unless`
+    - `any?` vs `empty?`
+    - `alias` is even a keyword
+
+- `extend` encourages people to add new methods to existing classes just by loading a library.
+
+    It becomes then impossible to find where the method comes from without going through
+    every single library you have required.
 
 - identifier first letter case matters:
 
@@ -66,22 +168,6 @@ The most notable ones are:
 - puppet
 - Mac homebrew
 
-#gem
-
-A gem is like a Python package: an interface which allows to install and publish
-Ruby projects.
-
-It is recommended that you use Bundler instead of gem to install gems,
-since bundler also takes care of dependency issues.
-
-The de-facto standard web interface for gems is `rubygems.org`,
-which is open source rails application.
-
-Gem metadata is specified on a `.gemspec` file.
-
-For gem documentation, the most widely used option is <http://rubydoc.info>,
-which is YARD based.
-
 #rdoc
 
 stdlib tool to generate documentation from comments.
@@ -89,69 +175,6 @@ stdlib tool to generate documentation from comments.
 Does not have many features.
 
 Also consider the more advanced YARD tool.
-
-#rvm
-
-Ruby version manager.
-
-Similar to Python virtualenv.
-
-Manage multiple Ruby versions on a single system.
-Run programs in specific environments.
-
-Install rvm:
-
-    curl -L https://get.rvm.io | bash -s stable
-
-This added `~/.rvm/bin` to the `$PATH`.
-
-Meet the rvm dependencies:
-
-    rvm requirements
-
-This seems to generate instructions to the system's package manager
-to install dependencif()es.
-
-Install a specific version of Ruby:
-
-    rvm install 1.9.2
-
-This may download and compile its source, so it may take some time.
-
-The ruby interpreter is installed only for the current user under `~/.rvm/bin/`.
-
-Install the latest version of Ruby:
-
-    rvm install ruby
-
-Use ruby interpreter 1.9.2:
-
-    rvm use 1.9.2
-    ruby -v
-
-Use ruby named `ruby` and make it the default:
-
-    rvm use ruby --default
-    ruby -v
-
-View installed interpreter versions, current and default one:
-
-    rvm list
-
-Make the `gem` command install gems for current ruby installation:
-
-    rvm rubygem current
-
-Show the install directory current gems:
-
-    rvm gemdir
-
-Sample output:
-
-    /home/ciro/.rvm/gems/ruby-2.0.0-p247
-
-Gems installed from now on with `gem install <gemname>` will go there,
-and be visible only to the given Ruby version.
 
 #rack
 
