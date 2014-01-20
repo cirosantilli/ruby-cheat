@@ -2,6 +2,86 @@ Ruby cheatsheets and mini projects.
 
 Interactive REPL interface: `irb`.
 
+#ruby vs python
+
+As of 2013, Ruby is almost equivalent to Python:
+
+- interpreted
+- dynamically typed
+- large cross platform stdlib
+
+Advantages of Python:
+
+- part of the LSB.
+
+- much more used. Ruby is only used because of RoR.
+
+    Python is more useful in every other application domain.
+
+- Ruby uses many punctuation characters (often based on `sh` or `perl`)
+    where using actual names would be saner.
+
+    - `$:` for `require` path
+    - `@`  for class instance variables
+    - `?`, `!` and `=` allowed as method name suffixes
+
+- many convenience function which are too easily derivable from others.
+
+    This means that programmers have to learn more language primitives:
+
+    - `if` vs `unless`
+    - `any?` vs `empty?`
+    - `alias` is even a keyword to create more redundancy.
+    - `not` vs `!`, only differentiated by precedence.
+
+- requires of requires are also required.
+
+    It becomes very hard to find where a function comes from.
+
+    If you have ever tried to hack a large project, you will know that Python explicit `import`
+    make your job *much* easier.
+
+- identifier first letter case matters:
+
+        i = 0
+        i = 1
+        I = 0
+        I = 1 #warning
+
+Disadvantages of Python:
+
+- confusing global functions in places where methods would be adequate: `len` vs `split`.
+
+- statements that could be functions such as `print` (corrected in Python 3),
+    `del`, `in`, etc.
+
+- Ruby built-in types look more like objects than Python's.
+
+- Ruby have some important tools on its stdlib, including:
+
+    - erb: a ruby/HTML template language, much like PHP.
+    - rake: a Makefile system.
+
+    In Python, those tools are lacking a good implementation as of 2013.
+
+It is a shame that the FOSS community must be divided yet again.
+
+#programs that use ruby
+
+The most notable ones are:
+
+- ruby on rails. Major importance to the Ruby language.
+
+    Powers:
+
+    - Github
+    - parts of Twitter
+
+- rake
+- GRUB2. [This](http://www.amazon.co.uk/Ruby-Grub-Abi-Burlingham/dp/1848120346) is the reason why!
+- puppet
+- Mac homebrew
+
 #rvm
 
 Ruby version manager.
@@ -90,83 +170,6 @@ Gem metadata is specified on a `.gemspec` file.
 
 For gem documentation, the most widely used option is <http://rubydoc.info>,
 which is YARD based.
-
-#ruby vs python
-
-As of 2013, Ruby is almost equivalent to Python:
-
-- interpreted
-- dynamically typed
-- large cross platform stdlib
-
-Advantages of Python:
-
-- part of the LSB.
-
-- much more used. Ruby is only used because of RoR.
-
-    Python is more useful in every other application domain.
-
-- Ruby uses many punctuation characters (often based on `sh` or `perl`)
-    where using actual names would be saner.
-
-    - `$:` for `require` path
-    - `@`  for class instance variables
-    - `?`, `!` and `=` allowed as method name suffixes
-
-- many convenience function which are too easily derivable from others.
-
-    This means that programmers have to learn more language primitives:
-
-    - `if` vs `unless`
-    - `any?` vs `empty?`
-    - `alias` is even a keyword
-
-- `extend` encourages people to add new methods to existing classes just by loading a library.
-
-    It becomes then impossible to find where the method comes from without going through
-    every single library you have required.
-
-- identifier first letter case matters:
-
-        i = 0
-        i = 1
-        I = 0
-        I = 1 #warning
-
-Disadvantages of Python:
-
-- confusing global functions in places where methods would be adequate: `len` vs `split`.
-
-- statements that could be functions such as `print` (corrected in Python 3),
-    `del`, `in`, etc.
-
-- Ruby built-in types look more like objects than Python's.
-
-- Ruby have some important tools on its stdlib, including:
-
-    - erb: a ruby/HTML template language, much like PHP.
-    - rake: a Makefile system.
-
-    In Python, those tools are lacking a good implementation as of 2013.
-
-It is a shame that the FOSS community must be divided yet again.
-
-#programs that use ruby
-
-The most notable ones are:
-
-- ruby on rails. Major importance to the Ruby language.
-
-    Powers:
-
-    - Github
-    - parts of Twitter
-
-- rake
-- GRUB2. [This](http://www.amazon.co.uk/Ruby-Grub-Abi-Burlingham/dp/1848120346) is the reason why!
-- puppet
-- Mac homebrew
 
 #rdoc
 

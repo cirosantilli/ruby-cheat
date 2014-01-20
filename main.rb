@@ -34,7 +34,7 @@ require 'tempfile'
     1 +
     1 == 2 or raise
 
-  # Spaces may disambiguate certain statements. See function
+  # Spaces may disambiguate certain statements. See function.
 
 ##identifier chars
 
@@ -80,9 +80,9 @@ require 'tempfile'
 
 ##object
 
-  # Base class of all types.
+  # Base class of almost all types.
 
-  # Also note that it includes the Kernel module.
+  # Includes the Kernel module, and inherits from `BaseObject`.
 
   ##inspect
 
@@ -95,6 +95,29 @@ require 'tempfile'
     # more adapted for debugging than end-user display.
 
     # Same as Python `repr` relative to `str`.
+
+##BaseObject
+
+  # Base class of all classes.
+
+  ##method_missing
+
+    # What to do is a method is not found.
+
+    # By default raises an exception, but can do anyhting.
+
+    # Don't ever use this to implement an interface (yes, I *have* seen it used):
+    # it is really hard to find out what is going on.
+
+      class MethodMissing
+        def method_missing(sym)
+          $sym = sym
+        end
+      end
+
+      $sym = :''
+      MethodMissing.new.asdf
+      $sym == :asdf or raise
 
 ##kernel
 
@@ -220,6 +243,31 @@ b
     MINUS_MEANS_TERMINATOR_CAN_HAVE_SPACE
     s == "a\nb\n" or raise
 
+  ##match
+
+    # Regexp match:
+
+      'a0'.match(/a./) or raise
+
+    # Convert strings into regexps:
+
+      'a0'.match('a.') or raise
+
+  ##=~
+
+    # Regexp match:
+
+      'a0' =~ /a./ or raise
+
+    # Unlike `match`, does not convert strings into regexps:
+
+      begin
+        'a0' =~ 'a.'
+      rescue TypeError
+      else
+        raise
+      end
+
   ##gsub
 
     # Regex find and replace.
@@ -246,6 +294,10 @@ b
 
       "a0-b1-c2".scan(/(\w)(\d)/) == [['a', '0'], ['b', '1'], ['c', '2']] or raise
 
+  ##start_with?
+
+      "abc".start_with?("ab") or raise
+
 ##regexp
 
   # Like in Perl, regexps have literals in Ruby.
@@ -263,6 +315,8 @@ b
     # Non full matches work:
 
       /a./ =~ "a0c" or raise
+
+    # Also exists for the String class
 
   ##!~
 
@@ -309,28 +363,44 @@ b
 
   # Also possible to create via explicit constructor:
 
-    Array.new        == [] or raise
+    Array.new          == [] or raise
     Array.new(3)       == [nil, nil, nil] or raise
     Array.new(3, true) == [true, true, true] or raise
 
-  # The following works because the `[]` operator overload can have any number of arguments:
+  # In Ruby, `[]` operator overload can have any number of arguments.
+  # The following are jsut constructors:
 
     Array.[](1, 2) == [1, 2] or raise
     Array[1, 2]    == [1, 2] or raise
 
-  # Special syntax for an array of strings literal:
+  # Literal for an array of strings:
 
-    ss = %w{ ab cd ef }
-    ss == ['ab', 'cd', 'ef'] or raise
+    %w{ ab cd ef } == ['ab', 'cd', 'ef'] or raise
 
-  # Range array:
+  # From range:
 
-    (0..2).to_a() == [0, 1, 2] or raise
+    (0..2).to_a   == [0, 1, 2] or raise
     Array(0..2)   == [0, 1, 2] or raise
 
   # Length:
 
     [0, 1, 2].length() == 3 or raise
+
+  # Last element:
+
+    [0, 1].last == 1   or raise
+    [0, 1][-1]  == 1   or raise
+    [].last     == nil or raise
+    [][-1]      == nil or raise
+
+  # Range select:
+
+    (0..4).to_a[1..3]  == (1..3).to_a or raise
+    (0..4).to_a[1..-2] == (1..3).to_a or raise
+
+  # Start from, take how many:
+
+    (0..4).to_a[2, 2] == (2..3).to_a or raise
 
   # Unpack:
 
@@ -387,6 +457,36 @@ b
       b[0] = 0
       a == [0, 2, 3] or raise
 
+  ##select ##filter
+
+    # Python's filter is called select.
+
+      ((0..3).to_a.select {|x| x % 2 == 0}) == [0, 2] or raise
+
+  ##uniq
+
+    # Remove duplicates:
+
+      [0, 1, 0].uniq.sort == [0, 1] or raise
+
+  ##sort_by
+
+    # Sorts by block. Expects -1, 0 or 1.
+
+      class Sort
+        attr_accessor :i
+        def initialize(i)
+          @i = i
+        end
+        def ==(other)
+          other.i == @i
+        end
+      end
+
+      [Sort.new(2), Sort.new(0), Sort.new(1)].sort_by{|x| x.i}  == [Sort.new(0), Sort.new(1), Sort.new(2)] or raise
+      [Sort.new(2), Sort.new(0), Sort.new(1)].sort_by(&:i)  == [Sort.new(0), Sort.new(1), Sort.new(2)] or raise
+      [Sort.new(2), Sort.new(0), Sort.new(1)].sort_by{|x| -x.i} == [Sort.new(2), Sort.new(1), Sort.new(0)] or raise
+
 ##range
 
   # Different from Array.
@@ -410,14 +510,23 @@ b
     ('a'..'c').to_a == ['a', 'b', 'c'] or raise
     ('aa'..'ac').to_a == ['aa', 'ab', 'ac'] or raise
 
-  # Range test:
+  ##contained in
 
-    (1..3) === 2 or raise
-    (1..3) != 2 or raise
+    # Contained test test with `===`:
 
-  # Not reflexive:
+      (1..3) === 2 or raise
 
-    not 2 === (1..3) or raise
+    # Does not work between ranges:
+
+      not (1..2) == (1..3) or raise
+
+    # Does not work with `==`
+
+      not (1..3) ==  2 or raise
+
+    # Not reflexive:
+
+      not 2 === (1..3) or raise
 
 ##map
 
@@ -447,6 +556,11 @@ b
       m == m2 or raise
     end
 
+  # From array:
+
+    a = [0, 1, 2]
+    Hash[a.collect{|v| [v, v*v]}] == {0=>0, 1=>1, 2=>4}
+
   ##hash foreach iteration
 
     # Iteration order: random in 1.8, same as literal in 1.9.
@@ -462,15 +576,17 @@ b
         i += 1
       end
 
-  # Non existing keys simply return nil value, no exception:
+  ##access missing key
 
-    x = {a: 1}
-    x[:b] == nil or raise
+    # Non existing keys simply return nil value, no exception:
 
-  # It is possible to change the default via the explicit constructor:
+      x = {a: 1}
+      x[:b] == nil or raise
 
-    x = Hash.new(1)
-    x[:a] == 1 or raise
+    # It is possible to change the default via the explicit constructor:
+
+      x = Hash.new(1)
+      x[:a] == 1 or raise
 
   ##get ##fetch
 
@@ -482,36 +598,130 @@ b
 
 ##operators
 
-  ##|| vs or
+  ##logic
 
-    # TODO
+    ##! vs not
 
-  ##||= ##or equals
+      # `not` has very low precedence.
 
-    # Assign only if var is neither nil nor false.
+        def f(b)
+          b
+        end
 
-    # Same as `x || x = y`.
+        f(!true) == false or raise
 
-      x = nil
-      x ||= 1
-      x == 1 or raise
+      # Syntax error TODO why? so it is not just a precedence question?:
+      # `not` does not return any value?
 
-      x = false
-      x ||= 2
-      x == 2 or raise
+        #f(not true)
 
-      x = 3
-      x ||= 4
-      x == 3 or raise
+        if not true
+          raise
+        end
 
-    # *Not* the same as `x = x || y`, because the assign only happens if var is neither nil nor false,
-    # but an assign always happens for `x = x || y`.
+    ##||= ##or equals
 
-    # Confusing, since this is different from the rest of the `+=` family, which always assigns.
+      # Assign only if var is neither nil nor false.
 
-      h = Hash.new(1)
-      h[:a] ||= 2
-      h.size == 0 or raise
+      # Same as `x || x = y`.
+
+        x = nil
+        x ||= 1
+        x == 1 or raise
+
+        x = false
+        x ||= 2
+        x == 2 or raise
+
+        x = 3
+        x ||= 4
+        x == 3 or raise
+
+      # *Not* the same as `x = x || y`, because the assign only happens if var is neither nil nor false,
+      # but an assign always happens for `x = x || y`.
+
+      # Confusing, since this is different from the rest of the `+=` family, which always assigns.
+
+        h = Hash.new(1)
+        h[:a] ||= 2
+        h.size == 0 or raise
+
+  ##==
+
+    # By the Object `==` compares by id, not fields:
+
+      class Eq2
+        attr_accessor :i
+        def initialize(i)
+          @i = i
+        end
+      end
+
+      Eq2.new(0) != Eq2.new(0) or raise
+
+  ##===
+
+    # Used on case statements istead of `===`:
+
+      class Eq3
+        def initialize(i)
+          @i = i
+        end
+
+        def ===(other)
+          @i == other + 1
+        end
+      end
+
+      case 0
+      when Eq3.new(0)
+        #Eq3.new(0) === 0
+        raise
+      when Eq3.new(1)
+        #Eq3.new(0) === 1
+      else
+        raise
+      end
+
+    # For Object is the same as `==`, but certain stdlib classes override it,
+    # notably: Regexp, Range and Proc:
+
+      input = ['a0', 3, 0]
+      output = []
+      input.each do |x|
+        case x
+        when /a(.)/
+          output << x
+        when 2..4
+          output << x
+        when lambda {|x| x*x == 0 }
+          output << x
+        end
+      end
+      input == output or raise
+
+  ##eq?
+
+    # On Object same as `==`.
+
+    # A few stdlib classes override it.
+
+    # I prefer never to override this to avoid confusion.
+    # Use a more explicit indication of the difference with `==`.
+
+    # One of the classes that overrides it is Numeric, where it affects type conversion:
+
+      1 == 1.0 or raise
+      not 1.eql?(1.0) or raise
+
+  ##equal?
+
+    # Compare by ID.
+
+    # Never overrided on stdlib base classes, and should never be in any sane lib.
+
+      not "abc".equal?("abc") or raise
+      :abc.equal?(:abc) or raise
 
   ##defined?
 
@@ -675,6 +885,28 @@ b
         j += 1
       end
       j == 3 or raise
+
+##if
+
+  if false
+    raise
+  elsif true
+  else
+    raise
+  end
+
+##case
+
+    case 0
+    when 0
+    when 1
+      raise
+    else
+      raise
+    end
+
+  # Objects are evaluated according to the `===` operator and not the `==` operator!
+  # See `===` for more info.
 
 ##method ##function
 
@@ -928,6 +1160,26 @@ b
         raise
       end
 
+  ##$0
+
+    # Contains the name of this script.
+
+      puts "$0 = #{$0}"
+
+  ##$1 ##$2
+
+    # Unintuitivelly, $1, ... are not argv (since $0 is the program name),
+    # but capturing groups of the last regex.
+
+    # Keep the last regexp matching group.
+
+      /a(.)/ =~ "a0"
+      $1 == '0' or raise
+
+    # Error: can't set variable.
+
+      #$1 = 1
+
   ##overload
 
     # Function overload does not exist.
@@ -970,6 +1222,20 @@ b
           f = ->x  { x + 1 }
           f.call(1) == 2 or raise
     end
+
+##method method
+
+  # Get a method from a string or symbol.
+
+    class MethodMethod
+      def f(x)
+        x
+      end
+    end
+
+    m = MethodMethod.new.method(:f)
+    m.class == Method or raise
+    m.(1) == 1 or raise
 
 ##alias
 
@@ -1211,8 +1477,17 @@ b
         #
         def f
           self.class == Self or raise
+
+          # Self can be ommited for method calls.
+          self.f2() == 2 or raise
+          f2() == 2 or raise
+        end
+
+        def f2
+          2
         end
       end
+
       Self.new.f
 
   ##class methods and variables ##static
@@ -1285,8 +1560,8 @@ b
       ClassMethod.class_method3  == 3 or raise
 
       c = ClassMethod.new
-      #c.class_method() == 1 or raise           #=> ERROR
-      #c.class_i2 == 1 or raise                 #=> ERROR
+      #c.class_method()           #=> ERROR
+      #c.class_i2                 #=> ERROR
 
   ##operator overload:
 
@@ -1629,28 +1904,30 @@ b
     # Make module functions into instance methods.
 
       module IncludeModule
-
         def f2()
           2
         end
 
-        def IncludeModule.f3()
-          2
+        def self.f3()
+          3
         end
-
       end
 
       class IncludeClass
         include IncludeModule
         def f1()
+          f2() == 2 or raise
           1
         end
       end
 
       IncludeClass.new.f1() == 1 or raise
       IncludeClass.new.f2() == 2 or raise
-      # Error: undefined
+
+    # Public module methods are not exported:
+
       #IncludeClass.new.f3()
+      #IncludeClass.f3()
 
   ##extend
 
@@ -1664,7 +1941,37 @@ b
 
     # ERROR: undefined
 
-      #ExtendClass.f3()
+    # Also possible to extend via the `extend` method from the `Object` class:
+
+      class ExtendClassMethod; end
+      ExtendClassMethod.extend(IncludeModule)
+      ExtendClassMethod.f2() == 2 or raise
+
+  ##include and extend at the same time
+
+    # The following common pattern exists.
+
+    # It is done automatically by Rails `ActiveSupport::Concern` inclusion.
+
+    # It is a bit implicit.
+
+      module IncludeExtendModule
+        def self.included(base)
+            base.extend(ClassMethods)
+        end
+
+        def f1; 1; end
+
+        module ClassMethods
+          def f2; 2; end
+        end
+      end
+
+      class IncludeExtendClass
+        include IncludeExtendModule
+      end
+      IncludeExtendClass.new.f1 == 1 or raise
+      IncludeExtendClass.f2     == 2 or raise
 
 ##closure
 
@@ -1955,14 +2262,14 @@ b
 
     #http://stackoverflow.com/questions/17800629/unexpected-return-localjumperror
 
-    g = Proc.new do
-      return 1
-    end
+      g = Proc.new do
+        return 1
+      end
 
-    def f(g)
-      g.call()
-      2
-    end
+      def f(g)
+        g.call()
+        2
+      end
 
     #TODO
     #f(g) == 2 or raise
@@ -2168,16 +2475,6 @@ b
 
 ##command line arguments
 
-  ##global variables ##$
-
-      puts($0)
-      puts($1)
-      puts($2)
-
-    # Error: cannot be set:
-
-      #$0 = "a"
-
   ##argv
 
       puts('ARGV = ' + ARGV.join(', '))
@@ -2196,6 +2493,28 @@ b
 
     puts('stdout')
     print("stdout\n")
+
+  ##puts
+
+    # Is also part of Kernel. It calls `to_s` on strings.
+
+      s = [1, 2]
+      puts("puts format:")
+      puts("#{s}")
+      puts(s)
+
+  ##p
+
+    # Similar to put, but calls inspect on obejcts, which should contain
+    # more complete and debug useful content.
+
+    # This is what irb shows by default.
+
+      p "abc"
+      # Shows `"abc"`
+
+      puts "abc"
+      # Shows `abc` (without the quotes).
 
   ##stdout
 
@@ -2230,13 +2549,6 @@ b
 
       STDERR.puts('stderr')
       $stderr.puts('stderr')
-
-  # Puts format things in the same way as format strings.
-
-    s = [1, 2]
-    puts("puts format:")
-    puts("#{s}")
-    puts(s)
 
 ##File
 

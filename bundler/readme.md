@@ -13,10 +13,30 @@ Update all gems to their latest versions allowed by the `Gemfile`, ignoring `Gem
 
     bundle update
 
+Show gem install path:
+
+    bundle show $gemname
+
+Remove unused gems:
+
+    bundle clean
+
+#usage
+
 Execute a script that comes with a gem installed with Bundler
 in which all packages will be at the version specified by the `Gemfile`:
 
-    bundle exec
+    bundle exec ruby script.rb
+    bundle exec irb
+
+If you run a script / console like this, all the gems in the Gemfile can then be required
+simply as `require 'gem'`
+
+This also automatically adds the `Bundler` object to Ruby,
+which has methods such as `Bundler.require`, that automatically requires all the gems.
+It is also possible to require gems by gem group via `Bundler.require(:group)`
+
+#configuration
 
 Bundler can be configured via:
 
@@ -33,17 +53,28 @@ The `config` file in that directory can contain options such as:
     The default is the user local `~/.bundle`, but you could make it a global
     shared directory if you have sudo.
 
+    One good per project option is the `.bundle` directory itself.
+
+    On Rails 4 the default is `vendor/bundle`.
+
     The directory is created if it does not exist.
 
 - `BUNDLE_DISABLE_SHARED_GEMS: '1'`
 
-    If a gem is present on the system, install it anyways.
+    Without this, bundler does not install gems which are already present on the system.
 
-    By default, bundler does not install gems which are already present on the system.
+    With this option on it thus.
+
+    After a `Bundler.setup`, the shared gem will *not* be visible to the
+    program, so `require 'gem'` will fail.
+    `bundle exec ruby a.rb` automatically does `Bundler.setup`.
 
 Each of the options can be set from the command line:
 
-    bundle install --path=asdf --disable-shared-gems
+    bundle install --path=eanything
+
+TODO `--disable-shared-gems` cannot be set anymore from cmdline on 1.3?
+But it is automatically set on the config file if `--path` is used.
 
 If the option is used from the command line the `.bundle/config` file is automatically
 modified / created so that the option will have that value.
