@@ -1,14 +1,16 @@
 Ruby cheatsheets and mini projects.
 
-Interactive REPL interface: `irb`.
+For Rails and libraries that are very commonly related to Rails or web dev, see [this](https://github.com/cirosantilli/rails-cheat).
 
 #ruby vs python
 
 As of 2013, Ruby is almost equivalent to Python:
 
-- interpreted
+- main implementations are mostly interpreted (with some on the fly compiling)
 - dynamically typed
 - large cross platform stdlib
+
+It is a shame that the FOSS community must be divided over trivial differences.
 
 Advantages of Python:
 
@@ -64,8 +66,6 @@ Disadvantages of Python:
 
     In Python, those tools are lacking a good implementation as of 2013.
 
-It is a shame that the FOSS community must be divided yet again.
-
 #programs that use ruby
 
 The most notable ones are:
@@ -78,9 +78,18 @@ The most notable ones are:
     - parts of Twitter
 
 - rake
+
 - GRUB2. [This](http://www.amazon.co.uk/Ruby-Grub-Abi-Burlingham/dp/1848120346) is the reason why!
+
 - puppet
+
 - Mac homebrew
+
+#irb
+
+Interactive REPL interface: `irb`.
+
+To repeat last command: `<left><up>`.
 
 #rvm
 

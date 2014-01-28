@@ -484,8 +484,20 @@ b
       end
 
       [Sort.new(2), Sort.new(0), Sort.new(1)].sort_by{|x| x.i}  == [Sort.new(0), Sort.new(1), Sort.new(2)] or raise
-      [Sort.new(2), Sort.new(0), Sort.new(1)].sort_by(&:i)  == [Sort.new(0), Sort.new(1), Sort.new(2)] or raise
+      [Sort.new(2), Sort.new(0), Sort.new(1)].sort_by(&:i)      == [Sort.new(0), Sort.new(1), Sort.new(2)] or raise
       [Sort.new(2), Sort.new(0), Sort.new(1)].sort_by{|x| -x.i} == [Sort.new(2), Sort.new(1), Sort.new(0)] or raise
+
+  ##zip
+
+    # Useful to iterate two arrays in parallel:
+
+      [0, 1].zip([2, 3]) == [[0, 2], [1, 3]] or raise
+
+      a = []
+      [0, 1].zip([2, 3]).each do |x, y|
+        a << [x, y]
+      end
+      a == [[0, 2], [1, 3]] or raise
 
 ##range
 
@@ -726,8 +738,8 @@ b
   ##defined?
 
       not defined? not_yet_defined or raise
-      not_yet_defined = 1
-      defined? not_yet_defined or raise
+      a = 1
+      defined? a or raise
 
 ##loops
 
@@ -772,7 +784,7 @@ b
       i == 3 or raise
       j == 1 or raise
 
-    # While modifier multiple statements:
+    # While modifier multiple statements to do a do while:
 
       i = 0
       j = 0
@@ -2019,25 +2031,55 @@ b
   # There seems to not be any semantical difference between the two of them,
   # except precedence and different usage convention: <http://stackoverflow.com/questions/2122380/using-do-block-vs-brackets>
 
-  # Note how the local variable `i` is modified  inside `f` by `yield`.
-  # This is because the block is not just a function: it is a *closure*,
-  # so it also "contains" variables. This could not be achieved by passing
-  # a simple function as argument:
+  ##scope
 
-    def f(func)
-      func() == 2 or raise
-    end
+    # Note how the local variable `i` is modified  inside `f` by `yield`.
+    # This is because the block is not just a function: it is a *closure*,
+    # so it also "contains" variables. This could not be achieved by passing
+    # a simple function as argument:
 
-    i = 1
-    def g()
-      # Cannot change the outter i from here!
-      # This will create a local i.
-      i += 1
-      2
-    end
-    i == 1 or raise
+    # Works because block:
 
-  # Blok arguments:
+      def f
+        yield
+      end
+
+      i = 0
+      f() do
+        i += 1
+      end
+      i == 1 or raise
+
+      i = 0
+      f() do
+        i += 1
+      end
+      i == 1 or raise
+
+    # However, to be part of the closure the variable has to be defined outside,
+    # or else it is a local variable. Very confusing.
+
+      f() do
+        not_yet_defined = 1
+      end
+
+      not defined? not_yet_defined or raise
+
+    # Fails because function:
+
+      def f(func)
+        func() == 2 or raise
+      end
+
+      i = 0
+      def g()
+        # Cannot change the outter i from here!
+        # This will create a local i.
+        i += 1
+      end
+      i == 0 or raise
+
+  # Pass arguments:
 
     $i = 0
     def f(i, j)
@@ -2047,7 +2089,7 @@ b
     f(1, 2) { |i, j| $i += i * j }
     $i == 4 or raise
 
-  # Get values:
+  # Get return values:
 
     $i = 0
     def f()
