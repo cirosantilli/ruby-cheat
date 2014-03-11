@@ -2,6 +2,8 @@ Ruby cheatsheets and mini projects.
 
 For Rails and libraries that are very commonly related to Rails or web dev, see [this](https://github.com/cirosantilli/rails-cheat).
 
+All runnable Ruby files are meant to be run with `bundle exec ruby <filename>`.
+
 #ruby vs python
 
 As of 2013, Ruby is almost equivalent to Python:
@@ -50,6 +52,8 @@ Advantages of Python:
         I = 0
         I = 1 #warning
 
+- `super` without parenthesis is different from `super()` with parenthesis!
+
 Disadvantages of Python:
 
 - confusing global functions in places where methods would be adequate: `len` vs `split`.
@@ -91,43 +95,51 @@ Interactive REPL interface: `irb`.
 
 To repeat last command: `<left><up>`.
 
-#rvm
+#version managers
 
-Ruby version manager.
+Manage multiple Ruby versions on a single system. Run programs in specific environments.
 
-Similar to Python virtualenv.
+Programs similar to Python `virtualenv`.
 
-The best way to install ruby, do that you can manage mutiple versions easily.
+The best way to install Ruby, do that you can manage multiple versions easily.
+
+**Always** use it one of those methods.
+
+##rbenv
+
+<https://github.com/sstephenson/rbenv>
+
+As of 2014-03, has 2x more stars than RVM.
+
+##rvm
+
+Ruby version manager: <https://github.com/wayneeseguin/rvm>
 
 Recognizes Gemfile's `ruby` lines and automatically changes the ruby version to match it.
 
-Manage multiple Ruby versions on a single system.
-Run programs in specific environments.
-
-Install rvm:
+Install RVM and a ruby version:
 
     curl -L https://get.rvm.io | bash -s stable
+    source ~/.rvm/scripts/rvm
+    rvm install 2.1.1
 
-This added `~/.rvm/bin` to the `$PATH`.
+Log out, login, and it will work well on all new shells.
 
-Next do:
+This seems to generate instructions to the system's package manager to install build dependency programs, such as build tools. Works on a clean Ubuntu 12.04.
 
-    source /home/ubuntu/.rvm/scripts/rvm
+The RVM install adds to `bash_profile`:
 
-to update your current shell state.
+    [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
 
-Meet the rvm dependencies:
+And to `~/.bashrc`:
 
-    rvm requirements
+    PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
 
-This seems to generate instructions to the system's package manager
-to install dependency programs, such as build tools.
+Install another version of Ruby:
 
-Install a specific version of Ruby:
+    rvm install 1.9.3
 
-    rvm install 1.9.2
-
-This may download and compile its source, so it may take some time.
+This may download and compile its source if a binary is not found, so it may take some time.
 
 The ruby interpreter is installed only for the current user under `~/.rvm/bin/`.
 
@@ -135,14 +147,14 @@ Install the latest version of Ruby:
 
     rvm install ruby
 
-Use ruby interpreter 1.9.2:
+Use ruby interpreter `1.9.3`:
 
-    rvm use 1.9.2
+    rvm use 1.9.3
     ruby -v
 
-Use ruby named `ruby` and make it the default:
+Use ruby named `2.1.1` and make it the default:
 
-    rvm use ruby --default
+    rvm use 2.1.1 --default
     ruby -v
 
 View installed interpreter versions, current and default one:
@@ -161,24 +173,27 @@ Sample output:
 
     /home/ciro/.rvm/gems/ruby-2.0.0-p247
 
-Gems installed from now on with `gem install <gemname>` will go there,
-and be visible only to the given Ruby version.
+Gems installed from now on with `gem install <gemname>` will go there, and be visible only to the given Ruby version. 
 
 #gem
 
-A gem is like a Python package: an interface which allows to install and publish
-Ruby projects.
+A gem is like a Python package: an interface which allows to install and publish Ruby projects.
 
-It is recommended that you use Bundler instead of gem to install gems,
-since bundler also takes care of dependency issues.
+It is recommended that you use Bundler instead of gem to install gems, since bundler also takes care of dependency issues.
 
-The de-facto standard web interface for gems is `rubygems.org`,
-which is open source rails application.
+The de-facto standard web interface for gems is `rubygems.org`, which is open source rails application.
 
 Gem metadata is specified on a `.gemspec` file.
 
-For gem documentation, the most widely used option is <http://rubydoc.info>,
-which is YARD based.
+For gem documentation, the most widely used option is <http://rubydoc.info>, which is YARD based.
+
+##gem uninstall
+
+There is no clean built-in way to remove installed dependencies of a gem with it: <http://stackoverflow.com/questions/952836/do-i-have-to-manually-uninstall-all-dependent-gems>
+
+[gem-prune](https://github.com/ddollar/gem-prune/tree/master>) however seems to do the trick, but you have to manually mark which gems you want to keep, it is not done automatically with install. So maybe:
+
+    function gemi{ gem keep "$1" && gem install "$1"; }
 
 #rdoc
 
@@ -188,32 +203,11 @@ Does not have many features.
 
 Also consider the more advanced YARD tool.
 
-#rack
-
-Standard Ruby SGI interface.
-
-Action to run specified in a `config.ru` file. This is called a *rackup file*.
-
-#unicorn
-
-Rack HTTP server.
-
-Must be run from  directory that contains a `config.ru` file,
-for example a root of a rails template.
-
-Can be used both for production and tests.
-
-    unicorn
-
-Run test rails server:
-
-    bundle exec unicorn -p 3000
-
 #foreman
 
 Foreman is a tool to facilitate web app deployment.
 
-foreman configuration is found on a file named `Procfile`.
+Foreman configuration is found on a file named `Procfile`.
 
 The `Procfile` is used by the application called `foreman`.
 
@@ -221,8 +215,7 @@ The line:
 
     web: gunicorn main:app
 
-Simply says that web servers should run the command `gunicorn main:app`
-(gunicorn is a Python WSGI server).
+Simply says that web servers should run the command `gunicorn main:app` (gunicorn is a Python WSGI server).
 
 Sample one web app, one worker and one clock dyno:
 
@@ -236,12 +229,14 @@ To test the project locally you can use:
 
 This will run all the commands in the procfile.
 
-To set environment variables for a project only, foreman adds all environment
-variables in the `.env` file to the running environment.
-This file contains local only information, and should not be uploaded.
+To set environment variables for a project only, foreman adds all environment variables in the `.env` file to the running environment. This file contains local only information, and should not be uploaded.
 
 #sources
 
 - <http://rubylearning.com/satishtalim/tutorial.html>
 
     Good intro tutorial.
+
+- <https://github.com/styleguide/ruby>
+
+    GitHub style guide. Probably one of the best / most popular available.

@@ -32,6 +32,9 @@ ruby '2.0.0'
 # It is possible to get gems from git repositories:
 #gem 'nokogiri', :git => 'git://github.com/tenderlove/nokogiri.git', :branch => '1.4'
 
+# On RVM, the gem will then be installed to a path of type:
+#.rvm/gems/ruby-2.1.1/bundler/gems/softcover-60ad088323ce
+
 # Cannot do `require_relative` from here. One possible alternative is a brute `instance_eval` + File.read:
 #instance_eval(File.read(File.join(File.dirname(__FILE__), 'Gemfile_dbms')))
 
@@ -41,6 +44,14 @@ ruby '2.0.0'
 
 gem 'haml'
 gem 'faker', require: false
+
+##path
+
+# Install from given path.
+
+# Possible way to develop Gems.
+
+#gem 'counter_culture', :path => '../counter_culture'
 
 ##git
 

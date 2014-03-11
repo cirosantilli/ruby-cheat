@@ -1,0 +1,14 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    hub (1.11.2)
+    kramdown (1.3.2)
+    redcarpet (3.0.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  hub
+  kramdown
+  redcarpet

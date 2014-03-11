@@ -125,6 +125,10 @@ require 'tempfile'
 
   # It contains therefore many *built-in* methods such as print, puts, Array, etc.
 
+##nil
+
+  nil.to_i == 0 or raise
+
 ##string
 
   ##quoting
@@ -270,7 +274,9 @@ b
 
   ##gsub
 
-    # Regex find and replace.
+    # Regex find and replace multiple non overlapping times:
+
+      "aa".gsub(/./, 'b') == "bb" or raise
 
     # Numbered capture groups:
 
@@ -280,7 +286,7 @@ b
 
       "a0".gsub(/a(?<name>.)/, 'b\k<name>') == "b0" or raise
 
-    # Hash case by case replace:
+    # Hash: case by case replace:
 
       "abcd".gsub(/../, {'ab'=>'01', 'cd'=>'23'}) == "0123" or raise
 
@@ -298,17 +304,35 @@ b
 
       "abc".start_with?("ab") or raise
 
+  ##encoding
+
 ##regexp
 
-  # Like in Perl, regexps have literals in Ruby.
+  ##literal
 
-  # There eis not however a `s//` substitution function special syntax:
-  # regular functions such as the string gsub method are used for that.
+    # Like in Perl, regexps have literals in Ruby.
 
-  # Also check regexp methods present on the string class such as
-  # gsub, scan,
+    # There eis not however a `s//` substitution function special syntax:
+    # regular functions such as the string gsub method are used for that.
 
-    /a./.class == Regexp or raise
+    # Also check regexp methods present on the string class such as # gsub, scan,
+
+    # There are two equivalent syntaxes for regexp literals:
+
+      /a./.class == Regexp or raise
+      %r{a.}.class == Regexp or raise
+
+    # // syntax is cleaner ans shorter, better unless you have lots of slashes like in HTML.
+
+    # The only difference is what you have to backslash escape on each:
+
+      /\/}/   =~ "/}" or raise
+      %r{/\}} =~ "/}" or raise
+
+    # Regexp literal from string:
+
+      s = ".c"
+      /a#{s}/ =~ "a0c" or raise
 
   ##=~
 
@@ -352,6 +376,14 @@ b
 ##list
 
   # See array.
+
+##Enumerable
+
+  # Module.
+
+  # The most prototypical includer ir Array.
+
+  # Its cheat is currently not separated from that of Array TODO.
 
 ##array
 
@@ -397,10 +429,34 @@ b
 
     (0..4).to_a[1..3]  == (1..3).to_a or raise
     (0..4).to_a[1..-2] == (1..3).to_a or raise
+    (0..4).to_a[3..1]  == (3..1).to_a or raise
+    (0..4).to_a[3..-3] == (3..2).to_a or raise
+    (0..2).to_a[1..4]  == [1,2].to_a  or raise
+
+  # Insane special cases: for ranges, if the staring index is:
+  #
+  # - == length, return []
+  # - != length and out of range, return nil
+  #
+  # TODO why such insane default? Probably because of requiring ranges to be lvalues.
+  # <http://stackoverflow.com/questions/3568222/array-slicing-in-ruby-looking-for-explanation-for-illogical-behaviour-taken-fr?rq=1>
+
+    [1][1..3] == []  or raise
+    [1][2..3] == nil or raise
+
+  # TODO why are the following not [1]??
+
+    [1][0..-2] == [] or raise
+    [1][0..-3] == [] or raise
+
+  # But this one is (as expected):
+
+    [1][0..-1] == [1] or raise
 
   # Start from, take how many:
 
     (0..4).to_a[2, 2] == (2..3).to_a or raise
+    (0..4).to_a[2, 0] == [] or raise
 
   # Unpack:
 
@@ -418,6 +474,11 @@ b
     a[0, 2] == [0, 1] or raise
     a[0, 3] == [0, 1, 2] or raise
     a[1, 2] == [1, 2] or raise
+
+  # Check if array contain element via `include?`:
+
+    [0, 1].include?(0) or  raise
+    [   1].include?(0) and raise
 
   ##append inplace ##<<
 
@@ -499,6 +560,18 @@ b
       end
       a == [[0, 2], [1, 3]] or raise
 
+  ##inject
+
+    # Python reduce.
+
+    # Without any argument, the first memo is set to the fist object, and the first obj is the second element:
+
+      [1,2,3].reverse.inject{|memo, obj| memo = {obj => memo}} == {1=>{2=>3}} or raise
+
+    # With an argument, the first memo is set to it, and the first obj is the first element:
+
+      [[1,1],[2,4],[3,9]].inject({}){|memo, obj| memo[obj[0]] = obj[1]; memo} == {1=>1, 2=>4, 3=>9} or raise
+
 ##range
 
   # Different from Array.
@@ -540,11 +613,7 @@ b
 
       not 2 === (1..3) or raise
 
-##map
-
-  # See hash.
-
-##hash
+##hash ##map
 
     m = {1=>'one', 2=>'two'}
     m[1] == 'one' or raise
@@ -607,6 +676,18 @@ b
       h = {a: 1, b: 2}
       h.fetch(:a, 3) == 1 or raise
       h.fetch(:d, 3) == 3 or raise
+
+  ##merge
+
+    # Like Python extend.
+
+      {a: 0, b: 1}.merge({a: 10, c: 2}) == {a: 10, b: 1, c: 2} or raise
+
+  ##delete
+
+      h = {a:0, b:1}
+      h.delete(:a) == 0 or raise
+      h == {b:1} or raise
 
 ##operators
 
@@ -1123,17 +1204,34 @@ b
         total
       end
 
+  ##default values
+
+    def f(x, y=2)
+      x + y
+    end
+
+    f(1)    == 3 or raise
+    f(1, 3) == 4 or raise
+
   ##kwargs
 
     # Does not exist in ruby.
 
     # Similar syntax can be achieved however by passing a dictionary and omiting braces.
 
-      def f(d)
+    # It is also common to set the dictionnary to a default `{}`, further emulating kwargs in Python.
+
+      def f(d={})
+        if d != {}
+          d[:a] + d[:b]
+        else
+          0
+        end
       end
 
-      f({a:1, b:2})
-      f(a:1, b:2)
+      f({a:1, b:2}) == 3 or raise
+      f(a:1, b:2)   == 3 or raise
+      f()           == 0 or raise
 
   ##global variable
 
@@ -1178,10 +1276,9 @@ b
 
       puts "$0 = #{$0}"
 
-  ##$1 ##$2
+  ##$1 ##$2 ##capture groups
 
-    # Unintuitivelly, $1, ... are not argv (since $0 is the program name),
-    # but capturing groups of the last regex.
+    # Unintuitivelly, $1, ... are not argv (since $0 is the program name), but capturing groups of the last regex.
 
     # Keep the last regexp matching group.
 
@@ -1666,6 +1763,15 @@ b
           end
         end
 
+        Derived.new(1).i == 1 or raise
+
+      # Without parenthesis, automatically forwards all the arguments *insane!*
+
+        class DerivedSuperNoParenthesis < Base
+          def initialize(i)
+            super
+          end
+        end
         Derived.new(1).i == 1 or raise
 
       # Without it, the base class constructor is not called at all.
@@ -2521,7 +2627,7 @@ b
 
       puts('ARGV = ' + ARGV.join(', '))
 
-##env
+##environment variables
 
   # Environment variables.
 
@@ -2677,6 +2783,15 @@ b
     file.read      # => "hello world"
     file.close
     file.unlink    # deletes the temp file
+
+##StringIO
+
+  # String that looks like a file to do IO tests.
+
+    file = StringIO.new
+    file.write("a")
+    file.read == "a" or raise
+    file.close
 
 ##process
 

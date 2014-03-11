@@ -6,8 +6,7 @@ Install all gems listed on file `Gemfile` in current directory:
 
     bundle install
 
-If you have a `Gemfile.lock` only gems that were modified on the Gemfile will be reinstalled.
-after the `Gemfile.lock` was created will be reinstalled.
+If you have a `Gemfile.lock` only gems that were modified on the `Gemfile` will be reinstalled.
 
 Update all gems to their latest versions allowed by the `Gemfile`, ignoring `Gemfile.lock`:
 
@@ -23,18 +22,14 @@ Remove unused gems:
 
 #usage
 
-Execute a script that comes with a gem installed with Bundler
-in which all packages will be at the version specified by the `Gemfile`:
+Execute a script that comes with a gem installed with Bundler in which all packages will be at the version specified by the `Gemfile`:
 
     bundle exec ruby script.rb
     bundle exec irb
 
-If you run a script / console like this, all the gems in the Gemfile can then be required
-simply as `require 'gem'`
+If you run a script / console like this, all the gems in the `Gemfile` can then be required simply as `require 'gem'`
 
-This also automatically adds the `Bundler` object to Ruby,
-which has methods such as `Bundler.require`, that automatically requires all the gems.
-It is also possible to require gems by gem group via `Bundler.require(:group)`
+This also automatically adds the `Bundler` object to Ruby, which has methods such as `Bundler.require`, that automatically requires all the gems. It is also possible to require gems by gem group via `Bundler.require(:group)`.
 
 #configuration
 
@@ -50,8 +45,7 @@ The `config` file in that directory can contain options such as:
 
 - `BUNDLE_PATH: vendor/bundle`: set the path to install gems under.
 
-    The default is the user local `~/.bundle`, but you could make it a global
-    shared directory if you have sudo.
+    The default is the user local `~/.bundle`, but you could make it a global shared directory if you have `sudo`.
 
     One good per project option is the `.bundle` directory itself.
 
@@ -65,17 +59,14 @@ The `config` file in that directory can contain options such as:
 
     With this option on it thus.
 
-    After a `Bundler.setup`, the shared gem will *not* be visible to the
-    program, so `require 'gem'` will fail.
-    `bundle exec ruby a.rb` automatically does `Bundler.setup`.
+    After a `Bundler.setup`, the shared gem will *not* be visible to the program, so `require 'gem'` will fail. `bundle exec ruby a.rb` automatically does `Bundler.setup`.
 
 Each of the options can be set from the command line:
 
-    bundle install --path=eanything
+    bundle install --path=anything
 
 TODO `--disable-shared-gems` cannot be set anymore from cmdline on 1.3?
+
 But it is automatically set on the config file if `--path` is used.
 
-If the option is used from the command line the `.bundle/config` file is automatically
-modified / created so that the option will have that value.
-In this way, the last options are remembered.
+If the option is used from the command line the `.bundle/config` file is automatically modified / created so that the option will have that value. In this way, the last options are remembered.
