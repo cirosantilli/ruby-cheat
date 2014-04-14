@@ -1969,15 +1969,20 @@ b
     #M::f2() == 2 or raise
     #f2() == 2 or raise
 
-  # Dot `.` and double colon `:` are the same except for constants,
-  # in which case only the colon works:
+  ##dot vs double colons
 
-    #M.i == 1 or raise
-    #M.I == 1 or raise
-    #M::i == 2 or raise
-    M::I == 2 or raise
-    # Warning: modifying already initialized constant.
-    #M::I = 3
+    # Dot `.` and two double colons `::` are the same except for constants,
+    # in which case only the colon works:
+
+      #M.i == 1 or raise
+      #M.I == 1 or raise
+      #M::i == 2 or raise
+      M::I == 2 or raise
+      # Warning: modifying already initialized constant.
+      #M::I = 3
+
+    # It is generaly better style to use only dot `.` for methods, sinc that makes it clearer
+    # that it is a method and not a constant.
 
   # Classes are constant objects so:
 
@@ -2533,7 +2538,16 @@ b
 
   ##require_relative
 
+    # Requires file `main2.rb`:
+
       require_relative('main2')
+
+      begin
+        require_relative('i_dont_exist')
+      rescue LoadError
+      else
+        raise
+      end
 
     # Non-const variables are bad. Everything else is ok.
 
@@ -2763,6 +2777,11 @@ b
     # Remove empty directory. For non empty, consider `fileutils.rm_rf`.
 
       #Dir.rmdir(".")
+
+  ##getwd ##pwd
+
+      puts "pwd = " + Dir.pwd()
+      puts "getwd = " + Dir.getwd()
 
 ##fileutils
 

@@ -20,7 +20,7 @@ Remove unused gems:
 
     bundle clean
 
-#usage
+#Usage
 
 Execute a script that comes with a gem installed with Bundler in which all packages will be at the version specified by the `Gemfile`:
 
@@ -31,7 +31,7 @@ If you run a script / console like this, all the gems in the `Gemfile` can then 
 
 This also automatically adds the `Bundler` object to Ruby, which has methods such as `Bundler.require`, that automatically requires all the gems. It is also possible to require gems by gem group via `Bundler.require(:group)`.
 
-#configuration
+#Configuration
 
 Bundler can be configured via:
 
@@ -43,23 +43,25 @@ Each configuration option can be set via those three methods.
 
 The `config` file in that directory can contain options such as:
 
-- `BUNDLE_PATH: vendor/bundle`: set the path to install gems under.
+##PATH
 
-    The default is the user local `~/.bundle`, but you could make it a global shared directory if you have `sudo`.
+`BUNDLE_PATH vendor/bundle`: set the path to install gems under.
 
-    One good per project option is the `.bundle` directory itself.
+The default is the user local `~/.bundle`, but you could make it a global shared directory if you have `sudo`.
 
-    On Rails 4 the default is `vendor/bundle`.
+The most standard per project location is `vendor/bundle`, which is the Rails 4 default. It is also used on certain `bundler` defaults, such as the `--deployment` option.
 
-    The directory is created if it does not exist.
+If you don't already have a `vendor/bundle` directory, and don't want to create one, just use the `.bundle` directory itself.
 
-- `BUNDLE_DISABLE_SHARED_GEMS: '1'`
+The directory is created if it does not exist.
 
-    Without this, bundler does not install gems which are already present on the system.
+##DISABLE_SHARED_GEMS
 
-    With this option on it thus.
+If different from `1`, bundler does not install gems which are already present on the system.
 
-    After a `Bundler.setup`, the shared gem will *not* be visible to the program, so `require 'gem'` will fail. `bundle exec ruby a.rb` automatically does `Bundler.setup`.
+With this option on it thus.
+
+After a `Bundler.setup`, the shared gem will *not* be visible to the program, so `require 'gem'` will fail. `bundle exec ruby a.rb` automatically does `Bundler.setup`.
 
 Each of the options can be set from the command line:
 
@@ -70,3 +72,30 @@ TODO `--disable-shared-gems` cannot be set anymore from cmdline on 1.3?
 But it is automatically set on the config file if `--path` is used.
 
 If the option is used from the command line the `.bundle/config` file is automatically modified / created so that the option will have that value. In this way, the last options are remembered.
+
+#BUNDLE_WITHOUT
+
+Don't install a group.
+
+Example: you support two databases: MySQL and PostgreSQL.
+
+Put all that is specific to each one in a group, and then install with either:
+
+    bundle install --without=mysql
+    bundle install --without=pg
+
+#Help
+
+List of subcommands:
+
+    bundle help
+
+Details on a subcommand:
+
+    bundle help install
+
+#Install
+
+Installs gems to the same path as `gem install` would install, which may require `sudo` privileges.
+
+`bundle help install` says that you should never use `sudo bundle install`, as some of the steps towards installation do not require `sudo`, and doing them as sudo may cause you problems later. If `sudo` is required, Bundler will ask your password and to it for you.

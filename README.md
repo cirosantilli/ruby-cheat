@@ -4,7 +4,7 @@ For Rails and libraries that are very commonly related to Rails or web dev, see 
 
 All runnable Ruby files are meant to be run with `bundle exec ruby <filename>`.
 
-#ruby vs python
+#Ruby vs Python
 
 As of 2013, Ruby is almost equivalent to Python:
 
@@ -65,12 +65,12 @@ Disadvantages of Python:
 
 - Ruby have some important tools on its stdlib, including:
 
-    - erb: a ruby/HTML template language, much like PHP.
+    - ERB: a ruby/HTML template language, much like PHP.
     - rake: a Makefile system.
 
     In Python, those tools are lacking a good implementation as of 2013.
 
-#programs that use ruby
+#Programs that use ruby
 
 The most notable ones are:
 
@@ -78,7 +78,7 @@ The most notable ones are:
 
     Powers:
 
-    - Github
+    - GitHub
     - parts of Twitter
 
 - rake
@@ -87,15 +87,33 @@ The most notable ones are:
 
 - puppet
 
-- Mac homebrew
+- Mac Homebrew.
 
-#irb
+#Style guides
+
+- <https://github.com/styleguide/ruby>
+
+    Official GitHub style guide.
+
+- <https://github.com/bbatsov/ruby-style-guide>
+
+    Bastov's style guide. 5,500 stars as of 2014-04.
+
+- <https://github.com/thoughtbot/guides/tree/master/style#ruby>
+
+    Thoughbot Inc. styles.
+
+    Short for Ruby, but also includes all tools of the Rails workflow.
+
+    Automatically checked by Hound CI.
+
+#IRB
 
 Interactive REPL interface: `irb`.
 
 To repeat last command: `<left><up>`.
 
-#version managers
+#Version managers
 
 Manage multiple Ruby versions on a single system. Run programs in specific environments.
 
@@ -109,23 +127,21 @@ The best way to install Ruby, do that you can manage multiple versions easily.
 
 <https://github.com/sstephenson/rbenv>
 
-As of 2014-03, has 2x more stars than RVM.
+As of 2014-03, has 2x more stars than RVM. It is much more recent than RVM (2 years vs 4 for RVM).
 
-##rvm
+##RVM
 
 Ruby version manager: <https://github.com/wayneeseguin/rvm>
 
 Recognizes Gemfile's `ruby` lines and automatically changes the ruby version to match it.
 
-Install RVM and a ruby version:
+Basic install command you will want to use most of the time:
 
     curl -L https://get.rvm.io | bash -s stable
     source ~/.rvm/scripts/rvm
     rvm install 2.1.1
 
 Log out, login, and it will work well on all new shells.
-
-This seems to generate instructions to the system's package manager to install build dependency programs, such as build tools. Works on a clean Ubuntu 12.04.
 
 The RVM install adds to `bash_profile`:
 
@@ -140,6 +156,8 @@ Install another version of Ruby:
     rvm install 1.9.3
 
 This may download and compile its source if a binary is not found, so it may take some time.
+
+This seems to generate instructions to the system's package manager to install build dependency programs, such as build tools. Works on a clean Ubuntu 12.04.
 
 The ruby interpreter is installed only for the current user under `~/.rvm/bin/`.
 
@@ -156,6 +174,10 @@ Use ruby named `2.1.1` and make it the default:
 
     rvm use 2.1.1 --default
     ruby -v
+
+Use the system ruby (disable RVM for current shell):
+
+    rvm use system
 
 View installed interpreter versions, current and default one:
 
@@ -175,7 +197,7 @@ Sample output:
 
 Gems installed from now on with `gem install <gemname>` will go there, and be visible only to the given Ruby version. 
 
-#gem
+#Gem
 
 A gem is like a Python package: an interface which allows to install and publish Ruby projects.
 
@@ -203,7 +225,7 @@ Does not have many features.
 
 Also consider the more advanced YARD tool.
 
-#foreman
+#Foreman
 
 Foreman is a tool to facilitate web app deployment.
 
@@ -231,12 +253,8 @@ This will run all the commands in the procfile.
 
 To set environment variables for a project only, foreman adds all environment variables in the `.env` file to the running environment. This file contains local only information, and should not be uploaded.
 
-#sources
+#Sources
 
 - <http://rubylearning.com/satishtalim/tutorial.html>
 
     Good intro tutorial.
-
-- <https://github.com/styleguide/ruby>
-
-    GitHub style guide. Probably one of the best / most popular available.
