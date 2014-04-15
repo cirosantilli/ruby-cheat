@@ -129,6 +129,19 @@ require 'tempfile'
 
   nil.to_i == 0 or raise
 
+##int
+
+  # Underscore in integer literals are ignore. Use them for readability for long integers.
+
+    1_000_000 == 1000000 or raise
+    1_0_00_0_00 == 1000000 or raise
+
+  # Cannot start, end or have multiple consecutive underlines:
+
+    #_1
+    #1_
+    #1__0
+
 ##string
 
   ##quoting
