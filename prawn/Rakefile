@@ -1,0 +1,10 @@
+pdf_path = 'a.pdf'
+
+task(:default) do
+  require_relative('main')
+  generate_pdf(pdf_path)
+end
+
+task(:clean) do
+  File.delete(pdf_path)
+end

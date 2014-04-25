@@ -5,9 +5,14 @@ GEM
       tilt
     hub (1.11.2)
     kramdown (1.3.2)
+    pdf-core (0.2.5)
+    prawn (1.0.0)
+      pdf-core (~> 0.2.2)
+      ttfunk (~> 1.1.1)
     redcarpet (3.0.0)
     sass (3.3.3)
     tilt (2.0.0)
+    ttfunk (1.1.1)
 
 PLATFORMS
   ruby
@@ -16,5 +21,6 @@ DEPENDENCIES
   haml
   hub
   kramdown
+  prawn
   redcarpet
   sass

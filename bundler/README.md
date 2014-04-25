@@ -2,6 +2,10 @@ Package installer.
 
 It higher level than `gem`, as it takes care of things such as dealing with dependencies.
 
+Install bundler:
+
+    gem install bundler
+
 Install all gems listed on file `Gemfile` in current directory:
 
     bundle install

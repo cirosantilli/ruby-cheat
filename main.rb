@@ -78,6 +78,14 @@ require 'tempfile'
       puts("__FILE__ = #{__FILE__}")
       puts("__LINE__ = #{__LINE__}")
 
+  ##if __name__ == '__main__'
+
+    # Design pattern to run something only when executed, not required:
+
+      if __FILE__ == $0
+        puts('__FILE__ == $0')
+      end
+
 ##object
 
   # Base class of almost all types.
@@ -2745,6 +2753,10 @@ b
 
         File.basename(File.join("a", "b", "c")) == "c" or raise
 
+    ##unlink ##delete
+
+      # Delete file.
+
     ##exists
 
       # Do not confound with `exist?` which is only for directories!
@@ -2778,6 +2790,10 @@ b
         data_read == data or raise
 
       File.unlink(path)
+
+      File.open(path, 'w') do |f|
+        f.write(data)
+      end
 
 ##Dir
 
