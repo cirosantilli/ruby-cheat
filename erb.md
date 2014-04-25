@@ -4,7 +4,7 @@ Part of the Ruby stdlib.
 
 Both a Ruby API and an executable.
 
-#usage
+# Usage
 
 Executable:
 
@@ -21,7 +21,7 @@ API:
     renderer = ERB.new(input)
     renderer.result() == 'a = 1, b = 2' or raise
 
-#tags
+# Tags
 
 Alternatives:
 

@@ -22,8 +22,7 @@ Advantages of Python:
 
     Python is more useful in every other application domain.
 
-- Ruby uses many punctuation characters (often based on `sh` or `perl`)
-    where using actual names would be saner.
+- Ruby uses many punctuation characters (often based on `sh` or `perl`) where using actual names would be saner.
 
     - `$:` for `require` path
     - `@`  for class instance variables
@@ -42,8 +41,7 @@ Advantages of Python:
 
     It becomes very hard to find where a function comes from.
 
-    If you have ever tried to hack a large project, you will know that Python explicit `import`
-    make your job *much* easier.
+    If you have ever tried to hack a large project, you will know that Python explicit `import` make your job *much* easier.
 
 - identifier first letter case matters:
 
@@ -58,8 +56,7 @@ Disadvantages of Python:
 
 - confusing global functions in places where methods would be adequate: `len` vs `split`.
 
-- statements that could be functions such as `print` (corrected in Python 3),
-    `del`, `in`, etc.
+- statements that could be functions such as `print` (corrected in Python 3), `del`, `in`, etc.
 
 - Ruby built-in types look more like objects than Python's.
 
