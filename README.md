@@ -94,13 +94,13 @@ The most notable ones are:
 
 - <https://github.com/bbatsov/ruby-style-guide>
 
-    Bastov's style guide. 5,500 stars as of 2014-04.
+    Bastov's style guide. 5,500 stars as of 2014-04. Lots of examples.
 
 - <https://github.com/thoughtbot/guides/tree/master/style#ruby>
 
     Thoughbot Inc. styles.
 
-    Short for Ruby, but also includes all tools of the Rails workflow.
+    Not many examples for Ruby, but also includes many tools of the Rails workflow.
 
     Automatically checked by Hound CI.
 

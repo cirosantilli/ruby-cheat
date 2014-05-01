@@ -369,6 +369,45 @@ b
 
       /a/ !~ "b" or raise
 
+  ##$1 ##$2 ##capture groups
+
+    # Unintuitivelly, $1, ... are not argv (since $0 is the program name), but capturing groups of the last regex.
+
+    # Keep the last regexp matching group.
+
+      /a(.)/ =~ "a0"
+      $1 == '0' or raise
+
+    # Error: can't set variable.
+
+      #$1 = 1
+
+  ##$~
+
+    # MatchData from previous successful match.
+
+  ##$&
+
+    # Matched string from the previous successful pattern match:
+
+    "abcd".match(/b.d/)
+    $& == "bcd"
+
+  ##$+
+
+    # Last match groups from the previous successful pattern match.
+
+      "abcd".match(/(b)(.)(d)/)
+      $+ == ["abcd", "b", "c", "d"]
+
+  ##$` ##$'
+
+    # String before / after the actual matched string of the previous successful pattern match.
+
+      'abcd'.match(/b./)
+      $` == 'a' or raise
+      $' == 'd' or raise
+
 ##symbols
 
   # Similar to strings but:
@@ -775,7 +814,7 @@ b
 
   ##===
 
-    # Used on case statements istead of `===`:
+    # Used on case statements instead of `==`:
 
       class Eq3
         def initialize(i)
@@ -1291,25 +1330,6 @@ b
         raise
       end
 
-  ##$0
-
-    # Contains the name of this script.
-
-      puts "$0 = #{$0}"
-
-  ##$1 ##$2 ##capture groups
-
-    # Unintuitivelly, $1, ... are not argv (since $0 is the program name), but capturing groups of the last regex.
-
-    # Keep the last regexp matching group.
-
-      /a(.)/ =~ "a0"
-      $1 == '0' or raise
-
-    # Error: can't set variable.
-
-      #$1 = 1
-
   ##overload
 
     # Function overload does not exist.
@@ -1424,8 +1444,9 @@ b
 
     class C
 
-      # The constructor.
+      ##constructor
       def initialize(i=1)
+        ##define instance variable
         @member_i = i
       end
 
@@ -1436,7 +1457,7 @@ b
           method2() == 2 or raise
           self.method2() == 2 or raise
 
-        # Access an instance variable:
+        # Access an ##instance variable:
 
           @member_i
 
@@ -2489,6 +2510,43 @@ b
   # The main lanauge feature used to implement such Ruby DSL is `instance_eval`,
   # or `class_eval`
 
+##special ##predefined variables
+
+  # Very insane. Good list: <http://www.zenspider.com/Languages/Ruby/QuickRef.html#pre-defined-variables>
+
+  # By default, most don't have readable names, but `require 'English'` remedies that.
+
+  # Many more exist besides those here and are kept in the thematic section closes to their application.
+
+  ##$0
+
+    # Contains the name of this script.
+
+      puts "$0 = #{$0}"
+
+  ##command line arguments ##ARGV
+
+      puts('ARGV = ' + ARGV.join(', '))
+
+    ##ARGF ##$<
+
+      # Python fileinput.
+
+      # - if ARGV empty, ARGF == stdin
+      # - else, assume that all elements of ARGV are files, and read from them sequentialy.
+
+        ARGF.
+
+  ##environment variables ##ENV
+
+    # Environment variables.
+
+    # Print all environment:
+
+      ENV.each() do |k,v|
+        #puts("ENV[#{k}] = #{v}")
+      end
+
 ##instance_eval ##class_eval
 
   # Useful for DSL like interfaces.
@@ -2551,11 +2609,13 @@ b
 
       #require 'main2'
 
-    # Require search path:
+    ##$LOAD_PATH ##$:
 
-      puts('require search path:')
-      puts($:)
-      ($LOAD_PATH)
+      # require search path
+
+        puts('require search path:')
+        puts($LOAD_PATH)
+        $LOAD_PATH == $: or raise
 
   ##require_relative
 
@@ -2656,22 +2716,6 @@ b
 
     Math.sqrt(9) == 3 or raise
 
-##command line arguments
-
-  ##argv
-
-      puts('ARGV = ' + ARGV.join(', '))
-
-##environment variables
-
-  # Environment variables.
-
-  # Print all environment:
-
-    ENV.each() do |k,v|
-      #puts("ENV[#{k}] = #{v}")
-    end
-
 ##io
 
     puts('stdout')
@@ -2699,7 +2743,7 @@ b
       puts "abc"
       # Shows `abc` (without the quotes).
 
-  ##stdout
+  ##stdout ##$stdout ##STDOUT
 
     # The difference between `$stdout` and `STDOUT` is that `$stdout`
     # can be reassigned, so always use it for more flexibility.
@@ -2728,12 +2772,12 @@ b
       STDOUT.puts('stderr')
       $stdout = STDOUT
 
-    # Of course, `$stderr` and `STDERR` also exist:
+    ##stderr
 
       STDERR.puts('stderr')
       $stderr.puts('stderr')
 
-##File
+##File ##file IO
 
   # File and pathname operations.
 
@@ -2770,7 +2814,7 @@ b
 
   ##open ##write ##read ##write
 
-    # Must use `'b'` if there will be non ascii chars.
+    # Must use `'b'` if there will be non ASCII chars.
 
       data = 'abc'
 
@@ -2843,7 +2887,7 @@ b
 
 ##process
 
-  ##id of current process
+  ##id of current process ##$$
 
       puts "$$ = #{$$}"
 
@@ -2855,9 +2899,11 @@ b
       o = `ruby -e 'print #{n}'`
       o == '1' or raise
 
-    # Sets the `$?` variable.
+    ##$?
 
-      # puts $?.exitstatus
+      # Sets the `$?` variable.
+
+        # puts $?.exitstatus
 
   ##popen3
 
