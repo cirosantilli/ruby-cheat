@@ -248,7 +248,7 @@ require 'tempfile'
       h = {1=>'one', 2=>'two'}
       "#{h}"          == '{1=>"one", 2=>"two"}' or raise
 
-  ##heredoc
+  ##heredoc ##multiline
 
     s = <<EOF
 a
@@ -1424,6 +1424,10 @@ b
 
 ##class
 
+  # Understand Ruby's class model:
+
+  # - <http://viewsourcecode.org/why/hacking/seeingMetaclassesClearly.html>
+
   # Everyting is an object, including integers and floats:
 
     1.class   == Fixnum or raise
@@ -1509,9 +1513,11 @@ b
         def initialize(i=1)
           @i = i
         end
+
         def i()
           return @i
         end
+
         def i=(i)
           @i = i
         end
@@ -1641,11 +1647,14 @@ b
 
       Self.new.f
 
-  ##class methods and variables ##static
+  ##class methods ##class variables ##static
 
       class ClassMethod
 
+        # Instance variable for the class object.
         @class_i   = 1
+
+        # TODO difference from above
         @@class_i2 = 2
 
         def private_klass_method
@@ -1694,7 +1703,7 @@ b
           end
         end
 
-        def initialize()
+        def initialize
           ClassMethod.class_method()
           #class_method()             #=> ERROR
           #@class_i   == 1 or raise #=> ERROR: @class_i is the instance member
@@ -1713,6 +1722,16 @@ b
       c = ClassMethod.new
       #c.class_method()           #=> ERROR
       #c.class_i2                 #=> ERROR
+
+      # attr_accessor for class variable:
+
+        class AttrAccessorClassVariable
+          @v = 1
+          class << self
+            attr_accessor :v
+          end
+        end
+        AttrAccessorClassVariable.v == 1 or raise
 
   ##operator overload:
 
@@ -2535,7 +2554,7 @@ b
       # - if ARGV empty, ARGF == stdin
       # - else, assume that all elements of ARGV are files, and read from them sequentialy.
 
-        ARGF.
+        #input = ARGF.read
 
   ##environment variables ##ENV
 
@@ -2729,6 +2748,11 @@ b
       puts("puts format:")
       puts("#{s}")
       puts(s)
+
+    # I the input ends in newline, does not add a newline. Insanity.
+
+      puts("puts one trailing newline\n")
+      puts("puts two trailing newlines\n\n")
 
   ##p
 
