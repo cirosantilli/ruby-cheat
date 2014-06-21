@@ -213,7 +213,7 @@ require 'tempfile'
 
     # Arbitrary delimier:
 
-      s = "a"
+      s = 'a'
       '#{s}' == '#' + '{s}' or raise
 
     # Escape:
@@ -297,33 +297,33 @@ b
 
     # Regex find and replace multiple non overlapping times:
 
-      "aa".gsub(/./, 'b') == "bb" or raise
+      'aa'.gsub(/./, 'b') == 'bb' or raise
 
     # Numbered capture groups:
 
-      "a0".gsub(/a(.)/, 'b\1') == "b0" or raise
+      'a0'.gsub(/a(.)/, 'b\1') == 'b0' or raise
 
     # Named capture groups:
 
-      "a0".gsub(/a(?<name>.)/, 'b\k<name>') == "b0" or raise
+      'a0'.gsub(/a(?<name>.)/, 'b\k<name>') == 'b0' or raise
 
     # Hash: case by case replace:
 
-      "abcd".gsub(/../, {'ab'=>'01', 'cd'=>'23'}) == "0123" or raise
+      'abcd'.gsub(/../, {'ab'=>'01', 'cd'=>'23'}) == '0123' or raise
 
     # Block match replace:
 
-      "a0".gsub(/\d/) {|s| (s.to_i + 1).to_s } == "a1" or raise
+      'a0'.gsub(/\d/) {|s| (s.to_i + 1).to_s } == 'a1' or raise
 
   ##scan
 
     # Make an array of all regexp matches on the string.
 
-      "a0-b1-c2".scan(/(\w)(\d)/) == [['a', '0'], ['b', '1'], ['c', '2']] or raise
+      'a0-b1-c2'.scan(/(\w)(\d)/) == [['a', '0'], ['b', '1'], ['c', '2']] or raise
 
   ##start_with?
 
-      "abc".start_with?("ab") or raise
+      'abc'.start_with?('ab') or raise
 
   ##encoding
 
@@ -347,19 +347,19 @@ b
 
     # The only difference is what you have to backslash escape on each:
 
-      /\/}/   =~ "/}" or raise
-      %r{/\}} =~ "/}" or raise
+      /\/}/   =~ '/}' or raise
+      %r{/\}} =~ '/}' or raise
 
     # Regexp literal from string:
 
-      s = ".c"
-      /a#{s}/ =~ "a0c" or raise
+      s = '.c'
+      /a#{s}/ =~ 'a0c' or raise
 
   ##=~
 
     # Non full matches work:
 
-      /a./ =~ "a0c" or raise
+      /a./ =~ 'a0c' or raise
 
     # Also exists for the String class
 
@@ -367,7 +367,7 @@ b
 
     # Negation of `=~`:
 
-      /a/ !~ "b" or raise
+      /a/ !~ 'b' or raise
 
   ##$1 ##$2 ##capture groups
 
@@ -375,7 +375,7 @@ b
 
     # Keep the last regexp matching group.
 
-      /a(.)/ =~ "a0"
+      /a(.)/ =~ 'a0'
       $1 == '0' or raise
 
     # Error: can't set variable.
@@ -390,15 +390,15 @@ b
 
     # Matched string from the previous successful pattern match:
 
-    "abcd".match(/b.d/)
-    $& == "bcd"
+    'abcd'.match(/b.d/)
+    $& == 'bcd'
 
   ##$+
 
     # Last match groups from the previous successful pattern match.
 
-      "abcd".match(/(b)(.)(d)/)
-      $+ == ["abcd", "b", "c", "d"]
+      'abcd'.match(/(b)(.)(d)/)
+      $+ == ['abcd', 'b', 'c', 'd']
 
   ##$` ##$'
 
@@ -422,11 +422,11 @@ b
 
   # Strings are different from symbols.
 
-    "abc" != :abc or raise
+    'abc' != :abc or raise
 
   # Symbols are immutable, single instance and fast to compare, strings are not:
 
-    (not "abc".equal?("abc")) or raise
+    (not 'abc'.equal?('abc')) or raise
     :abc.equal?(:abc) or raise
 
   # Literals can include invalid id chars by using the following syntax:
@@ -749,6 +749,22 @@ b
       h.delete(:a) == 0 or raise
       h == {b:1} or raise
 
+##openstruct
+
+  # Sintatically like a class that can add attributes on the fly.
+
+  # Hash based, therefore potentially slower than Hash.
+
+    require 'ostruct'
+
+    s = OpenStruct.new
+    s.a = 0
+    s.b = 'a'
+
+    s.a == 0   or raise
+    s.b == 'a' or raise
+    s.c == nil or raise
+
 ##operators
 
   ##logic
@@ -873,7 +889,7 @@ b
 
     # Never overrided on stdlib base classes, and should never be in any sane lib.
 
-      not "abc".equal?("abc") or raise
+      not 'abc'.equal?('abc') or raise
       :abc.equal?(:abc) or raise
 
   ##defined?
@@ -1139,7 +1155,7 @@ b
        return i
       end
 
-      f"abc" == "abc" or raise
+      f'abc' == 'abc' or raise
       f:abc == :abc or raise
 
     # TODO why does this give a syntax error:
@@ -1443,6 +1459,13 @@ b
       class C
       end
       C.new.class == C or raise
+
+    # Classes implicitly inherit from the Object class:
+
+      class ClassNoBase
+      end
+      p ClassNoBase.class
+      ClassNoBase.class == Object or raise
 
   # Define a class:
 
@@ -1926,7 +1949,7 @@ b
 
     # Exclude inherited methods:
 
-      puts "instance_methods = "
+      puts 'instance_methods = '
       puts ReflectionDerived.instance_methods(false).sort
 
     ##send
@@ -2636,6 +2659,13 @@ b
         puts($LOAD_PATH)
         $LOAD_PATH == $: or raise
 
+  ##RUBYLIB
+
+    # append to require path from environment variable:
+
+    # RUBYLIB:          Additional search path for Ruby programs ($SAFE must be 0).
+    # DLN_LIBRARY_PATH: Search path for dynamically loaded modules.
+
   ##require_relative
 
     # Requires file `main2.rb`:
@@ -2745,7 +2775,7 @@ b
     # Is also part of Kernel. It calls `to_s` on strings.
 
       s = [1, 2]
-      puts("puts format:")
+      puts('puts format:')
       puts("#{s}")
       puts(s)
 
@@ -2761,10 +2791,10 @@ b
 
     # This is what irb shows by default.
 
-      p "abc"
+      p 'abc'
       # Shows `"abc"`
 
-      puts "abc"
+      puts 'abc'
       # Shows `abc` (without the quotes).
 
   ##stdout ##$stdout ##STDOUT
@@ -2815,11 +2845,11 @@ b
 
     ##join
 
-        File.join("a", "b", "c") == "a" + File::SEPARATOR + "b" + File::SEPARATOR + "c" or raise
+        File.join('a', 'b', 'c') == 'a' + File::SEPARATOR + 'b' + File::SEPARATOR + 'c' or raise
 
     ##basename
 
-        File.basename(File.join("a", "b", "c")) == "c" or raise
+        File.basename(File.join('a', 'b', 'c')) == 'c' or raise
 
     ##unlink ##delete
 
@@ -2849,8 +2879,8 @@ b
 
     ##linewise
 
-        data_read = ""
-        file = File.new(path, "r")
+        data_read = ''
+        file = File.new(path, 'r')
         while line = file.gets
             data_read += line
         end
@@ -2867,18 +2897,18 @@ b
 
   ##list directory ##ls
 
-      Dir.entries(".")
+      Dir.entries('.')
 
   ##rmdir
 
     # Remove empty directory. For non empty, consider `fileutils.rm_rf`.
 
-      #Dir.rmdir(".")
+      #Dir.rmdir('.')
 
   ##getwd ##pwd
 
-      puts "pwd = " + Dir.pwd()
-      puts "getwd = " + Dir.getwd()
+      puts 'pwd = ' + Dir.pwd()
+      puts 'getwd = ' + Dir.getwd()
 
 ##fileutils
 
@@ -2894,7 +2924,7 @@ b
     puts "Tempfile.new('abc').path = " + file.path      # => A unique filename in the OS's temp directory,
                   #    e.g.: "/tmp/foo.24722.0"
                   #    This filename contains 'foo' in its basename.
-    file.write("hello world")
+    file.write('hello world')
     file.rewind
     file.read      # => "hello world"
     file.close
@@ -2904,9 +2934,12 @@ b
 
   # String that looks like a file to do IO tests.
 
+    require 'stringio'
     file = StringIO.new
-    file.write("a")
-    file.read == "a" or raise
+    file.write('a')
+    file.flush
+    # TODO how does it work?
+    #file.read == "a" or raise
     file.close
 
 ##process
@@ -2919,9 +2952,19 @@ b
 
     # Short to write, but the most flexible method.
 
-      n = 1
-      o = `ruby -e 'print #{n}'`
+      o = `ruby -e 'print 1'`
       o == '1' or raise
+
+    # Captures only stdout, not stderr:
+
+      o = `ruby -e '$stderr.puts 1'`
+      o == '' or raise
+
+    # Only one newline character is chomped from the end of the stdout,
+    # unlike Bash's `` which chomps all trailling newlines.
+
+      o = `ruby -e 'puts "a\n\n"'`
+      o == "a\n\n" or raise
 
     ##$?
 
@@ -2929,16 +2972,60 @@ b
 
         # puts $?.exitstatus
 
+  ##%x(date)
+
+    # Same as backticks percent style.
+
+      o = %x(ruby -e 'print 1')
+      o == '1' or raise
+
+  ##system
+
+    # Binds STDIN, STDOUT and STDERR to current terminal.
+
+      system("ruby -e 'puts \"#system\"'")
+
   ##popen3
 
     # More general process IO.
 
   ##current user ##uid
 
-      puts "Process.euid = " + Process.euid.to_s
+      puts 'Process.euid = ' + Process.euid.to_s
 
 ##time date
 
   # Current time as ISO string (from year to second):
 
-    puts "Time.now = " + Time.now.to_s
+    puts 'Time.now = ' + Time.now.to_s
+
+##serialization
+
+  # Two main methods:
+  #
+  # - Marshal.dump: binary. Faster.
+  # - YAML::dump:   human readable.
+
+    obj = {
+      a: 0,
+      b: '1',
+      c: {a: 0}
+    }
+
+  ##YAML
+
+    require('yaml')
+    ser_obj = YAML::dump(obj)
+    puts 'YAML::dump = ' + ser_obj
+    obj == YAML::load(ser_obj) or raise
+
+  ##Marshal
+
+    # Name probably comes from: <https://en.wikipedia.org/wiki/Heraldry#Marshalling>
+    #
+    # In Java, serialization and Marshalling are different.
+    #
+    # In Python, the term is never used: there is only one type of serialization: `pickle`.
+
+    ser_obj = Marshal.dump(obj)
+    obj == Marshal.load(ser_obj) or raise

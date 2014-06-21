@@ -47,9 +47,9 @@ gem 'faker', require: false
 
 ##path
 
-# Install from given path.
+# Use gem at given path without installing it.
 
-# Possible way to develop Gems.
+# Good way to develop Gems.
 
 #gem 'counter_culture', :path => '../counter_culture'
 

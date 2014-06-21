@@ -1,6 +1,7 @@
-Ruby cheatsheets and mini projects.
+Ruby information and cheatsheets.
 
-For Rails and libraries that are very commonly related to Rails or web dev, see [this](https://github.com/cirosantilli/rails-cheat).
+For Rails and libraries that are very commonly related to Rails or web dev,
+see [this](https://github.com/cirosantilli/rails-cheat).
 
 All runnable Ruby files are meant to be run with `bundle exec ruby <filename>`.
 
@@ -16,19 +17,20 @@ It is a shame that the FOSS community must be divided over trivial differences.
 
 Advantages of Python:
 
-- part of the LSB.
+-   part of the LSB.
 
-- much more used. Ruby is only used because of RoR.
+-   much more used. Ruby is only used because of RoR.
 
     Python is more useful in every other application domain.
 
-- Ruby uses many punctuation characters (often based on `sh` or `perl`) where using actual names would be saner.
+-   Ruby uses many punctuation characters, often based on `sh` or `perl`,
+    where using actual names would be saner.
 
     - `$:` for `require` path
     - `@`  for class instance variables
     - `?`, `!` and `=` allowed as method name suffixes
 
-- many convenience function which are too easily derivable from others.
+-   many convenience function which are too easily derivable from others.
 
     This means that programmers have to learn more language primitives:
 
@@ -37,30 +39,31 @@ Advantages of Python:
     - `alias` is even a keyword to create more redundancy.
     - `not` vs `!`, only differentiated by precedence.
 
-- requires of requires are also required.
+-   requires of requires are also required.
 
     It becomes very hard to find where a function comes from.
 
-    If you have ever tried to hack a large project, you will know that Python explicit `import` make your job *much* easier.
+    If you have ever tried to hack a large project,
+    you will know that Python explicit `import` make your job *much* easier.
 
-- identifier first letter case matters:
+-   identifier first letter case matters:
 
         i = 0
         i = 1
         I = 0
         I = 1 #warning
 
-- `super` without parenthesis is different from `super()` with parenthesis!
+-   `super` without parenthesis is different from `super()` with parenthesis!
 
 Disadvantages of Python:
 
-- confusing global functions in places where methods would be adequate: `len` vs `split`.
+-   confusing global functions in places where methods would be adequate: `len` vs `split`.
 
-- statements that could be functions such as `print` (corrected in Python 3), `del`, `in`, etc.
+-   statements that could be functions such as `print` (corrected in Python 3), `del`, `in`, etc.
 
-- Ruby built-in types look more like objects than Python's.
+-   Ruby built-in types look more like objects than Python's.
 
-- Ruby have some important tools on its stdlib, including:
+-   Ruby have some important tools on its stdlib, including:
 
     - ERB: a ruby/HTML template language, much like PHP.
     - rake: a Makefile system.
@@ -71,44 +74,94 @@ Disadvantages of Python:
 
 The most notable ones are:
 
-- ruby on rails. Major importance to the Ruby language.
+-   ruby on rails. Major importance to the Ruby language.
 
     Powers:
 
     - GitHub
     - parts of Twitter
 
-- rake
+-   rake
 
-- GRUB2. [This](http://www.amazon.co.uk/Ruby-Grub-Abi-Burlingham/dp/1848120346) is the reason why!
+-   GRUB2. [This](http://www.amazon.co.uk/Ruby-Grub-Abi-Burlingham/dp/1848120346) is the reason why!
 
-- puppet
+-   puppet
 
-- Mac Homebrew.
+-   Mac Homebrew.
 
-#Style guides
+# Style guides
 
-- <https://github.com/styleguide/ruby>
+-   <https://github.com/styleguide/ruby>
 
     Official GitHub style guide.
 
-- <https://github.com/bbatsov/ruby-style-guide>
+-   <https://github.com/bbatsov/ruby-style-guide>
 
     Bastov's style guide. 5,500 stars as of 2014-04. Lots of examples.
 
-- <https://github.com/thoughtbot/guides/tree/master/style#ruby>
+    Automatically checked by the Rubocop lint tool: <https://github.com/bbatsov/rubocop>
+
+-   <https://github.com/thoughtbot/guides/tree/master/style#ruby>
 
     Thoughbot Inc. styles.
 
-    Not many examples for Ruby, but also includes many tools of the Rails workflow.
+    Includes many tools of the Rails workflow, not just Ruby.
 
-    Automatically checked by Hound CI.
+    Automatically checked by the Hound CI lint tool: <https://github.com/thoughtbot/hound>
+    Uses Rubocop on the backend.
 
 #IRB
 
 Interactive REPL interface: `irb`.
 
 To repeat last command: `<left><up>`.
+
+#Gem
+
+A gem is like a Python package: an interface which allows to install and publish Ruby projects.
+
+It is also a command line utility that downloads and manages gems.
+
+It is recommended that you use Bundler instead of gem to install gems,
+since bundler also takes care of dependencies and more.
+
+The de-facto standard gem index is `rubygems.org`, which is open source Rails application.
+
+Gem metadata is specified on a `.gemspec` file.
+
+For gem documentation, the most widely used option is <http://rubydoc.info>, which is YARD based.
+
+List all subcommands:
+
+    gem help
+
+Get help on one subcommand:
+
+    gem help list
+
+##gem install
+
+Specify gem version;
+
+    gem install -v 0.9.17 softcover
+
+##gem uninstall
+
+There is no clean built-in way to remove installed dependencies of a gem with it:
+<http://stackoverflow.com/questions/952836/do-i-have-to-manually-uninstall-all-dependent-gems>
+
+[gem-prune](https://github.com/ddollar/gem-prune/tree/master>) however seems to do the trick,
+but you have to manually mark which gems you want to keep, it is not done automatically with install. So maybe:
+
+    function gemi{ gem keep "$1" && gem install "$1"; }
+
+List installed gems in current gemset:
+
+    gem list
+
+List all available versions of a gem on remote:
+
+    gem list -ar gemname
 
 #Version managers
 
@@ -154,7 +207,8 @@ Install another version of Ruby:
 
 This may download and compile its source if a binary is not found, so it may take some time.
 
-This seems to generate instructions to the system's package manager to install build dependency programs, such as build tools. Works on a clean Ubuntu 12.04.
+This seems to generate instructions to the system's package manager to install build dependency programs,
+such as build tools. Works on a clean Ubuntu 12.04.
 
 The ruby interpreter is installed only for the current user under `~/.rvm/bin/`.
 
@@ -192,27 +246,43 @@ Sample output:
 
     /home/ciro/.rvm/gems/ruby-2.0.0-p247
 
-Gems installed from now on with `gem install <gemname>` will go there, and be visible only to the given Ruby version. 
+Gems installed from now on with `gem install <gemname>` will go there,
+and be visible only to the given Ruby version. 
 
-#Gem
+##@global
 
-A gem is like a Python package: an interface which allows to install and publish Ruby projects.
+##Gemsets
 
-It is recommended that you use Bundler instead of gem to install gems, since bundler also takes care of dependency issues.
+Allow you to install multiple versions of a gem in a single Ruby: <https://rvm.io/gemsets/basics>
 
-The de-facto standard web interface for gems is `rubygems.org`, which is open source rails application.
+Create gemset named `gemsetname` for Ruby 1.9.2:
 
-Gem metadata is specified on a `.gemspec` file.
+    rvm 1.9.2
+    rvm gemset create gemset_name
 
-For gem documentation, the most widely used option is <http://rubydoc.info>, which is YARD based.
+Use that gemset;
 
-##gem uninstall
+    rvm 1.9.2@gemset_name
 
-There is no clean built-in way to remove installed dependencies of a gem with it: <http://stackoverflow.com/questions/952836/do-i-have-to-manually-uninstall-all-dependent-gems>
+Install a gem for the default gemset:
 
-[gem-prune](https://github.com/ddollar/gem-prune/tree/master>) however seems to do the trick, but you have to manually mark which gems you want to keep, it is not done automatically with install. So maybe:
+    rvm 1.9.2
+    gem install rails -v 2.3.3
 
-    function gemi{ gem keep "$1" && gem install "$1"; }
+Install another version for the gemset we created;
+
+    rvm 1.9.2@gemset_name
+    gem install rails -v 2.3.2
+
+The `@global` gemset is visible whenever a gemset other than the default is used.
+
+List gemsets:
+
+    rvm gemset list
+
+Delete gemset:
+
+    rvm gemset delete gemset_name
 
 #rdoc
 
@@ -248,7 +318,9 @@ To test the project locally you can use:
 
 This will run all the commands in the procfile.
 
-To set environment variables for a project only, foreman adds all environment variables in the `.env` file to the running environment. This file contains local only information, and should not be uploaded.
+To set environment variables for a project only,
+foreman adds all environment variables in the `.env` file to the running environment.
+This file contains local only information, and should not be uploaded.
 
 #Sources
 
