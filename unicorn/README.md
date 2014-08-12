@@ -1,3 +1,5 @@
+# Unicorn
+
 Rack HTTP server.
 
 Must be run from  directory that contains a `config.ru` file, for example a root of a rails template.

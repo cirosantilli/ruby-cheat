@@ -1,3 +1,5 @@
+# Rack
+
 Standard Ruby SGI interface.
 
 Action to run specified in a pure Ruby `config.ru` file.

@@ -1,10 +1,12 @@
+# ERB
+
 Embedded Ruby. Ruby inside HTML, much like PHP does by default.
 
 Part of the Ruby stdlib.
 
 Both a Ruby API and an executable.
 
-# Usage
+## Usage
 
 Executable:
 
@@ -21,7 +23,7 @@ API:
     renderer = ERB.new(input)
     renderer.result() == 'a = 1, b = 2' or raise
 
-# Tags
+## Tags
 
 Alternatives:
 

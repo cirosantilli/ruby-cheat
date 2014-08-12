@@ -1,3 +1,5 @@
+# Rake
+
 Ruby make tool. Part of the Ruby stdlib.
 
 One major advantage of Rake is that Rakefiles are written in pure Ruby,

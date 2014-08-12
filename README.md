@@ -1,3 +1,5 @@
+# Ruby Cheat
+
 Ruby information and cheatsheets.
 
 For Rails and libraries that are very commonly related to Rails or web dev,
@@ -5,7 +7,7 @@ see [this](https://github.com/cirosantilli/rails-cheat).
 
 All runnable Ruby files are meant to be run with `bundle exec ruby <filename>`.
 
-#Ruby vs Python
+## Ruby vs Python
 
 As of 2013, Ruby is almost equivalent to Python:
 
@@ -70,7 +72,7 @@ Disadvantages of Python:
 
     In Python, those tools are lacking a good implementation as of 2013.
 
-#Programs that use ruby
+## Programs that use ruby
 
 The most notable ones are:
 
@@ -89,7 +91,7 @@ The most notable ones are:
 
 -   Mac Homebrew.
 
-# Style guides
+##  Style guides
 
 -   <https://github.com/styleguide/ruby>
 
@@ -97,9 +99,9 @@ The most notable ones are:
 
 -   <https://github.com/bbatsov/ruby-style-guide>
 
-    Bastov's style guide. 5,500 stars as of 2014-04. Lots of examples.
+    Batsov's style guide. 5,500 stars as of 2014-04. Lots of examples.
 
-    Automatically checked by the Rubocop lint tool: <https://github.com/bbatsov/rubocop>
+    Automatically checked by the RuboCop lint tool: <https://github.com/bbatsov/rubocop>
 
 -   <https://github.com/thoughtbot/guides/tree/master/style#ruby>
 
@@ -110,13 +112,13 @@ The most notable ones are:
     Automatically checked by the Hound CI lint tool: <https://github.com/thoughtbot/hound>
     Uses Rubocop on the backend.
 
-#IRB
+## IRB
 
 Interactive REPL interface: `irb`.
 
 To repeat last command: `<left><up>`.
 
-#Gem
+## Gem
 
 A gem is like a Python package: an interface which allows to install and publish Ruby projects.
 
@@ -139,13 +141,13 @@ Get help on one subcommand:
 
     gem help list
 
-##gem install
+### gem install
 
 Specify gem version;
 
     gem install -v 0.9.17 softcover
 
-##gem uninstall
+### gem uninstall
 
 There is no clean built-in way to remove installed dependencies of a gem with it:
 <http://stackoverflow.com/questions/952836/do-i-have-to-manually-uninstall-all-dependent-gems>
@@ -163,7 +165,7 @@ List all available versions of a gem on remote:
 
     gem list -ar gemname
 
-#Version managers
+## Version managers
 
 Manage multiple Ruby versions on a single system. Run programs in specific environments.
 
@@ -173,13 +175,13 @@ The best way to install Ruby, do that you can manage multiple versions easily.
 
 **Always** use it one of those methods.
 
-##rbenv
+### rbenv
 
 <https://github.com/sstephenson/rbenv>
 
 As of 2014-03, has 2x more stars than RVM. It is much more recent than RVM (2 years vs 4 for RVM).
 
-##RVM
+### RVM
 
 Ruby version manager: <https://github.com/wayneeseguin/rvm>
 
@@ -247,11 +249,11 @@ Sample output:
     /home/ciro/.rvm/gems/ruby-2.0.0-p247
 
 Gems installed from now on with `gem install <gemname>` will go there,
-and be visible only to the given Ruby version. 
+and be visible only to the given Ruby version.
 
-##@global
+### @global
 
-##Gemsets
+### Gemsets
 
 Allow you to install multiple versions of a gem in a single Ruby: <https://rvm.io/gemsets/basics>
 
@@ -284,15 +286,15 @@ Delete gemset:
 
     rvm gemset delete gemset_name
 
-#rdoc
+## rdoc
 
-stdlib tool to generate documentation from comments.
+Stdlib tool to generate documentation from comments.
 
 Does not have many features.
 
 Also consider the more advanced YARD tool.
 
-#Foreman
+## Foreman
 
 Foreman is a tool to facilitate web app deployment.
 
@@ -316,14 +318,14 @@ To test the project locally you can use:
 
     foreman start
 
-This will run all the commands in the procfile.
+This will run all the commands in the `procfile`.
 
 To set environment variables for a project only,
 foreman adds all environment variables in the `.env` file to the running environment.
 This file contains local only information, and should not be uploaded.
 
-#Sources
+## Sources
 
-- <http://rubylearning.com/satishtalim/tutorial.html>
+-   <http://rubylearning.com/satishtalim/tutorial.html>
 
     Good intro tutorial.

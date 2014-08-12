@@ -1,3 +1,5 @@
+# Bundler
+
 Package installer.
 
 It higher level than `gem`, as it takes care of things such as dealing with dependencies.
@@ -24,7 +26,7 @@ Remove unused gems:
 
     bundle clean
 
-#Usage
+## Usage
 
 Execute a script that comes with a gem installed with Bundler in which all packages will be at the version specified by the `Gemfile`:
 
@@ -35,7 +37,7 @@ If you run a script / console like this, all the gems in the `Gemfile` can then 
 
 This also automatically adds the `Bundler` object to Ruby, which has methods such as `Bundler.require`, that automatically requires all the gems. It is also possible to require gems by gem group via `Bundler.require(:group)`.
 
-#Configuration
+## Configuration
 
 Bundler can be configured via:
 
@@ -47,7 +49,7 @@ Each configuration option can be set via those three methods.
 
 The `config` file in that directory can contain options such as:
 
-##PATH
+### PATH
 
 `BUNDLE_PATH vendor/bundle`: set the path to install gems under.
 
@@ -59,7 +61,7 @@ If you don't already have a `vendor/bundle` directory, and don't want to create 
 
 The directory is created if it does not exist.
 
-##DISABLE_SHARED_GEMS
+### DISABLE_SHARED_GEMS
 
 If different from `1`, bundler does not install gems which are already present on the system.
 
@@ -77,7 +79,7 @@ But it is automatically set on the config file if `--path` is used.
 
 If the option is used from the command line the `.bundle/config` file is automatically modified / created so that the option will have that value. In this way, the last options are remembered.
 
-#BUNDLE_WITHOUT
+## BUNDLE_WITHOUT
 
 Don't install a group.
 
@@ -88,7 +90,7 @@ Put all that is specific to each one in a group, and then install with either:
     bundle install --without=mysql
     bundle install --without=pg
 
-#Help
+## Help
 
 List of subcommands:
 
@@ -98,7 +100,7 @@ Details on a subcommand:
 
     bundle help install
 
-#Install
+## Install
 
 Installs gems to the same path as `gem install` would install, which may require `sudo` privileges.
 

@@ -16,7 +16,7 @@ require 'tempfile'
     #=begin
     #=end
 
-##spaces
+##spaces ##newline ##semicolon
 
   # Indentation is not mandatory:
 
@@ -24,15 +24,29 @@ require 'tempfile'
       true
   true
 
-  # Newlines dispense semicolon `;`
+  # Newlines dispense semicolon `;` to delimitates statements.
+
+    1 + 1
+    1 + 1
+
   # Semicolon `;` needed for multiple statements on a single line.
 
     1 + 1; 1 + 1
 
-  # If a `+` is encountered at the end of line, then the line continues:
+  # If some operators like `+` are encountered at the end of line,
+  # then the line continues automatically:
 
     1 +
     1 == 2 or raise
+
+  # To force line continuation, use a backslash.
+  # In practice, the only use case for this is spliting up long strings
+  # not to blow up line width limits:
+
+    'a' \
+    'b' == 'ab' or raise
+
+  # This is the only use case recommende by bbatsov style.
 
   # Spaces may disambiguate certain statements. See function.
 
@@ -73,10 +87,27 @@ require 'tempfile'
 
   ##built-in variables
 
-      puts("RUBY_VERSION = #{RUBY_VERSION}")
-      puts("RUBY_PATCHLEVEL = #{RUBY_PATCHLEVEL}")
-      puts("__FILE__ = #{__FILE__}")
-      puts("__LINE__ = #{__LINE__}")
+      puts("##RUBY_PATCHLEVEL = #{RUBY_PATCHLEVEL}")
+      puts("##__FILE__ = #{__FILE__}")
+      puts("##__LINE__ = #{__LINE__}")
+
+    ##RUBY_VERSION
+
+        puts("##RUBY_VERSION = #{RUBY_VERSION}")
+
+      # Can be used to run version specific code. For current versions,
+      # works naively as:
+
+        if RUBY_VERSION >= '1.9'
+          puts("RUBY_VERSION >= 1.9")
+        end
+
+      # But this will someday break because of the string compare.
+      # To do it robustly use `Gem::Version`:
+
+        if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('1.9')
+          puts("RUBY_VERSION >= 1.9")
+        end
 
   ##if __name__ == '__main__'
 
@@ -135,7 +166,12 @@ require 'tempfile'
 
 ##nil
 
-  nil.to_i == 0 or raise
+    nil.to_i == 0 or raise
+
+  ##nil?
+
+    nil.nil?       or raise
+    not false.nil? or raise
 
 ##int
 
@@ -152,33 +188,75 @@ require 'tempfile'
 
 ##string
 
-  ##quoting
+  ##literals
 
-    # Single or double quotes can be used with the difference that with single quotes:
+    ##quoting
 
-    # - backslash escapes are not interpreted
-    # - format strings are not interpreted
+      # Single or double quotes can be used with the difference that with single quotes:
 
-    ##arbitrary delimier
+      # - backslash escapes are not interpreted except for `\\` and `\'`
+      # - format strings are not interpreted
 
-      # The percent allows to use any delimier character:
+        '\\' == "\\" or raise
+        '\'' == "'"  or raise
 
-        'a' == %<a> or raise
-        'a' == %!a! or raise
+      ##arbitrary delimier ##percent string literls ##%Q
 
-      # Must be an special char:
+        # The percent allows to use any delimiter character:
 
-        #'a' == %bab or raise
+          'a' == %<a> or raise
+          'a' == %!a! or raise
 
-      # `q` is optional. Other modifiers exist:
+        # If the delimier is a character with a closing correspondent,
+        # use the closing correspondent to close.
 
-      # - `Q` for double quoted
-      # - `x` for backtick executes
+        # Delimiter must be an special char:
 
-        s = 'a'
-        '#{s}' == %q!#{s}! or raise
-        "#{s}" == %Q!#{s}! or raise
-        %x<ruby -e "print 1"> == '1' or raise
+          #'a' == %bab or raise
+
+        # `Q` is the default and thus optional modifier, which behaves like double quotes (interpolated):
+
+        # `q` is for non-interpolated.
+
+          "\n" == %Q{\n} or raise
+          "\n" == %{\n}  or raise
+          '\n' == %q{\n} or raise
+
+    ##multiline string literals
+
+      ##with newlines
+
+        ##quotes or percent
+
+            s = 'a
+ b'
+            s == "a\n b" or raise
+
+            s = %{a
+ b}
+            s == "a\n b" or raise
+
+        ##heredoc
+
+          # Advantage over quotes: allows you to set a custom terminator
+          # in case the content has quotes
+
+            s = <<EOF
+ a
+  b
+EOF
+            s == " a\n  b\n" or raise
+
+            s = <<ANY_STRING_OK
+a
+ANY_STRING_OK
+            s == "a\n" or raise
+
+            s = <<-MINUS_MEANS_TERMINATOR_CAN_HAVE_SPACE_BEFORE
+a
+b
+            MINUS_MEANS_TERMINATOR_CAN_HAVE_SPACE_BEFORE
+            s == "a\nb\n" or raise
 
   ##compare strings
 
@@ -248,26 +326,6 @@ require 'tempfile'
       h = {1=>'one', 2=>'two'}
       "#{h}"          == '{1=>"one", 2=>"two"}' or raise
 
-  ##heredoc ##multiline
-
-    s = <<EOF
-a
-b
-EOF
-    s == "a\nb\n" or raise
-
-    s = <<ANY_STRING_OK
-a
-ANY_STRING_OK
-
-    s == "a\n" or raise
-
-    s = <<-MINUS_MEANS_TERMINATOR_CAN_HAVE_SPACE
-a
-b
-    MINUS_MEANS_TERMINATOR_CAN_HAVE_SPACE
-    s == "a\nb\n" or raise
-
   ##match
 
     # Regexp match:
@@ -280,9 +338,18 @@ b
 
   ##=~
 
-    # Regexp match:
+    # Regexp match. Returns:
 
-      'a0' =~ /a./ or raise
+    # - position of match if any
+    # - nil otherwise
+
+      ('a0'  =~ /a./) == 0   or raise
+      ('ba0' =~ /a./) == 1   or raise
+      ('b0'  =~ /a./) == nil or raise
+
+    # Since `0` is truthy in Ruby, it is fine to write:
+
+      'a0'  =~ /a./ or raise
 
     # Unlike `match`, does not convert strings into regexps:
 
@@ -292,6 +359,13 @@ b
       else
         raise
       end
+
+  ##!~
+
+    # Returns:
+    #
+    # - true if not match
+    # - false if match
 
   ##gsub
 
@@ -350,16 +424,28 @@ b
       /\/}/   =~ '/}' or raise
       %r{/\}} =~ '/}' or raise
 
-    # Regexp literal from string:
+    # Regexp literals accept substitution just like double quoted strings:
 
       s = '.c'
       /a#{s}/ =~ 'a0c' or raise
+
+    # Character classes:
+
+      # -   `^` and `$` start / end of string or after / before newline
+      #
+      # -   `\A`, `\Z` and `\z`: like `^` and `$` but not around newlines
+      #
+      #     Use them instead for input validation as they are more strict:
+      #     `me@example.com\n<script>dangerous_stuff();</script>`
+      #
+      #     `\z` matche includes the newline, `\Z` excludes it.
 
   ##=~
 
     # Non full matches work:
 
       /a./ =~ 'a0c' or raise
+      /a/  =~ 'a' or raise
 
     # Also exists for the String class
 
@@ -468,15 +554,17 @@ b
   # Literal for an array of strings:
 
     %w{ ab cd ef } == ['ab', 'cd', 'ef'] or raise
+    %W{ ab cd ef } == ['ab', 'cd', 'ef'] or raise
 
   # From range:
 
-    (0..2).to_a   == [0, 1, 2] or raise
-    Array(0..2)   == [0, 1, 2] or raise
+    (0..2).to_a == [0, 1, 2] or raise
+    Array(0..2) == [0, 1, 2] or raise
 
-  # Length:
+  # Length, size (alias):
 
-    [0, 1, 2].length() == 3 or raise
+    [0, 1, 2].length == 3 or raise
+    [0, 1, 2].size   == 3 or raise
 
   # Last element:
 
@@ -485,33 +573,50 @@ b
     [].last     == nil or raise
     [][-1]      == nil or raise
 
-  # Range select:
+  ##slice
 
-    (0..4).to_a[1..3]  == (1..3).to_a or raise
-    (0..4).to_a[1..-2] == (1..3).to_a or raise
-    (0..4).to_a[3..1]  == (3..1).to_a or raise
-    (0..4).to_a[3..-3] == (3..2).to_a or raise
-    (0..2).to_a[1..4]  == [1,2].to_a  or raise
+    # Slice: start, take how many:
 
-  # Insane special cases: for ranges, if the staring index is:
-  #
-  # - == length, return []
-  # - != length and out of range, return nil
-  #
-  # TODO why such insane default? Probably because of requiring ranges to be lvalues.
-  # <http://stackoverflow.com/questions/3568222/array-slicing-in-ruby-looking-for-explanation-for-illogical-behaviour-taken-fr?rq=1>
+      a = [0, 1, 2, 3]
+      a[0, 2] == [0, 1] or raise
+      a[0, 3] == [0, 1, 2] or raise
+      a[1, 2] == [1, 2] or raise
 
-    [1][1..3] == []  or raise
-    [1][2..3] == nil or raise
+    # Range select:
 
-  # TODO why are the following not [1]??
+      (0..4).to_a[1..3]  == (1..3).to_a or raise
+      (0..4).to_a[1..-2] == (1..3).to_a or raise
+      (0..4).to_a[3..1]  == (3..1).to_a or raise
+      (0..4).to_a[3..-3] == (3..2).to_a or raise
+      (0..2).to_a[1..4]  == [1,2].to_a  or raise
 
-    [1][0..-2] == [] or raise
-    [1][0..-3] == [] or raise
+    # Special cases: all but last:
 
-  # But this one is (as expected):
+      (0..4).to_a[0..-2]  == (0..3).to_a or raise
 
-    [1][0..-1] == [1] or raise
+    # Insane special cases: for ranges, if the staring index is:
+    #
+    # - == length, return []
+    # - != length and out of range, return nil
+    #
+    # TODO why such insane default? Probably because of requiring ranges to be lvalues.
+    # <http://stackoverflow.com/questions/3568222/array-slicing-in-ruby-looking-for-explanation-for-illogical-behaviour-taken-fr?rq=1>
+
+      [1][1..3] == []  or raise
+      [1][2..3] == nil or raise
+
+    # TODO why are the following not [1]??
+
+      [1][0..-2] == [] or raise
+      [1][0..-3] == [] or raise
+
+    # But this one is (as expected):
+
+      [1][0..-1] == [1] or raise
+
+    # TODO: triple dots:
+
+      #a[0...2]
 
   # Start from, take how many:
 
@@ -527,13 +632,6 @@ b
   # Array to string:
 
     ['ab', 'cd'].join(' ') == 'ab cd' or raise
-
-  # Slice: specifies the `[start, number of args]`:
-
-    a = [0, 1, 2, 3]
-    a[0, 2] == [0, 1] or raise
-    a[0, 3] == [0, 1, 2] or raise
-    a[1, 2] == [1, 2] or raise
 
   # Check if array contain element via `include?`:
 
@@ -577,6 +675,10 @@ b
       a == (1..3).to_a or raise
       b[0] = 0
       a == [0, 2, 3] or raise
+
+  ##collect
+
+    # Alias to `map`.
 
   ##select ##filter
 
@@ -632,7 +734,26 @@ b
 
       [[1,1],[2,4],[3,9]].inject({}){|memo, obj| memo[obj[0]] = obj[1]; memo} == {1=>1, 2=>4, 3=>9} or raise
 
-##range
+##empty?
+
+    ''.empty?       or raise
+    not '  '.empty? or raise
+    [].empty?       or raise
+    not [0].empty?  or raise
+    {}.empty?       or raise
+
+  # Only present for collection like objects:
+
+    begin
+      0.empty?
+    rescue NoMethodError
+    else
+      raise
+    end
+
+  # Rails adds `blank` which works on all objects.
+
+##range ##.. ##...
 
   # Different from Array.
 
@@ -688,10 +809,10 @@ b
     f(1=>'one', 2=>'two') == 'one' or raise
     f 1=>'one', 2=>'two'  == 'one' or raise
 
-  # A new syntax was added in 1.9 for hashes with symbol keys.
-  # See what symbol is if you don't know yet.
+  # A new shorthand syntax was added in 1.9 for hashes with symbol keys
+  # because this is a very common use case:
 
-    if RUBY_VERSION >= '1.9'
+    if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('1.9')
       m  = {:a=>1, :b=>2}
       m2 = {a: 1, b: 2}
       m == m2 or raise
@@ -710,7 +831,7 @@ b
       keys = [2, 1]
       i = 0
       m.each() do |k, v|
-        if RUBY_VERSION >= '1.9'
+        if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('1.9')
           k == keys[i] or raise
         end
         m[k] == v or raise
@@ -724,14 +845,16 @@ b
       x = {a: 1}
       x[:b] == nil or raise
 
-    # It is possible to change the default via the explicit constructor:
+    # It is possible to change the global default via the explicit constructor:
 
       x = Hash.new(1)
       x[:a] == 1 or raise
 
+    # Single call default with `fetch`.
+
   ##get ##fetch
 
-    # Python get is called fetch: get val or given default if not present.
+    # Get val or return given default if not present.
 
       h = {a: 1, b: 2}
       h.fetch(:a, 3) == 1 or raise
@@ -853,7 +976,7 @@ b
       end
 
     # For Object is the same as `==`, but certain stdlib classes override it,
-    # notably: Regexp, Range and Proc:
+    # notably: Regexp, Range and Proc to work well with `case` statements.
 
       input = ['a0', 3, 0]
       output = []
@@ -868,6 +991,29 @@ b
         end
       end
       input == output or raise
+
+    # Each case can take multiple values:
+
+      a = false
+      case 1
+      when 0, 1
+        a = true
+      else
+        raise
+      end
+      a or raise
+
+  ##<=>
+
+    # `a <=> b` returns:
+    #
+    # -  `0` if equal
+    # -  `1` if `a > b`
+    # - `-1` if `a < b`
+
+      (0 <=>  1) == -1 or raise
+      (0 <=>  0) ==  0 or raise
+      (0 <=> -1) ==  1 or raise
 
   ##eq?
 
@@ -1055,7 +1201,9 @@ b
       end
       j == 3 or raise
 
-##if
+##if ##elsif ##truthy ##falsy
+
+  # Only `false` and `nil` are falsy.
 
   if false
     raise
@@ -1063,6 +1211,40 @@ b
   else
     raise
   end
+
+  if nil
+    raise
+  else
+  end
+
+  # Even 0 is truthy:
+
+  if 0
+  else
+    raise
+  end
+
+  ##unless
+
+    # Exactly the same as `if not`.
+
+    # I feel it is more used that `if not` by the ruby community,
+    # including in https://github.com/bbatsov/ruby-style-guide.
+
+    # Not recommended to be used with `else`, better to just inverse
+    # the order of the statements.
+
+    # No, there is no `elsunless`: http://stackoverflow.com/questions/20470308/why-is-there-no-elsunless-statement-in-ruby
+
+    #a = 0
+    #if false
+      #raise
+    #elsunless false
+      #a = 1
+    #else
+      #raise
+    #end
+    #a == 1 or raise
 
 ##case
 
@@ -1078,6 +1260,10 @@ b
   # See `===` for more info.
 
 ##method ##function
+
+  # Syntax: http://www.ruby-doc.org/core-2.1.2/doc/syntax/methods_rdoc.html
+
+  # Class:  http://www.ruby-doc.org/core-2.1.2/Method.html
 
   ##return value
 
@@ -1139,13 +1325,11 @@ b
 
     # Parenthesis are optional if no ambiguity is created.
 
-    # For the sake of 
-
       def f(i, j)
         i + j
       end
 
-      f(1, 1) == 2 or raise
+      f(1, 1)  == 2 or raise
       (f 1, 1) == 2 or raise
 
     # Special characters used for literals such as `"` for strings
@@ -1156,13 +1340,12 @@ b
       end
 
       f'abc' == 'abc' or raise
-      f:abc == :abc or raise
+      f:abc  == :abc or raise
 
     # TODO why does this give a syntax error:
 
       #f{a: 1} == {a: 1} or raise
       f({a: 1}) == {a: 1} or raise
-
 
   ##parenthesis omission ambiguity
 
@@ -1180,7 +1363,27 @@ b
 
       f -1 == f(-1) or raise
 
-  ##allowed characters
+  ##get method ##method
+
+    # Because calls can happen without parenthesis, it is not possible to refer to the
+    # function directly. One must use the `method` method instead.
+
+      def f
+        0
+      end
+
+    # Gets the return value:
+
+      a = f
+      a == 0 or raise
+
+    # Gets the function:
+
+      a = 1
+      a = method(:f)
+      a.call == 0 or raise
+
+  ##allowed identifier characters
 
     # Besides the usual alphanumeric characters,
     # the last character of a method name can also be either a question mark `?`
@@ -1282,24 +1485,67 @@ b
 
   ##default values
 
-    def f(x, y=2)
-      x + y
-    end
+      def f(x, y=2)
+        x + y
+      end
 
-    f(1)    == 3 or raise
-    f(1, 3) == 4 or raise
+      f(1)    == 3 or raise
+      f(1, 3) == 4 or raise
 
-  ##kwargs
+  ##keyword arguments ##named parameters ##kwargs
 
-    # Does not exist in ruby.
+    # http://www.ruby-doc.org/core-2.1.2/doc/syntax/methods_rdoc.html#label-Keyword+Arguments
 
-    # Similar syntax can be achieved however by passing a dictionary and omiting braces.
+      if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.0')
+        def f(a: 1, b: 10)
+          a + b
+        end
 
-    # It is also common to set the dictionnary to a default `{}`, further emulating kwargs in Python.
+        f()           == 11 or raise
+        f(a:  2)      == 12 or raise
+        f(b: 20)      == 21 or raise
+        f(a:2, b: 20) == 22 or raise
+      end
 
-      def f(d={})
-        if d != {}
-          d[:a] + d[:b]
+    ##**
+
+      # Pass options hash after keyword arguments:
+
+        if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.0')
+          def f(a: 1, **args)
+            a + (args[:b] || 0)
+          end
+
+          f(a: 1)       == 1 or raise
+          f(a: 1, b: 2) == 3 or raise
+        end
+
+      # Not possible as `options = {}`
+      # becaues there can be no regular arguments after the keyword arguments.
+
+    # Without default value:
+
+      if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.1')
+        def f(a:)
+          a + 1
+        end
+
+        f(a:1) == 2 or raise
+        begin
+          f()
+        rescue ArgumentError
+        else
+          raise
+        end
+      end
+
+    # Before that, similar syntax could be achieved however by passing a hash,
+    # setting it to default options={}, omiting call braces, and using the hash
+    # inside of the method:
+
+      def f(options = {})
+        if options != {}
+          options[:a] + options[:b]
         else
           0
         end
@@ -1372,7 +1618,7 @@ b
       f = lambda {|x| x + 1 }
       f.call(1) == 2 or raise
 
-    if RUBY_VERSION >= '1.9'
+    if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('1.9')
       ##-> ##stabby lambda
 
         # Exact same as lambda, but new notation.
@@ -1465,7 +1711,8 @@ b
       class ClassNoBase
       end
       p ClassNoBase.class
-      ClassNoBase.class == Object or raise
+      # TODO
+      #ClassNoBase.class == Object or raise
 
   # Define a class:
 
@@ -2226,6 +2473,17 @@ b
   # There seems to not be any semantical difference between the two of them,
   # except precedence and different usage convention: <http://stackoverflow.com/questions/2122380/using-do-block-vs-brackets>
 
+  ##chaining syntax
+
+    # Chain directly. Parenthesis mandatory on call if there are other parameters.
+
+    def f(x)
+      x + yield
+    end
+
+    f(1) {1}.to_s       == '2' or raise
+    f(1) do 1; end.to_s == '2' or raise
+
   ##scope
 
     # Note how the local variable `i` is modified  inside `f` by `yield`.
@@ -2728,14 +2986,21 @@ b
         #raise
       #end
 
-##exception ##raise ##rescue
+##exception ##raise ##rescue ##ensure
 
+    rescued = false
+    ensured = false
     begin
       raise(NameError)
     rescue NameError
+      rescued = true
     else
       raise
+    ensure
+      ensured = true
     end
+    rescued or raise
+    ensured or raise
 
   # Empty rescue rescues all:
 
@@ -2757,9 +3022,28 @@ b
       end
     end
 
+  ##recue short forms
+
+    # It is possible to have a `rescue` withtout `begin`.
+
+    # Inline form: single statement only, much like inline `if`:
+
+      raise(0) rescue
+      raise rescue
+
+    # Paired with `def`: catches anything inside the function:
+
+      def raise_exc
+        raise
+      rescue
+      end
+
+      raise_exc
+
 ##throw ##catch
 
-  #Vs raise rescue: <http://stackoverflow.com/questions/51021/what-is-the-difference-between-raising-exceptions-vs-throwing-exceptions-in-ruby>
+  # Vs raise rescue:
+  # <http://stackoverflow.com/questions/51021/what-is-the-difference-between-raising-exceptions-vs-throwing-exceptions-in-ruby>
 
 ##math
 
@@ -2786,7 +3070,7 @@ b
 
   ##p
 
-    # Similar to put, but calls inspect on obejcts, which should contain
+    # Similar to put, but calls `inspect` on obejcts, which should contain
     # more complete and debug useful content.
 
     # This is what irb shows by default.
@@ -2799,8 +3083,7 @@ b
 
   ##stdout ##$stdout ##STDOUT
 
-    # The difference between `$stdout` and `STDOUT` is that `$stdout`
-    # can be reassigned, so always use it for more flexibility.
+    # `$stdout` can be reassigned, so always use it to print for more flexibility.
     #
     # Only use `STDOUT` when doing things like `$stdout = STDOUT`
     # to return to the actual stdout.
@@ -2999,6 +3282,17 @@ b
 
     puts 'Time.now = ' + Time.now.to_s
 
+##Gem
+
+  # Compare SemVer strings:
+
+    Gem::Version.new('0.10.1') > Gem::Version.new('0.4.1') or raise
+
+  # Handle Gemfile version range specification:
+
+     Gem::Dependency.new('', '~> 1.4.5').match?('', '1.4.6beta4') or raise
+    !Gem::Dependency.new('', '~> 1.5.5').match?('', '1.4.6beta4') or raise
+
 ##serialization
 
   # Two main methods:
@@ -3029,3 +3323,7 @@ b
 
     ser_obj = Marshal.dump(obj)
     obj == Marshal.load(ser_obj) or raise
+
+$stdout.flush
+$stderr.flush
+puts("ALL ASSERTS PASSED")
