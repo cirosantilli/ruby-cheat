@@ -188,9 +188,9 @@ require 'tempfile'
 
 ##string
 
-  ##literals
+  ##Literals
 
-    ##quoting
+    ##Quoting
 
       # Single or double quotes can be used with the difference that with single quotes:
 

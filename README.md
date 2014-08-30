@@ -129,7 +129,11 @@ since bundler also takes care of dependencies and more.
 
 The de-facto standard gem index is `rubygems.org`, which is open source Rails application.
 
-Gem metadata is specified on a `.gemspec` file.
+Gem metadata is specified on a `project_name.gemspec` file at the top-level of projects.
+To install a project from it's `gemspec`, do:
+
+    gem build project_name.gemspec
+    gem install project_name.gemspec
 
 For gem documentation, the most widely used option is <http://rubydoc.info>, which is YARD based.
 
