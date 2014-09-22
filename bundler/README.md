@@ -12,19 +12,38 @@ Install all gems listed on file `Gemfile` in current directory:
 
     bundle install
 
-If you have a `Gemfile.lock` only gems that were modified on the `Gemfile` will be reinstalled.
-
-Update all gems to their latest versions allowed by the `Gemfile`, ignoring `Gemfile.lock`:
+Update all gems to their latest versions allowed by the `Gemfile`, modifying `Gemfile.lock`:
 
     bundle update
 
+Only a single gem:
+
+    bundle update $gem
+
 Show gem install path:
 
-    bundle show $gemname
+    bundle show $gem
 
 Remove unused gems:
 
     bundle clean
+
+## Gemspec vs Gemfile
+
+<http://yehudakatz.com/2010/12/16/clarifying-the-roles-of-the-gemspec-and-gemfile/>
+
+If you have a `Gemfile.lock` only gems that were modified on the `Gemfile` will be reinstalled.
+
+You should only include a `Gemfile.lock` for applications, not for libraries:
+<http://stackoverflow.com/questions/4151495/should-gemfile-lock-be-included-in-gitignore>
+<http://bundler.io/v1.7/rationale.html>
+<http://yehudakatz.com/2010/12/16/clarifying-the-roles-of-the-gemspec-and-gemfile/>
+
+You can generate the basic structure for a library with:
+
+    bundle gem gem_name
+
+TODO: how to develop a library gem? Do I do `bundle install` or not? Do I gitignore `Gemfile.lock`?
 
 ## exec
 
@@ -43,7 +62,7 @@ It is also possible to require gems by gem group via `Bundler.require(:group)`.
 
 Execute using a Gemfile that is not in the current directory:
 
-    BUNDLE_GEMFILE=/path/to/Gemfile cmd
+    BUNDLE_GEMFILE=/path/to/Gemfile bundle exec cmd
 
 ## Configuration
 

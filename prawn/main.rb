@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'prawn'
 
 def generate_pdf(pdf_path)

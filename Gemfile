@@ -1,8 +1,10 @@
 source 'https://rubygems.org'
 
+ruby '2.1.1'
+
 # Gems that I find useful or interesting.
 
-# Markup to PDF without LaTeX, including Markdown.
+gem 'erubis'
 gem 'gimli'
 gem 'haml'
 gem 'hub'

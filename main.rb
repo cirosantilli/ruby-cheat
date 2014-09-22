@@ -2,7 +2,7 @@
 
 require 'tempfile'
 
-##comments
+##Comments
 
   # Multiline comments:
 
@@ -16,7 +16,7 @@ require 'tempfile'
     #=begin
     #=end
 
-##spaces ##newline ##semicolon
+##Spaces ##Newline ##Semicolon
 
   # Indentation is not mandatory:
 
@@ -50,7 +50,7 @@ require 'tempfile'
 
   # Spaces may disambiguate certain statements. See function.
 
-##identifier chars
+##Identifiers
 
   # Most of the rules are like for C: `a-zA-Z0-9_`, not start in `0-9`, canse sensitive.
 
@@ -79,15 +79,16 @@ require 'tempfile'
 
       #class c end
 
-##variables
+##Variables
 
     not defined? not_yet_defined or raise
     a = 1
     defined? a or raise
 
-  ##built-in variables
+  ##Built-in variables
 
-      puts("##RUBY_PATCHLEVEL = #{RUBY_PATCHLEVEL}")
+    # TODO where are they documented??
+
       puts("##__FILE__ = #{__FILE__}")
       puts("##__LINE__ = #{__LINE__}")
 
@@ -109,15 +110,35 @@ require 'tempfile'
           puts("RUBY_VERSION >= 1.9")
         end
 
+    ##RUBY_PATCHLEVEL
+
+      # E.g., Ruby `2.1.1p76` has patchlevel `76`.
+
+        puts("##RUBY_PATCHLEVEL = #{RUBY_PATCHLEVEL}")
+
+    ##RUBY_PLATFORM
+
+        puts("##RUBY_PLATFORM = #{RUBY_PLATFORM}")
+
+      # Sample output:
+
+        #x86_64-linux
+
+    ##RUBY_RELEASE_DATE
+
+        puts("##RUBY_RELEASE_DATE = #{RUBY_RELEASE_DATE}")
+
+      # Sample output:
+
   ##if __name__ == '__main__'
 
-    # Design pattern to run something only when executed, not required:
+    # Design pattern to run something only when executed, not when required:
 
       if __FILE__ == $0
         puts('__FILE__ == $0')
       end
 
-##object
+##Object
 
   # Base class of almost all types.
 
@@ -158,11 +179,31 @@ require 'tempfile'
       MethodMissing.new.asdf
       $sym == :asdf or raise
 
-##kernel
+##Kernel
 
   # Included by the Object class.
 
-  # It contains therefore many *built-in* methods such as print, puts, Array, etc.
+  # It contains therefore many "built-in" methods such as print, puts, Array, etc.
+
+  ##eval
+
+    # Run string
+
+      a = 0
+      eval('a = 1')
+      a == 1 or raise
+
+  ##load
+
+    # Load a file. Local variables are not made visible in loader context,
+    # globals yes but this is controlled by an option.
+
+      a = 0
+      A = 0
+      load('load.rb')
+      # warning: already initialized constant.
+      a == 0 or raise
+      A == 1 or raise
 
 ##nil
 
@@ -202,7 +243,7 @@ require 'tempfile'
 
       ##arbitrary delimier ##percent string literls ##%Q
 
-        # The percent allows to use any delimiter character:
+        # The percent allows to use many delimiter characters:
 
           'a' == %<a> or raise
           'a' == %!a! or raise
@@ -258,6 +299,21 @@ b
             MINUS_MEANS_TERMINATOR_CAN_HAVE_SPACE_BEFORE
             s == "a\nb\n" or raise
 
+          # The EOF can be anywhere in the line, not necessarily at the end:
+
+            s = <<EOF == "a\nb\n" or raise
+a
+b
+EOF
+
+          # Very ugly, but allows you to place the string literal anywhere.
+          # E.g.: heredoc string inside array:
+
+            a = [<<EOF]
+a
+EOF
+            a == ["a\n"] or raise
+
   ##compare strings
 
       s1 = 'a'
@@ -308,15 +364,15 @@ b
 
       class C
         @@i = 0
-        def initialize()
+        def initialize
           @i = 1
         end
-        def method()
+        def method
           "#@@i#@i"
         end
       end
       c = C.new
-      c.method() == "01" or raise
+      c.method == "01" or raise
 
     # Anything can be formatted (TODO what does it have to implement?)
 
@@ -335,6 +391,11 @@ b
     # Convert strings into regexps:
 
       'a0'.match('a.') or raise
+
+  ##Check if contains substring
+
+      'abcd'.include?('bc') or raise
+      !'abcd'.include?('bd') or raise
 
   ##=~
 
@@ -436,7 +497,7 @@ b
       # -   `\A`, `\Z` and `\z`: like `^` and `$` but not around newlines
       #
       #     Use them instead for input validation as they are more strict:
-      #     `me@example.com\n<script>dangerous_stuff();</script>`
+      #     `me@example.com\n<script>dangerous_stuff;</script>`
       #
       #     `\z` matche includes the newline, `\Z` excludes it.
 
@@ -519,6 +580,14 @@ b
 
     (:'a$b').to_s == 'a$b' or raise
 
+  # Symbols can also end in `=`, `?` or `!` without quotes like methods:
+
+    (:a?).to_s == 'a?' or raise
+    (:a!).to_s == 'a!' or raise
+    (:a=).to_s == 'a=' or raise
+
+  # This is useful together with the `send` method.
+
 ##list
 
   # See array.
@@ -551,10 +620,13 @@ b
     Array.[](1, 2) == [1, 2] or raise
     Array[1, 2]    == [1, 2] or raise
 
-  # Literal for an array of strings:
+  ##percent array string literal ##%w
 
-    %w{ ab cd ef } == ['ab', 'cd', 'ef'] or raise
-    %W{ ab cd ef } == ['ab', 'cd', 'ef'] or raise
+    # Literal for an array of strings without spaces,
+    # not interpolated and interpolated:
+
+      %w( ab cd \n ) == ['ab', 'cd', '\n'] or raise
+      %W( ab cd \n ) == ['ab', 'cd', "\n"] or raise
 
   # From range:
 
@@ -633,7 +705,7 @@ b
 
     ['ab', 'cd'].join(' ') == 'ab cd' or raise
 
-  # Check if array contain element via `include?`:
+  # Check if array contain element via include?:
 
     [0, 1].include?(0) or  raise
     [   1].include?(0) and raise
@@ -661,13 +733,13 @@ b
 
   ##map method
 
-    # Creates a new array of modified elements.
+    # Create a new array of modified elements:
 
       a = (0..2).to_a
       a.map { |x| x + 1 } == (1..3).to_a or raise
       a == (0..2).to_a or raise
 
-    # In place version. Returns the modified map itself.
+    # In place version. Return the modified map itself:
 
       a = (0..2).to_a
       b = a.map! { |x| x + 1 }
@@ -680,9 +752,13 @@ b
 
     # Alias to `map`.
 
-  ##select ##filter
+  ##select ##filter ##reject ##delete_if
 
     # Python's filter is called select.
+
+    # `delete_if` is the negation.
+
+    # `reject` is like `delete_if` except it returns `nil` if no changes were made.
 
       ((0..3).to_a.select {|x| x % 2 == 0}) == [0, 2] or raise
 
@@ -734,24 +810,24 @@ b
 
       [[1,1],[2,4],[3,9]].inject({}){|memo, obj| memo[obj[0]] = obj[1]; memo} == {1=>1, 2=>4, 3=>9} or raise
 
-##empty?
+  ##empty?
 
-    ''.empty?       or raise
-    not '  '.empty? or raise
-    [].empty?       or raise
-    not [0].empty?  or raise
-    {}.empty?       or raise
+      ''.empty?       or raise
+      not '  '.empty? or raise
+      [].empty?       or raise
+      not [0].empty?  or raise
+      {}.empty?       or raise
 
-  # Only present for collection like objects:
+    # Only present for collection like objects:
 
-    begin
-      0.empty?
-    rescue NoMethodError
-    else
-      raise
-    end
+      begin
+        0.empty?
+      rescue NoMethodError
+      else
+        raise
+      end
 
-  # Rails adds `blank` which works on all objects.
+    # Rails adds `blank` which works on all objects.
 
 ##range ##.. ##...
 
@@ -830,7 +906,7 @@ b
       m = {2=>'two', 1=>'one'}
       keys = [2, 1]
       i = 0
-      m.each() do |k, v|
+      m.each do |k, v|
         if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('1.9')
           k == keys[i] or raise
         end
@@ -871,22 +947,6 @@ b
       h = {a:0, b:1}
       h.delete(:a) == 0 or raise
       h == {b:1} or raise
-
-##openstruct
-
-  # Sintatically like a class that can add attributes on the fly.
-
-  # Hash based, therefore potentially slower than Hash.
-
-    require 'ostruct'
-
-    s = OpenStruct.new
-    s.a = 0
-    s.b = 'a'
-
-    s.a == 0   or raise
-    s.b == 'a' or raise
-    s.c == nil or raise
 
 ##operators
 
@@ -1142,7 +1202,7 @@ b
 
         $is = [0, 1, 2]
         $i = 0
-        is.each() {
+        is.each {
           $is[$i] == $i or raise
           $i += 1
         }
@@ -1151,7 +1211,7 @@ b
       # If no loop variables will be needed, the `||` can be omitted:
 
         i = 0
-        (1..3).each() do
+        (1..3).each do
           i += 1
         end
         i == 3 or raise
@@ -1173,7 +1233,7 @@ b
 
       is = [1, 2, 3]
       j = 0
-      (1..3).each() do |i|
+      (1..3).each do |i|
         is[j] == i or raise
         j += 1
       end
@@ -1195,7 +1255,7 @@ b
 
       is = [0, 1, 2]
       j = 0
-      3.times() do |i|
+      3.times do |i|
         is[j] == i or raise
         j += 1
       end
@@ -1269,21 +1329,22 @@ b
 
     # Like in Perl, is the value of the last statement.
 
-  ##multiple return values
+  ##Multiple return values
 
       i, j = 1, 2
       i == 1 or raise
       j == 2 or raise
 
       i, j = 0, 0
-      def f()
+      def f
         return 1, 2
       end
-      i, j = f()
+      i, j = f
       i == 1 or raise
       j == 2 or raise
 
-    # TODO why syntax error:
+    # TODO it appears to be a magic return syntax,
+    # not an explicit data type like Python tuples:
 
       #1, 2
 
@@ -1294,12 +1355,12 @@ b
       def f
         1
       end
-      f() == 1 or raise
+      f == 1 or raise
 
-      def f()
+      def f
         1
       end
-      f() == 1 or raise
+      f == 1 or raise
 
       def f i
         i
@@ -1319,7 +1380,7 @@ b
       def f i = 1, j = 2
         i + j
       end
-      f() == 3 or raise
+      f == 3 or raise
 
   ##call
 
@@ -1359,11 +1420,11 @@ b
         i
       end
 
-      f-1 == f() - 1 or raise
+      f-1 == f - 1 or raise
 
       f -1 == f(-1) or raise
 
-  ##get method ##method
+  ##method method
 
     # Because calls can happen without parenthesis, it is not possible to refer to the
     # function directly. One must use the `method` method instead.
@@ -1377,13 +1438,13 @@ b
       a = f
       a == 0 or raise
 
-    # Gets the function:
+    # Gets the function itself:
 
       a = 1
       a = method(:f)
       a.call == 0 or raise
 
-  ##allowed identifier characters
+  ##Allowed identifier characters
 
     # Besides the usual alphanumeric characters,
     # the last character of a method name can also be either a question mark `?`
@@ -1392,29 +1453,29 @@ b
     # `?` and `!` have no semantic value, and their meaning is
     # fixed by convention only. `=` also has a slight sintaxical meaning.
 
-    # ?: the method returns True or False. It queries the state of an object.
+    # ?: the method returns true or false. It queries the state of an object.
 
       $i = 0
-      def zero?()
+      def zero?
         $i == 0
       end
 
-      zero?() or raise
+      zero? or raise
 
     # !: this is the in-place version of a method.
 
-      def inc()
+      def inc
         $i + 1
       end
 
-      def inc!()
+      def inc!
         $i += 1
       end
 
       $i = 0
-      inc() == 1
+      inc == 1
       $i == 0
-      inc!() == 1
+      inc! == 1
       $i == 1
 
     # =: indicates a set method, specially to differenciate from the get method.
@@ -1423,7 +1484,7 @@ b
         def initialize(i)
           @int = i
         end
-        def int()
+        def int
           @int
         end
         def int=(i)
@@ -1432,24 +1493,27 @@ b
       end
 
       o = EqualSuffix.new(1)
-      o.int() == 1 or raise
+      o.int == 1 or raise
 
       o.int=(2)
-      o.int() == 2 or raise
+      o.int == 2 or raise
 
     # `=` gives the method a new possible shorthand setter syntax:
 
       o.int = 3
-      o.int() == 3 or raise
+      o.int == 3 or raise
 
     # Also works for compound operations:
 
       o.int += 1
-      o.int() == 4 or raise
+      o.int == 4 or raise
 
-  ##variable length argument list #nargs
+  ##variable length argument list ##nargs ##varargs
+
+    # `*args` becomes an `Array` object.
 
       def sum(i, *is)
+        is.class == Array or raise
         total = i
         is.each do |i|
           total += i
@@ -1459,11 +1523,24 @@ b
 
       sum(1, 2, 3) == 6 or raise
 
-  ##splat ##unpack argument list
+    # Can be in the middle:
 
-    # Similar to python argument lists unpacking.
+      def sum(i, *is, j)
+        is.class == Array or raise
+        total = i + j
+        is.each do |i|
+          total += i
+        end
+        total
+      end
 
-    # The asterisk ;ransforms an array into function argument list.
+      sum(1, 2, 3, 4) == 10 or raise
+
+  ##Splat ##Unpack argument list
+
+    # Similar to Python argument lists unpacking.
+
+    # The asterisk transforms an array into function argument list.
 
       def sum(i, *is)
         total = i
@@ -1472,18 +1549,13 @@ b
         end
         total
       end
-
       sum(*[1, 2, 3]) == 6 or raise
 
-      def sum(i, *is)
-        total = i
-        is.each do |i|
-          total += i
-        end
-        total
-      end
+    # Can be in the middle:
 
-  ##default values
+      sum(1, *[2, 3], 4) == 10 or raise
+
+  ##Default values ##Optional arguments
 
       def f(x, y=2)
         x + y
@@ -1492,7 +1564,7 @@ b
       f(1)    == 3 or raise
       f(1, 3) == 4 or raise
 
-  ##keyword arguments ##named parameters ##kwargs
+  ##Keyword arguments ##Named parameters ##kwargs
 
     # http://www.ruby-doc.org/core-2.1.2/doc/syntax/methods_rdoc.html#label-Keyword+Arguments
 
@@ -1501,7 +1573,7 @@ b
           a + b
         end
 
-        f()           == 11 or raise
+        f           == 11 or raise
         f(a:  2)      == 12 or raise
         f(b: 20)      == 21 or raise
         f(a:2, b: 20) == 22 or raise
@@ -1532,7 +1604,7 @@ b
 
         f(a:1) == 2 or raise
         begin
-          f()
+          f
         rescue ArgumentError
         else
           raise
@@ -1553,58 +1625,58 @@ b
 
       f({a:1, b:2}) == 3 or raise
       f(a:1, b:2)   == 3 or raise
-      f()           == 0 or raise
+      f           == 0 or raise
 
-  ##global variable
+  ##Global variable
 
       $i = 1
       i = 2
       $i == 1 or raise
 
       $i = 1
-      def f()
+      def f
         $i
       end
-      f() == 1 or raise
+      f == 1 or raise
 
       $i = 1
-      def f()
+      def f
         $i = 2
       end
-      f()
+      f
       $i == 2 or raise
 
       i = 1
-      def f()
+      def f
         $i = 2
       end
-      f()
+      f
       i == 1 or raise
 
       i = 1
-      def f()
+      def f
         i
       end
       begin
-        f()
+        f
       rescue NameError
       else
         raise
       end
 
-  ##overload
+  ##Overload
 
     # Function overload does not exist.
 
     # Every new method with the same name as an existing one simply creates
-    # a completely new method.
+    # a completely new method and erases the previous.
 
       def f() 1 end
       def f(i) 2 end
 
     # ERROR: f takes one argument:
 
-      #f()
+      #f
 
   ##lambda
 
@@ -1635,19 +1707,21 @@ b
           f.call(1) == 2 or raise
     end
 
-##method method
+  ##__method__ ##__callee__
 
-  # Get a method from a string or symbol.
+    # Get the name of the current method:
+    # http://stackoverflow.com/questions/199527/get-the-name-of-the-currently-executing-method-in-ruby
+    # TODO difference?
 
-    class MethodMethod
-      def f(x)
-        x
+      def method_var
+        __method__  == :method_var or raise
       end
-    end
+      method_var
 
-    m = MethodMethod.new.method(:f)
-    m.class == Method or raise
-    m.(1) == 1 or raise
+      def callee_var
+        __callee__  == :callee_var or raise
+      end
+      callee_var
 
 ##alias
 
@@ -1724,12 +1798,12 @@ b
         @member_i = i
       end
 
-      def method()
+      def method
 
         # Call another method of the instance:
 
-          method2() == 2 or raise
-          self.method2() == 2 or raise
+          method2 == 2 or raise
+          self.method2 == 2 or raise
 
         # Access an ##instance variable:
 
@@ -1740,7 +1814,7 @@ b
           #self.@member_i
       end
 
-      def method2()
+      def method2
         2
       end
 
@@ -1749,11 +1823,11 @@ b
   # In Ruby, Classes are also (constant) objects. `new` is just a method of that object:
 
     c = C.new(1)
-    c.method() == 1 or raise
+    c.method == 1 or raise
 
   # The constructor is private: TODO how to make other methods private?
 
-    #c.initialize()
+    #c.initialize
 
   # `new` automatically calls `initialize` with the same parameters it was given,
   # which is a special name for the constructor.
@@ -1784,7 +1858,7 @@ b
           @i = i
         end
 
-        def i()
+        def i
           return @i
         end
 
@@ -1797,7 +1871,7 @@ b
 
       o = GetSet.new
 
-      o.i() == 1 or raise
+      o.i == 1 or raise
       o.i   == 1 or raise
 
     # For the setter, the suffix `=` allows the following special syntax:
@@ -1850,20 +1924,20 @@ b
   # after its initial declaration.
 
     class AddMethod
-      def m0()
+      def m0
         0
       end
     end
 
     class AddMethod
-      def m1()
+      def m1
         1
       end
     end
 
     c = AddMethod.new
-    c.m0() == 0 or raise
-    c.m1() == 1 or raise
+    c.m0 == 0 or raise
+    c.m1 == 1 or raise
 
   # It is possible to add methods to specific instances of a class.
   # This is exactly what happens when creating static class methods.
@@ -1887,11 +1961,11 @@ b
 
   # Trying to do it outside defines a new class method:
 
-    def C.method4()
+    def C.method4
       return 4
     end
 
-    C.method4() == 4 or raise # ERROR
+    C.method4 == 4 or raise # ERROR
 
   ##self
 
@@ -1906,8 +1980,8 @@ b
           self.class == Self or raise
 
           # Self can be ommited for method calls.
-          self.f2() == 2 or raise
-          f2() == 2 or raise
+          self.f2 == 2 or raise
+          f2 == 2 or raise
         end
 
         def f2
@@ -1974,8 +2048,8 @@ b
         end
 
         def initialize
-          ClassMethod.class_method()
-          #class_method()             #=> ERROR
+          ClassMethod.class_method
+          #class_method             #=> ERROR
           #@class_i   == 1 or raise #=> ERROR: @class_i is the instance member
           @@class_i2 == 2 or raise
         end
@@ -1990,7 +2064,7 @@ b
       ClassMethod.class_method3  == 3 or raise
 
       c = ClassMethod.new
-      #c.class_method()           #=> ERROR
+      #c.class_method           #=> ERROR
       #c.class_i2                 #=> ERROR
 
       # attr_accessor for class variable:
@@ -2055,13 +2129,13 @@ b
   ##inheritance
 
       class Base
-        def base_method()
+        def base_method
           return 1
         end
       end
 
       class Derived < Base
-        def derived_method()
+        def derived_method
           return 2
         end
       end
@@ -2083,7 +2157,7 @@ b
           def initialize(i)
             @i = i
           end
-          def i()
+          def i
             return @i
           end
         end
@@ -2145,13 +2219,13 @@ b
     ##superclass
 
         class Base
-          def base_method()
+          def base_method
             return 1
           end
         end
 
         class Derived < Base
-          def derived_method()
+          def derived_method
             return 2
           end
         end
@@ -2205,13 +2279,19 @@ b
 
       # Call method by symbol.
 
+      # Remeber that symbols can end in either `=`, `?` and `!` without quotes.
+
         class Send
           def add(a, b)
             a + b
           end
+
+          def add=
+            1
+          end
         end
 
-        Send.new.send(:add, 1, 2) == 3 or raise
+        Send.new.send(:add=) == 1 or raise
 
   ##<< for classes
 
@@ -2259,7 +2339,7 @@ b
       #M.i = 3
       #M.I = 3
 
-      def M.f()
+      def M.f
         # Error:
         #I
         M::I
@@ -2267,38 +2347,38 @@ b
         1
       end
 
-      def self.f1()
+      def self.f1
         1
       end
 
       class << self
-        def f1_2()
+        def f1_2
           1
         end
       end
 
-      def f2()
+      def f2
         2
       end
 
       class C
-        def f()
+        def f
           1
         end
       end
 
     end
 
-    M.f() == 1 or raise
-    M::f() == 1 or raise
+    M.f == 1 or raise
+    M::f == 1 or raise
 
-    M.f1() == 1 or raise
-    M.f1_2() == 1 or raise
+    M.f1 == 1 or raise
+    M.f1_2 == 1 or raise
 
   # Inner methods are invisible:
 
-    #M::f2() == 2 or raise
-    #f2() == 2 or raise
+    #M::f2 == 2 or raise
+    #f2 == 2 or raise
 
   ##dot vs double colons
 
@@ -2317,8 +2397,8 @@ b
 
   # Classes are constant objects so:
 
-    #M.C.new.f() == 1 or raise
-    M::C.new.f() == 1 or raise
+    #M.C.new.f == 1 or raise
+    M::C.new.f == 1 or raise
 
   # Error: cannot add variables to the module after its creation:
 
@@ -2327,18 +2407,18 @@ b
   # Can add new functions to the module after its creation:
 
     module Extend
-      def self.f0()
+      def self.f0
         0
       end
     end
 
     module Extend
-      def self.f1()
+      def self.f1
         1
       end
     end
 
-    def Extend::f2()
+    def Extend::f2
       2
     end
 
@@ -2348,40 +2428,40 @@ b
       end
     end
 
-    Extend.f0() == 0 or raise
-    Extend.f1() == 1 or raise
-    Extend.f2() == 2 or raise
-    Extend::C.f0() == 0 or raise
+    Extend.f0 == 0 or raise
+    Extend.f1 == 1 or raise
+    Extend.f2 == 2 or raise
+    Extend::C.f0 == 0 or raise
 
   ##include
 
     # Make module functions into instance methods.
 
       module IncludeModule
-        def f2()
+        def f2
           2
         end
 
-        def self.f3()
+        def self.f3
           3
         end
       end
 
       class IncludeClass
         include IncludeModule
-        def f1()
-          f2() == 2 or raise
+        def f1
+          f2 == 2 or raise
           1
         end
       end
 
-      IncludeClass.new.f1() == 1 or raise
-      IncludeClass.new.f2() == 2 or raise
+      IncludeClass.new.f1 == 1 or raise
+      IncludeClass.new.f2 == 2 or raise
 
     # Public module methods are not exported:
 
-      #IncludeClass.new.f3()
-      #IncludeClass.f3()
+      #IncludeClass.new.f3
+      #IncludeClass.f3
 
   ##extend
 
@@ -2391,7 +2471,7 @@ b
         extend IncludeModule
       end
 
-      ExtendClass.f2() == 2 or raise
+      ExtendClass.f2 == 2 or raise
 
     # ERROR: undefined
 
@@ -2399,7 +2479,7 @@ b
 
       class ExtendClassMethod; end
       ExtendClassMethod.extend(IncludeModule)
-      ExtendClassMethod.f2() == 2 or raise
+      ExtendClassMethod.f2 == 2 or raise
 
   ##include and extend at the same time
 
@@ -2442,14 +2522,14 @@ b
 
   # yield calls the bock that has been passed to the function:
 
-    def f()
+    def f
       # This calls the block:
-      yield() == 2 or raise
-      yield() == 2 or raise
+      yield == 2 or raise
+      yield == 2 or raise
     end
 
     i = 0
-    f() { # This is the block.
+    f { # This is the block.
       i += 1
 
       # ERROR: cannot use return here.
@@ -2463,7 +2543,7 @@ b
   # Do version:
 
     i = 0
-    f() do
+    f do
       i += 1
       #return 2 # ERROR
       2
@@ -2473,16 +2553,16 @@ b
   # There seems to not be any semantical difference between the two of them,
   # except precedence and different usage convention: <http://stackoverflow.com/questions/2122380/using-do-block-vs-brackets>
 
-  ##chaining syntax
+  ##Chaining syntax
 
     # Chain directly. Parenthesis mandatory on call if there are other parameters.
 
-    def f(x)
-      x + yield
-    end
+      def f(x)
+        x + yield
+      end
 
-    f(1) {1}.to_s       == '2' or raise
-    f(1) do 1; end.to_s == '2' or raise
+      f(1) {1}.to_s       == '2' or raise
+      f(1) do 1; end.to_s == '2' or raise
 
   ##scope
 
@@ -2498,13 +2578,13 @@ b
       end
 
       i = 0
-      f() do
+      f do
         i += 1
       end
       i == 1 or raise
 
       i = 0
-      f() do
+      f do
         i += 1
       end
       i == 1 or raise
@@ -2512,7 +2592,7 @@ b
     # However, to be part of the closure the variable has to be defined outside,
     # or else it is a local variable. Very confusing.
 
-      f() do
+      f do
         not_yet_defined = 1
       end
 
@@ -2521,11 +2601,11 @@ b
     # Fails because function:
 
       def f(func)
-        func() == 2 or raise
+        func == 2 or raise
       end
 
       i = 0
-      def g()
+      def g
         # Cannot change the outter i from here!
         # This will create a local i.
         i += 1
@@ -2545,11 +2625,11 @@ b
   # Get return values:
 
     $i = 0
-    def f()
-      $i += yield()
-      $i += yield()
+    def f
+      $i += yield
+      $i += yield
     end
-    f() { 1 }
+    f { 1 }
     $i == 2 or raise
 
   ##block context
@@ -2562,56 +2642,56 @@ b
         @class_i   = 1
         @@class_i2 = 2
 
-        def C.class_method_yield()
-          yield()
+        def C.class_method_yield
+          yield
         end
 
-        def C.class_method()
+        def C.class_method
           return 1
         end
 
-        def self.self_method_yield()
-          yield()
+        def self.self_method_yield
+          yield
         end
 
-        def self.self_method()
+        def self.self_method
           return 1
         end
 
-        def initialize()
+        def initialize
           @i = 0
         end
 
-        def method_yield()
-          yield()
+        def method_yield
+          yield
         end
 
-        def method()
+        def method
           return 1
         end
       end
 
       o = C.new
-      o.method_yield() do
-        #method()           #=> undefined
+      o.method_yield do
+        #method           #=> undefined
         @class_i   == -1 or raise
         @@class_i2 ==  2 or raise
-        #class_method()     #=> undefined
-        #self_method()      #=> undefined
+        #class_method     #=> undefined
+        #self_method      #=> undefined
       end
 
-      C.class_method_yield() do
+      C.class_method_yield do
         @class_i   == -1 or raise
         @@class_i2 ==  2 or raise
-        #class_method()     #=> undefined
-        #self_method()      #=> undefined
+        #class_method     #=> undefined
+        #self_method      #=> undefined
       end
 
-      C.self_method_yield() do
+      C.self_method_yield do
         @class_i   == -1 or raise
         @@class_i2 ==  2 or raise
-        #class_method()     #=> undefined
-        #self_method()      #=> undefined
+        #class_method     #=> undefined
+        #self_method      #=> undefined
       end
 
   ##optional block
@@ -2619,13 +2699,13 @@ b
     # If `yield` is used in a function, it is mandatory to pass a block to the function,
     # or this yields a runtime error.
 
-      def f()
-        yield()
+      def f
+        yield
       end
 
     # Doing:
 
-      #f()
+      #f
 
     # Would give:
 
@@ -2633,40 +2713,40 @@ b
 
     # But the following is fine:
 
-      def f()
-        true or yield()
+      def f
+        true or yield
       end
 
-      f()
+      f
 
     # It is possible to detect if a block was passed or not:
 
-      def f()
-        if block_given?()
-          return yield()
+      def f
+        if block_given?
+          return yield
         else
           return 0
         end
       end
 
-      f()       == 0 or raise
-      f() { 1 } == 1 or raise
+      f()     == 0 or raise
+      f { 1 } == 1 or raise
 
   ##ampersand syntax
 
       def f(&code)
-        code.call() == 2 or raise
+        code.call == 2 or raise
       end
 
       i = 0
-      f() do
+      f do
         i += 1
         2
       end
       i == 1 or raise
 
       i = 0
-      f() {
+      f {
         i += 1
         2
       }
@@ -2676,7 +2756,7 @@ b
 
       def f(i, j, &code)
         i == 1
-        code.call() == 2 or raise
+        code.call == 2 or raise
         j == 3
       end
       i = 0
@@ -2717,7 +2797,7 @@ b
   # Explicit proc creation:
 
     def f(code)
-      code.call() == 2 or raise
+      code.call == 2 or raise
     end
 
     p = Proc.new do
@@ -2740,8 +2820,8 @@ b
   # Pass multiple procs:
 
     def f(code, code2)
-      code.call() == 2 or raise
-      code2.call() == 2 or raise
+      code.call == 2 or raise
+      code2.call == 2 or raise
     end
 
     p = Proc.new do
@@ -2762,7 +2842,7 @@ b
       end
 
       def f(g)
-        g.call()
+        g.call
         2
       end
 
@@ -2774,7 +2854,7 @@ b
     # Every block is a proc:
 
       def f(&code)
-        code.class() == Proc or raise
+        code.class == Proc or raise
       end
 
     # Procs are more versitile:
@@ -2843,7 +2923,7 @@ b
 
     # Print all environment:
 
-      ENV.each() do |k,v|
+      ENV.each do |k,v|
         #puts("ENV[#{k}] = #{v}")
       end
 
@@ -2937,7 +3017,7 @@ b
         raise
       end
 
-    # Non-const variables are bad. Everything else is ok.
+    # Non-const variables are not imported:
 
       begin
         main2_i
@@ -2948,13 +3028,13 @@ b
 
       Main2_const == 2 or raise
 
-      main2_f() == 2 or raise
-      Main2.f() == 2 or raise
-      AnyName.f() == 2 or raise
+      main2_f == 2 or raise
+      Main2.f == 2 or raise
+      AnyName.f == 2 or raise
 
     # Requires of requires are also required:
 
-      main3_f() == 3 or raise
+      main3_f == 3 or raise
 
   ##autoload
 
@@ -2986,59 +3066,154 @@ b
         #raise
       #end
 
-##exception ##raise ##rescue ##ensure
+##Exception ##ensure
 
-    rescued = false
+  # Basic example:
+
     ensured = false
     begin
       raise(NameError)
     rescue NameError
-      rescued = true
     else
       raise
     ensure
       ensured = true
     end
-    rescued or raise
     ensured or raise
 
-  # Empty rescue rescues all:
+  ##rescue
 
-    begin
-      raise(TypeError)
-    rescue NameError
-      raise
-    rescue
-    end
+    # Get the exception object with a (magic?) `ExceptionClass => exception_object` hash syntax:
 
-  # Only exception classes can be raised or `TypeError`:
-
-    begin
       begin
-        raise(1)
-      rescue TypeError
+        raise('msg')
+      rescue RuntimeError => ex
+        ex.message == 'msg' or raise
       else
         raise
       end
-    end
 
-  ##recue short forms
+    # You can use multiple rescue statements:
 
-    # It is possible to have a `rescue` withtout `begin`.
-
-    # Inline form: single statement only, much like inline `if`:
-
-      raise(0) rescue
-      raise rescue
-
-    # Paired with `def`: catches anything inside the function:
-
-      def raise_exc
+      begin
+        raise(TypeError)
+      rescue NameError
         raise
       rescue
+      else
+        raise
       end
 
-      raise_exc
+    # Empty rescue command rescues all descendants of StandardError,
+    # but not other classes like Exceptions.
+
+    # To rescue all exceptions, use `rescue Exception`.
+
+      begin
+        raise(Exception.new)
+      rescue
+        raise
+      rescue Exception
+      else
+        raise
+      end
+
+    ##rescue shorthand forms
+
+      # It is possible to have a `rescue` withtout `begin`.
+
+      # Inline form: single statement only, much like inline `if`:
+
+        raise(0) rescue
+        raise rescue
+
+      # Paired with `def`: catches anything inside the function:
+
+        def raise_exc
+          raise
+        rescue
+        end
+
+        raise_exc
+
+      # Rescue multiple types:
+
+        begin
+          raise(Exception.new)
+        rescue Exception, StandardError => ex
+        else
+          raise
+        end
+
+        begin
+          raise(StandardError.new)
+        rescue Exception, StandardError => ex
+        else
+          raise
+        end
+
+
+  ##raise
+
+    # http://www.ruby-doc.org/core-2.1.2/Kernel.html#method-i-raise
+
+    # Three forms:
+
+    # - `raise`: raise a `RuntimeError` with empty message
+    # - `raise('string')`: raise a `RuntimeError` with given message
+    # - `raise('string')`: raise a `RuntimeError` with given message
+
+      begin
+        raise('msg')
+      rescue RuntimeError => ex
+        ex.class == RuntimeError or raise
+        ex.message == 'msg' or raise
+      else
+        raise
+      end
+
+
+    # If you try to raise anything else, you get a `TypeError`:
+
+      begin
+        begin
+          raise(1)
+        rescue TypeError
+        else
+          raise
+        end
+      end
+
+  ##fail
+
+    # Alias to `raise`.
+
+  ##Built-in exception classes
+
+    # Used throughout the standard library and built-in classes.
+
+    # Ruby docs recommend that libs inherit from either `StandardError` or `RuntimeError`,
+    # once, and then inherit all other errors from that class, so that all error of the
+    # libray can be caught with a single expression.
+
+    ##Exception class
+
+      # Base class of all exceptions.
+
+    ##StandardError
+
+      # http://www.ruby-doc.org/core-2.1.2/StandardError.html
+
+      # Only this class and descendants are caught by an empty `rescue`.
+
+      # Parent class: `Exception`.
+
+    ##RuntimeError
+
+      # Type of exception raised by `raise` and `raise('string')`.
+
+      # Parent class: `StandardError`. Therefore exceptions raised with an empty `raise`
+      # can be caught by an empty `rescue`.
 
 ##throw ##catch
 
@@ -3124,7 +3299,12 @@ b
     path = file.path
     file.unlink
 
-  ##path operations
+  ##Read and write entire file at once
+
+    # `File.read(path)` and `File.write(path)`, inherited from `IO`.
+    # Convenience methods over `File.new.read` + `file.close`.
+
+  ##Path operations
 
     ##join
 
@@ -3142,12 +3322,12 @@ b
 
       # Do not confound with `exist?` which is only for directories!
 
-        not File.exists?(path) or raise
+        !File.exists?(path) or raise
         file = File.new(path, 'w')
         file.close
         File.exists?(path) or raise
         File.unlink(path)
-        not File.exists?(path) or raise
+        !File.exists?(path) or raise
 
   ##open ##write ##read ##write
 
@@ -3178,7 +3358,7 @@ b
 
 ##Dir
 
-  ##list directory ##ls
+  ##List directory ##ls
 
       Dir.entries('.')
 
@@ -3190,40 +3370,8 @@ b
 
   ##getwd ##pwd
 
-      puts 'pwd = ' + Dir.pwd()
-      puts 'getwd = ' + Dir.getwd()
-
-##fileutils
-
-  ##rm_rf
-
-      require 'fileutils'
-      #FileUtils.rm_rf(dir)
-
-##Tempfile
-
-    require 'tempfile'
-    file = Tempfile.new('abc')
-    puts "Tempfile.new('abc').path = " + file.path      # => A unique filename in the OS's temp directory,
-                  #    e.g.: "/tmp/foo.24722.0"
-                  #    This filename contains 'foo' in its basename.
-    file.write('hello world')
-    file.rewind
-    file.read      # => "hello world"
-    file.close
-    file.unlink    # deletes the temp file
-
-##StringIO
-
-  # String that looks like a file to do IO tests.
-
-    require 'stringio'
-    file = StringIO.new
-    file.write('a')
-    file.flush
-    # TODO how does it work?
-    #file.read == "a" or raise
-    file.close
+      puts 'pwd = ' + Dir.pwd
+      puts 'getwd = ' + Dir.getwd
 
 ##process
 
@@ -3293,37 +3441,117 @@ b
      Gem::Dependency.new('', '~> 1.4.5').match?('', '1.4.6beta4') or raise
     !Gem::Dependency.new('', '~> 1.5.5').match?('', '1.4.6beta4') or raise
 
-##serialization
+##stdlib
 
-  # Two main methods:
-  #
-  # - Marshal.dump: binary. Faster.
-  # - YAML::dump:   human readable.
+  ##OpenStruct
 
-    obj = {
-      a: 0,
-      b: '1',
-      c: {a: 0}
-    }
+    # Sintatically like a class that can add attributes on the fly.
 
-  ##YAML
+    # Hash based, therefore potentially slower than Hash.
 
-    require('yaml')
-    ser_obj = YAML::dump(obj)
-    puts 'YAML::dump = ' + ser_obj
-    obj == YAML::load(ser_obj) or raise
+      require 'ostruct'
 
-  ##Marshal
+      s = OpenStruct.new
+      s.a = 0
+      s.b = 'a'
 
-    # Name probably comes from: <https://en.wikipedia.org/wiki/Heraldry#Marshalling>
+      s.a == 0   or raise
+      s.b == 'a' or raise
+      s.c == nil or raise
+
+  ##StringIO
+
+    # String that looks like a file to do IO tests.
+
+      require 'stringio'
+      file = StringIO.new
+      file.write('a')
+      file.flush
+      # TODO how does it work?
+      #file.read == "a" or raise
+      file.close
+
+  ##pp ##pretty print
+
+    # Format Ruby objects nicely for human consumption.
+
+      require 'pp'
+
+      puts 'puts / pp'
+
+      os = [
+        [0, 1, 2],
+        {a: 0, b: 1, c: 2}
+      ]
+
+      os.each do |o|
+        puts(o)
+        pp(o)
+      end
+
+  ##fileutils
+
+    ##rm_rf
+
+        require 'fileutils'
+        #FileUtils.rm_rf(dir)
+
+  ##Tempfile
+
+      require 'tempfile'
+      file = Tempfile.new('abc')
+      # A unique filename in the OS's temp directory,
+      # e.g.: "/tmp/abc.24722.0"
+      # This filename contains 'abc' in its basename.
+      puts "Tempfile.new('abc').path = " + file.path
+      file.write('hello world')
+      file.rewind
+      file.read      # => "hello world"
+      file.close
+      file.unlink    # deletes the temp file
+
+    # TODO how to generate only a temporary file name without creating it?
+
+  ##Serialization
+
+    # Two main methods:
     #
-    # In Java, serialization and Marshalling are different.
-    #
-    # In Python, the term is never used: there is only one type of serialization: `pickle`.
+    # - Marshal.dump: binary. Faster.
+    # - YAML::dump:   human readable.
 
-    ser_obj = Marshal.dump(obj)
-    obj == Marshal.load(ser_obj) or raise
+      obj = {
+        a: 0,
+        b: '1',
+        c: {a: 0}
+      }
 
-$stdout.flush
-$stderr.flush
-puts("ALL ASSERTS PASSED")
+    ##YAML
+
+        require('yaml')
+        obj = [0, 1, {a: 2}]
+        ser_obj = YAML::dump(obj)
+        puts 'YAML::dump = ' + ser_obj
+        obj == YAML::load(ser_obj) or raise
+
+    ##Marshal
+
+      # Name probably comes from: <https://en.wikipedia.org/wiki/Heraldry#Marshalling>
+      #
+      # In Ruby, it is a serialization algorithm, tht uses a binary format.
+      #
+      # Faster and smaller (TODO check) than YAML.
+      #
+      # In Java, serialization and Marshalling are different operations.
+      #
+      # In Python, the term is never used: there is only one type of serialization: `pickle`.
+
+        obj = [0, 1, {a: 2}]
+        ser_obj = Marshal.dump(obj)
+        puts 'Marshal.dump = ' + ser_obj
+        obj == Marshal.load(ser_obj) or raise
+
+# Finalization:
+
+  $stdout.flush
+  $stderr.flush
+  puts("ALL ASSERTS PASSED")

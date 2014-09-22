@@ -1,0 +1,8 @@
+source 'https://rubygems.org'
+
+ruby '2.1.1'
+
+gem 'haml', '4.0.5'
+# Required for the coffeescript tag.
+gem 'coffee-script', '2.3.0'
+gem 'rake', '10.3.2'

@@ -1,0 +1,8 @@
+source 'https://rubygems.org'
+
+ruby '2.1.1'
+
+gem 'capybara', '2.4.3'
+# Required for `save_and_open_file`.
+gem 'launchy', '2.4.2'
+gem 'rake', '10.3.2'

@@ -2,9 +2,9 @@
 
 Standard Ruby SGI interface.
 
-Implementing gem: <https://github.com/rack/rack>
+Source: <https://github.com/jnicklas/capybara>
 
-Protocol specification: <https://github.com/rack/rack/blob/master/SPEC>
+Documentation: <http://rubydoc.info/github/jnicklas/capybara>
 
 TODO what are Phusion Passenger, Litespeed, Mongrel, Thin, Ebb, WEBrick etc.
 and why are they needed with Rack?

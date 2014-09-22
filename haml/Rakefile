@@ -1,0 +1,10 @@
+out = 'index.html'
+
+task :default do
+  require_relative 'main'
+  File.write(out, Haml::Engine.new(File.read(out + '.haml')).render)
+end
+
+task :clean do
+  File.unlink(out)
+end

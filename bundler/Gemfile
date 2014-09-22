@@ -5,71 +5,83 @@
 # Which URL will provide the Gems. Mandatory.
 source 'https://rubygems.org'
 
-# Require a ruby version. Optional.
-#
-# If the version is not met, abort.
-#
-# rvm can use that to automatically change ruby version when entering
-# a directory with such a Gemfile.
-#
-# It seems that it is not possible to use modifiers such as `>=`
-# to specify the ruby version: one specific version must be specified.
-ruby '2.1.1'
+##ruby
 
-# Require a specific Ruby implementation (engine):
-#ruby '1.9.3', :engine => 'jruby', :engine_version => '1.6.7'
+  # Require a ruby version. Optional.
+  #
+  # If the version is not met, abort.
+  #
+  # rvm can use that to automatically change ruby version when entering
+  # a directory with such a Gemfile.
+  #
+  # It seems that it is not possible to use modifiers such as `>=`
+  # to specify the ruby version: one specific version must be specified.
+  ruby '2.1.1'
 
-# Install exact version:
-#gem 'rails', '4.0.0'
+  # Require a specific Ruby implementation (engine):
+  #ruby '1.9.3', :engine => 'jruby', :engine_version => '1.6.7'
 
-# Install the latest version after given version:
-#gem 'uglifier', '>= 1.3.0'
+##gem
 
-# `~>` installs the latest version that does not increase the before last version number.
-# Examples:
-#
-# - `~> 2.0.3` is identical to `>= 2.0.3` and `< 2.1`.
-# - `~> 2.1` is identical to `>= 2.1` and `< 3.0`.
-# - `~> 2.2.beta` will match prerelease versions like `2.2.beta.12`.
-#gem 'sass-rails', '~> 4.0.0'
+  # Install exact version:
+  #gem 'rails', '4.0.0'
 
-# It is possible to get gems from git repositories:
-#gem 'nokogiri', :git => 'git://github.com/tenderlove/nokogiri.git', :branch => '1.4'
+  # Install the latest version after given version:
+  #gem 'uglifier', '>= 1.3.0'
 
-# On RVM, the gem will then be installed to a path of type:
-#.rvm/gems/ruby-2.1.1/bundler/gems/softcover-60ad088323ce
+  # #~>
+  #
+  # #Pessimistic version constraint.
+  #
+  # #spermy operator.
+  #
+  # http://stackoverflow.com/questions/3414337/meaning-of-tilde-greater-than-in-version-requirement#3416289
+  #
+  # `~>` installs the latest version that does not increase the before last version number.
+  #
+  # Examples:
+  #
+  # - `~> 2.0.3` is identical to `>= 2.0.3` and `< 2.1`.
+  # - `~> 2.1` is identical to `>= 2.1` and `< 3.0`.
+  # - `~> 2.2.beta` will match prerelease versions like `2.2.beta.12`.
 
-# Cannot do `require_relative` from here. One possible alternative is a brute `instance_eval` + File.read:
-#instance_eval(File.read(File.join(File.dirname(__FILE__), 'Gemfile_dbms')))
+  # It is possible to get gems from git repositories:
+  #gem 'nokogiri', :git => 'git://github.com/tenderlove/nokogiri.git', :branch => '1.4'
 
-##require false
+  # On RVM, the gem will then be installed to a path of type:
+  #.rvm/gems/ruby-2.1.1/bundler/gems/softcover-60ad088323ce
 
-# <http://stackoverflow.com/questions/4800721/bundler-what-is-the-require-false-on-the-gemfile-means>
+  # Cannot do `require_relative` from here. One possible alternative is a brute `instance_eval` + File.read:
+  #instance_eval(File.read(File.join(File.dirname(__FILE__), 'Gemfile_dbms')))
 
-gem 'haml'
-gem 'faker', require: false
+  ##require false
 
-##path
+  # <http://stackoverflow.com/questions/4800721/bundler-what-is-the-require-false-on-the-gemfile-means>
 
-# Use gem at given path without installing it.
+  gem 'haml'
+  gem 'faker', require: false
 
-# Good way to develop Gems.
+  ##path
 
-#gem 'counter_culture', :path => '../counter_culture'
+  # Use gem at given path without installing it.
 
-##git
+  # Possible way to develop Gems.
 
-# Install a gem directly from git repository.
+  #gem 'counter_culture', path: '../counter_culture'
 
-# Useful to get latest version and develop with it.
+  ##git
 
-# For bundle 1.3.5, installs the gem under `ruby/<ruby-version>/bundler/gems`.
+  # Install a gem directly from git repository.
 
-#gem 'counter_culture', :git => 'https://github.com/magnusvk/counter_culture.git'
+  # Useful to get latest version and develop with it.
+
+  # For bundle 1.3.5, installs the gem under `ruby/<ruby-version>/bundler/gems`.
+
+  #gem 'counter_culture', :git => 'https://github.com/magnusvk/counter_culture.git'
 
 ##gemspec
 
-# Read dependencies from the `package_name.gemspec` file in the current directory,
-# which is used to upload packages to rubygems.org.
+  # Read dependencies from the `package_name.gemspec` file in the current directory,
+  # which is used to upload packages to rubygems.org.
 
-# This way you don't have to duplicate the information there.
+  # This way you don't have to duplicate the information there.

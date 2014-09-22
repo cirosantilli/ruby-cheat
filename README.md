@@ -7,6 +7,24 @@ see [this](https://github.com/cirosantilli/rails-cheat).
 
 All runnable Ruby files are meant to be run with `bundle exec ruby <filename>`.
 
+## Implementations
+
+Ruby has a few major implementations.
+
+### MRI
+
+Matt's ruby, after the original creator of the language.
+
+Reference implementation. Coded in C.
+
+### JRuby
+
+Runs on top of JVM: compiles Ruby to Java object code.
+
+### Rubinius
+
+Seems to use LLVM JIT compilation.
+
 ## Ruby vs Python
 
 As of 2013, Ruby is almost equivalent to Python:
@@ -39,7 +57,10 @@ Advantages of Python:
     - `if` vs `unless`
     - `any?` vs `empty?`
     - `alias` is even a keyword to create more redundancy.
-    - `not` vs `!`, only differentiated by precedence.
+    - `not` vs `!`, only differentiated by precedence,
+        so `!` which has lower precedence is more general
+        (you can always add precedence with parenthesis, but not remove it)
+    - `raise` vs `fail`
 
 -   requires of requires are also required.
 
@@ -91,7 +112,9 @@ The most notable ones are:
 
 -   Mac Homebrew.
 
-##  Style guides
+## Lint tools
+
+## Style guides
 
 -   <https://github.com/styleguide/ruby>
 
@@ -110,13 +133,68 @@ The most notable ones are:
     Includes many tools of the Rails workflow, not just Ruby.
 
     Automatically checked by the Hound CI lint tool: <https://github.com/thoughtbot/hound>
-    Uses Rubocop on the backend.
+    Uses RuboCop on the backend.
+
+-   ruby-lint: <https://github.com/YorickPeterse/ruby-lint>
+
+Duplication finders:
+
+-   <https://github.com/seattlerb/flay>. HAML extension: <https://github.com/UncleGene/flay-haml>
+
+-   <https://github.com/gilesbowkett/towelie>
 
 ## IRB
 
 Interactive REPL interface: `irb`.
 
-To repeat last command: `<left><up>`.
+Repeat last command: `<up>`
+
+Enable persistent history:
+<http://stackoverflow.com/questions/10465251/can-i-get-the-ruby-on-rails-console-to-remember-my-command-history-umm-better>:
+
+    echo 'require "irb/ext/save-history"
+    IRB.conf[:SAVE_HISTORY] = 200
+    IRB.conf[:HISTORY_FILE] = "#{ENV['HOME']}/.irb-history"
+    ' > ~/.irbrc
+
+Note that RVM has a default `.irbrc` that does that for you automatically.
+
+### Reading the prompt
+
+    irb(main):001:0>
+    ^^^ ^^^^  ^^^ ^^
+    1   2     3   45
+
+1.  Tells you it's IRB!
+
+2.  TODO
+
+3.  Number of commands since you started the session.
+
+4.  `end` depth level:
+
+        irb(main):001:0> if true
+        irb(main):002:1> if true
+        irb(main):003:2> 0
+        irb(main):004:2> end
+        irb(main):005:1> end
+        => 0
+
+5.  If a statement needs closing.
+
+    Quotes:
+
+        irb(main):001:0> 'a
+        irb(main):002:0' b'
+        => "a\nb"
+
+    In the middle of a statement: `*` appears;
+
+        irb(main):001:0> 1 +
+        irb(main):002:0* 1
+        => 2
+
+    When on the middle of a statement, you can cancel it with Ctrl+C.
 
 ## Gem
 
@@ -128,12 +206,6 @@ It is recommended that you use Bundler instead of gem to install gems,
 since bundler also takes care of dependencies and more.
 
 The de-facto standard gem index is `rubygems.org`, which is open source Rails application.
-
-Gem metadata is specified on a `project_name.gemspec` file at the top-level of projects.
-To install a project from it's `gemspec`, do:
-
-    gem build project_name.gemspec
-    gem install project_name.gemspec
 
 For gem documentation, the most widely used option is <http://rubydoc.info>, which is YARD based.
 
@@ -168,6 +240,32 @@ List installed gems in current gemset:
 List all available versions of a gem on remote:
 
     gem list -ar gemname
+
+### Find gem version
+
+From the command line:
+
+    gem list | grep rake
+
+Each Gem may have multiple installed versions:
+
+    rake (10.3.2, 10.1.0, 0.9.2.2)
+
+In that case, by default Ruby will take the most recent version of the gem, and the most recent compatible installed version of it's dependencies: <http://yehudakatz.com/2011/05/30/gem-versioning-and-bundler-doing-it-right/ >
+
+From inside Ruby: <http://stackoverflow.com/questions/2054224/how-to-access-the-version-of-a-gem-from-within-ruby>. TODO.
+
+A common convention, followed by Rails, is to define a string with the version name at:
+
+    puts Rails::VERSION::STRING
+
+### gemspec file
+
+Gem metadata for `rubygems.org` is specified on a `project_name.gemspec` file at the top-level of projects.
+To install a project from it's `gemspec`, do:
+
+    gem build project_name.gemspec
+    gem install project_name.gemspec
 
 ## Version managers
 
@@ -289,14 +387,6 @@ List gemsets:
 Delete gemset:
 
     rvm gemset delete gemset_name
-
-## rdoc
-
-Stdlib tool to generate documentation from comments.
-
-Does not have many features.
-
-Also consider the more advanced YARD tool.
 
 ## Foreman
 
