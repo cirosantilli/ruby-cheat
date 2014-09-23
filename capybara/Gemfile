@@ -3,6 +3,11 @@ source 'https://rubygems.org'
 ruby '2.1.1'
 
 gem 'capybara', '2.4.3'
+# Required webkit driver. Installation will compile webkit!
+#gem 'capybara-webkit', '1.3.0'
 # Required for `save_and_open_file`.
 gem 'launchy', '2.4.2'
+gem 'poltergeist', '1.5.1'
 gem 'rake', '10.3.2'
+# Required selenium driver.
+gem 'selenium-webdriver', '2.43.0'

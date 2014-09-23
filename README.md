@@ -1,5 +1,7 @@
 # Ruby Cheat
 
+[![Build Status](https://travis-ci.org/cirosantilli/ruby-cheat.svg?branch=master)](https://travis-ci.org/cirosantilli/ruby-cheat)
+
 Ruby information and cheatsheets.
 
 For Rails and libraries that are very commonly related to Rails or web dev,

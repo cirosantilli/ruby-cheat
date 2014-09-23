@@ -1,0 +1,14 @@
+language: ruby
+
+rvm:
+  - 2.1.1
+
+install:
+  - bundle install
+  - cd haml     && bundle install && cd ..
+  - cd capybara && bundle install && cd ..
+
+script:
+  - bundle exec rake
+  - cd haml     && bundle exec rake && cd ..
+  - cd capybara && bundle exec rake && cd ..

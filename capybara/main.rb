@@ -3,6 +3,7 @@
 require 'tempfile'
 
 require 'capybara'
+require 'capybara/poltergeist'
 
 Capybara.app = Proc.new do |env|
   ['200', {'Content-Type' => 'text/html'}, [File.read('index.html')]]
@@ -22,30 +23,6 @@ class CapybaraTest
       # Or if you `include Capybara::DSL` you can write just:
 
         visit('/')
-
-    ##driver
-
-      # Capybara is an unified interface to multiple drivers, which actually implement the functions.
-
-      # Not all drivers support all functions. When this is the case, Capybara docs specify it.
-
-      # Driver can be set under `support/env.rb`
-
-        #Capybara.javascript_driver = :poltergeist
-
-      # On Cucumber, drivers can be set per test with tags such as `@javascript`,
-      # which uses the default Javascript enabled driver given by the `Capybara.javascript_driver` option.
-      # There are also explicit `@selenium` and `@rack_test` tags.
-
-      # List of supported drivers: <https://github.com/jnicklas/capybara#drivers>
-
-      ##RackTest
-
-        # Capybara's default driver. Simple, limited and fast.
-        #
-        # - only works with Rack apps like Rails or Sinatra,
-        # - and cannot access remote URLs.
-        # - only considers HTML, not CSS and Javascript. Parses HTML with Nogokiri.
 
     ##Session
 
@@ -188,24 +165,31 @@ class CapybaraTest
 
         ##has methods
 
+          # Each one has a `has_no` which is the negation.
+
+            has_selector?('div') or raise
+            has_no_selector?('asdf') or raise
+
+          # Kind of useless since it golfs worse and is less readable than `!has`.
+
+          ##has_selector?
+
+            # !all(...).empty?
+
+          ##has_xpath?
+
+            # has_selector(:xpath, ...)
+
+          ##has_css?
+
+            # has_selector(:css, ...)
+
           ##has_content
 
             # Stripts tags. Can also consider visibility with extra options.
 
-              has_content?('paragraph') or raise
-              !has_content?('<p>') or raise
-
-          ##has_selector
-
-            !# all(...).empty?
-
-          ##has_xpath
-
-            # has_selector(:xpath, ...)
-
-          ##has_css
-
-            # has_selector(:css, ...)
+              has_content?('has_content') or raise
+              !has_content?('<div>') or raise
 
         ##xpath
 
@@ -234,18 +218,18 @@ class CapybaraTest
 
           ##/ is direct child, `//` is descendant:
 
-            has_xpath?("//p[@id='xpath-p-id']//span") or raise
-            has_xpath?("//p[@id='xpath-p-id']//span[@class='b']") or raise
-            !has_xpath?("//p[@id='xpath-p-id']/span[@class='b']") or raise
+            has_xpath?("//div[@id='xpath']//span") or raise
+            has_xpath?("//div[@id='xpath']//span[@class='b']") or raise
+            !has_xpath?("//div[@id='xpath']/span[@class='b']") or raise
 
           # Double or single quotes are the same:
 
-            has_xpath?("//p[@id='xpath-p-id']") or raise
-            has_xpath?('//p[@id="xpath-p-id"]') or raise
+            has_xpath?("//div[@id='xpath']") or raise
+            has_xpath?('//div[@id="xpath"]') or raise
 
           ##* is an element of any type:
 
-            has_xpath?("//*[@id='xpath-p-id']") or raise
+            has_xpath?("//*[@id='xpath']") or raise
 
           # Multiple predicates:
 
@@ -288,9 +272,37 @@ class CapybaraTest
 
         ##click_link
 
+          # Finds either of:
+
+          # - case sensitive innerHTML substring
+          # - id
+
             visit('/')
-            click_link('2')
+            click_link('Click link 2')
             current_path == '/2' or raise
+
+            visit('/')
+            click_link('Click link 2')
+            current_path == '/2' or raise
+
+            visit('/')
+            click_link('lick link 2')
+            current_path == '/2' or raise
+
+          # Id:
+
+            visit('/')
+            click_link('click-link-2-id')
+            current_path == '/2' or raise
+
+          # Case sensitive:
+
+            begin
+              click_link('click link 2')
+            rescue Capybara::ElementNotFound
+            else
+              raise
+            end
 
         ##check
 
@@ -328,7 +340,76 @@ class CapybaraTest
       # - hover:
       # - visible? Not all drivers support CSS, so the result may be inaccurate.
 
-    ##javascript
+    ##Javascript
+
+      ##driver
+
+        # Capybara is an unified interface to multiple drivers, which actually implement the functions.
+
+        # Not all drivers support all functions. When this is the case, Capybara docs specify it.
+
+        # Driver can be set under `support/env.rb`
+
+          #Capybara.javascript_driver = :poltergeist
+
+        # On Cucumber, drivers can be set per test with tags such as `@javascript`,
+        # which uses the default Javascript enabled driver given by the `Capybara.javascript_driver` option.
+        # There are also explicit `@selenium` and `@rack_test` tags.
+
+        # List of supported drivers: <https://github.com/jnicklas/capybara#drivers>
+
+        # - webkit: fastetst js capable
+
+        ##RackTest
+
+          # Capybara's default driver. Limited and very fast.
+
+          # - only works with Rack apps like Rails or Sinatra,
+          # - cannot access remote URLs.
+          # - not CSS and Javascript aware: parses HTML with Nogokiri.
+
+            !has_css?('#js-click-target', text: 'clicked') or raise
+            find('#js-click').click
+            !has_css?('#js-click-target', text: 'clicked') or raise
+
+        ##Selenium
+
+          # Most reproductible and slow since it actually opens browser windows (not headless).
+
+            # false because very slow
+            if false
+              Capybara.current_driver = :selenium
+              visit('/')
+              !has_css?('#js-click-target', text: 'clicked') or raise
+              find('#js-click').click
+              has_css?('#js-click-target', text: 'clicked') or raise
+              Capybara.use_default_driver
+            end
+
+        ##webkit
+
+          # Headless webkit therefore fast. Hard to install: gem installation compiles webkit.
+          # <https://github.com/thoughtbot/capybara-webkit/releases>
+
+        ##poltergeist
+
+          # Integrates PhantomJS with Capybara:
+          # <https://github.com/teampoltergeist/poltergeist>
+
+          # PhantomJS is also webkit based, but lower level and more optimized to the web app testing task:
+          # <http://stackoverflow.com/questions/23951381/how-do-poltergeist-phantomjs-and-capybara-webkit-differ>
+
+          # This is probably the best option when testing Javascript features.
+
+            # false because a bit slow
+            if false
+              Capybara.current_driver = :poltergeist
+              visit('/')
+              !has_css?('#js-click-target', text: 'clicked') or raise
+              find('#js-click').click
+              has_css?('#js-click-target', text: 'clicked') or raise
+              Capybara.use_default_driver
+            end
 
       ##Modal ##alert ##Popup
 

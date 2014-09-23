@@ -710,6 +710,10 @@ EOF
     [0, 1].include?(0) or  raise
     [   1].include?(0) and raise
 
+  # Note that this is different from String.include? which checks for substrings.
+
+    ![0, 1].include?([0, 1]) or  raise
+
   ##append inplace ##<<
 
       a = [1]
@@ -3358,9 +3362,12 @@ EOF
 
 ##Dir
 
-  ##List directory ##ls
+  ##List directory ##ls ##entries
 
-      Dir.entries('.')
+      entries = Dir.entries('.')
+      entries.include?('.') or raise
+      entries.include?('..') or raise
+      puts "Dir.entries('.') = " + entries.inspect
 
   ##rmdir
 
@@ -3406,6 +3413,9 @@ EOF
   ##%x(date)
 
     # Same as backticks percent style.
+
+    # bbatsov says use backticks unless your command
+    # contains backticks (which is unlikely).
 
       o = %x(ruby -e 'print 1')
       o == '1' or raise

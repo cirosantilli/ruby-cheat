@@ -5,19 +5,42 @@
   <title>Capybara Cheat Title</title>
 </head>
 <body>
+<h1>Capybara Cheat</h1>
 
-<h1>Capybara Tests</h1>
+<h2>#all</h2>
 
-  <p>paragraph</p>
-  <p id="xpath-p-id"><span class="a"><span class="b"></span></span></p>
+  <div id="all-text">ab<i>cd</i>ef</div>
+  <div id="all-text-whitespace"> a </div>
+
+<h2>#has_content</h2>
+
+  <div>has_content</div>
+
+<h2>#xpath</h2>
+
+  <div id="xpath">
+    <span class="a">
+      <span class="b"></span>
+    </span>
+  </div>
   <div id="xpath-text">div<span>span</span>div2</div>
   <div id="xpath-contains">abcde</div>
-  <a href="/" id="a-id">a</a>
 
-  <h2>#all</h2>
+<h2>#click_link</h2>
 
-    <div id="all-text">ab<i>cd</i>ef</div>
-    <div id="all-text-whitespace"> a </div>
-    <a href="2">2</a>
+  <a href="2" id="click-link-2-id">Click link 2</a>
+
+<h2>#Javascript</h2>
+
+  <div id="js-click-target"></div>
+  <div id="js-click">js-click</div>
+  <script>
+    document.getElementById('js-click').addEventListener(
+      'click',
+      function(e) {
+        document.getElementById('js-click-target').innerHTML = 'clicked'
+      }
+    )
+  </script>
 </body>
 </html>
