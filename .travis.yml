@@ -3,6 +3,9 @@ language: ruby
 rvm:
   - 2.1.1
 
+# TODO: fix the intsall.
+# It appears that haml deps are not beings installed:
+# it's as if the cd haml had no effect.
 install:
   - bundle install
   - cd haml     && bundle install && cd ..

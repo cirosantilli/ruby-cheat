@@ -29,14 +29,81 @@ class CapybaraTest
       # Class that contains most of the most useful methods!
       # <http://rubydoc.info/github/jnicklas/capybara/master/Capybara/Session>
 
+      ##page
+
+      ##curent_session
+
+        # Same as the current session.
+
+          page == Capybara.current_session or raise
+
+        # All of its methods are brought in with the DSL, so never use this,
+        # except for insane RSpec assertion syntax like `expect(page).to have...`,
+        # where you need page and `to have` is magic.
+
+          page.current_path == current_path or raise
+
       ##visit
 
       ##current_path
 
           visit('/')
-          current_path == ('/') or raise
+          current_path == '/' or raise
+
           visit('/2')
-          current_path == ('/2') or raise
+          current_path == '/2' or raise
+
+        # Only includes the path, **not** the query string!
+
+          visit('/2?a=b')
+          current_path == '/2' or raise
+
+        # How to include the query string:
+        # http://stackoverflow.com/questions/5228371/how-to-get-current-path-with-query-string-using-capybara
+        # Best ways seems to be:
+
+          visit('/2?a=b')
+          URI.parse(current_url).request_uri == '/2?a=b' or raise
+          current_url[current_host.size..-1] == '/2?a=b' or raise
+
+        # Encoding:
+
+          visit('/2?a%5Bb%5D=c')
+          URI.parse(current_url).request_uri == '/2?a[b]=c' or raise
+
+          visit('/2?a[b]=c')
+          URI.parse(current_url).request_uri == '/2?a[b]=c' or raise
+
+        # Click link was strict on invalid URLs where visit was not.
+        # This may have changed as per <https://github.com/teampoltergeist/poltergeist/issues/349>
+
+          #click_link('click-link-2-brace-id')
+          #begin
+            #URI.parse(current_url)
+          #rescue URI::InvalidURIError
+          #else
+            #raise
+          #end
+
+          click_link('click-link-2-brace-encode-id')
+          URI.parse(current_url).request_uri == '/2%5B' or raise
+
+      ##current_url
+
+        # Full current URL. Not very useful variable since uusally we do care about the domain.
+
+          puts 'current_url = ' + current_url
+
+        # The domain was `http://example.com`.
+
+      ##current_host
+
+          puts 'current_host = ' + current_host
+
+      ##status_code
+
+          visit('/')
+          status_code == 200 or raise
 
       ##body
 
@@ -401,13 +468,64 @@ class CapybaraTest
 
           # This is probably the best option when testing Javascript features.
 
-            # false because a bit slow
-            if false
+            if true
               Capybara.current_driver = :poltergeist
-              visit('/')
-              !has_css?('#js-click-target', text: 'clicked') or raise
-              find('#js-click').click
-              has_css?('#js-click-target', text: 'clicked') or raise
+
+              # js works:
+
+                visit('/')
+                !has_css?('#js-click-target', text: 'clicked') or raise
+                find('#js-click').click
+                has_css?('#js-click-target', text: 'clicked') or raise
+
+              ##execute_script
+
+                # Run Javascript on current page.
+
+                  visit('/')
+                  !has_css?('#js-click-target', text: 'clicked') or raise
+                  execute_script("document.getElementById('js-click-target').innerHTML = 'clicked'")
+                  has_css?('#js-click-target', text: 'clicked') or raise
+
+                # Javascript errors generate Ruby exceptions by default:
+
+                  begin
+                    execute_script('not_defined;')
+                  rescue
+                  else
+                    raise
+                  end
+
+                # Different Javascript errors generate different Ruby exceptions.
+                # TODO how do they map exactly?
+
+                # Errors can be avoided with an option.
+
+                ##window.replace
+
+                  # TODO can it work or not? <https://github.com/teampoltergeist/poltergeist/issues/220>
+
+                    visit('/')
+                    execute_script("window.location.replace('/2');")
+                    #current_path == '/2' or raise
+
+              ##evaluate_script
+
+                # Can also get return values from Javascript.
+                # TODO how Js -> Ruby conversion done exactly?
+
+                # Slower and more flexible. Only use if you need the return.
+
+                  evaluate_script('1') == 1 or raise
+
+              ##url encoding
+
+                # The behaviour is inconsistent with that of the RackTest driver!
+                # This double encodes the URL.
+
+                  visit('/2?a%5Bb%5D=c')
+                  URI.parse(current_url).request_uri == '/2?a%255Bb%255D=c' or raise
+
               Capybara.use_default_driver
             end
 

@@ -2,18 +2,19 @@
 
   ##task
 
-    # General task.
+    ##default
+
+      # The task called `default` is magic
+      # and will be called from `rake` without given tasks.
+
+        task(:default) do
+          require_relative 'main'
+        end
 
     # Single prerequisite:
 
-      task({:a => :b}) do
+      task({a: :b}) do
         puts 'a'
-      end
-
-    # Default task, called if you only do `rake` without arguments:
-
-      task :default do
-        puts 'default'
       end
 
     # No prerequisite:
@@ -32,9 +33,9 @@
 
       task(:circ => :circ)
 
-    # Multiple parallel prerequisites:
+    # Multiple prerequisites run in the given order:
 
-      task({:c => [:d, :e]}) do
+      task({de: [:d, :e]}) do
         puts 'c'
       end
 
@@ -46,9 +47,8 @@
         puts 'e'
       end
 
-    # Multiple parallel prerequisites and does nothing:
-
-      task({:de => [:d, :e]})
+    # Does not seem to do them in parallel out of the box.
+    # Possible 3rd party solution: <https://github.com/grosser/parallel_tests>
 
     # The following will be named `a_str`:
 
@@ -62,22 +62,26 @@
         puts 1
       end
 
-    # If there are multiple tasks with the same name, all are run:
+    ##redefine task
 
-      task(:multi) do
-        puts 'multiple_symbol'
-      end
+      # If there are multiple tasks with the same name, all are run:
 
-      task('multi') do
-        puts 'multiple_str'
-      end
+        task(:multi) do
+          puts 'multiple_symbol'
+        end
 
-    # Taks context:
+        task('multi') do
+          puts 'multiple_str'
+        end
 
-      task({:ctx => [:a, :b]}) do |t|
-        puts 'name = ' + t.name()
-        puts 'prerequisites = ' + t.prerequisites.to_s()
-      end
+    ##Context
+
+      # Callback variable passed to tasks.
+
+        task({:ctx => [:a, :b]}) do |t|
+          puts 'name = ' + t.name()
+          puts 'prerequisites = ' + t.prerequisites.to_s()
+        end
 
     # Call one task from another explicitly.
 
@@ -89,6 +93,19 @@
       task :after do
         puts 'after'
       end
+
+    ##Multiple ask invocations
+
+      # Tasks are invoked only once per `rake` call.
+
+        task once: [:once1, :once2]
+        task once1: :once3
+        task once2: :once3
+        task :once3 do
+          puts 'once3'
+        end
+
+      # Now running `rake once3` will only print `once3` once!
 
     ##namespace
 
@@ -147,7 +164,7 @@
         task(:t)
       end
 
-##rules
+##Rules
 
   ##sh
 
@@ -173,13 +190,23 @@
 
       directory('tmp')
 
-##command line args
+##Command line arguments
 
   # It is possible to pass command line arguments to tasks.
 
   #TODO
 
-##applications
+##Programmatic usage
+
+    task programmatic: :programmatic_dep do
+      puts 'programmatic'
+    end
+
+    task :programmatic_dep do
+      puts 'programmatic_dep'
+    end
+
+##Applications
 
     task :clean do
       require 'fileutils'

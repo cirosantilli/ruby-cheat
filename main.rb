@@ -87,10 +87,24 @@ require 'tempfile'
 
   ##Built-in variables
 
-    # TODO where are they documented??
+    # TODO Where are they documented??
 
-      puts("##__FILE__ = #{__FILE__}")
-      puts("##__LINE__ = #{__LINE__}")
+    ##FILE
+
+      # Relative path to file being run:
+
+        puts("##__FILE__ = #{__FILE__}")
+
+      # Sample outputs:
+
+        #./main.rb
+        #./ruby-cheat/main.rb
+
+    ##LINE
+
+      # Current line in the file:
+
+        puts("##__LINE__ = #{__LINE__}")
 
     ##RUBY_VERSION
 
@@ -184,26 +198,6 @@ require 'tempfile'
   # Included by the Object class.
 
   # It contains therefore many "built-in" methods such as print, puts, Array, etc.
-
-  ##eval
-
-    # Run string
-
-      a = 0
-      eval('a = 1')
-      a == 1 or raise
-
-  ##load
-
-    # Load a file. Local variables are not made visible in loader context,
-    # globals yes but this is controlled by an option.
-
-      a = 0
-      A = 0
-      load('load.rb')
-      # warning: already initialized constant.
-      a == 0 or raise
-      A == 1 or raise
 
 ##nil
 
@@ -1310,7 +1304,7 @@ EOF
     #end
     #a == 1 or raise
 
-##case
+##case ##switch
 
     case 0
     when 0
@@ -2984,9 +2978,13 @@ EOF
 
 ##instance_exec ##class_exec
 
-##require and friends
+  # TODO
+
+##require and family
 
   ##require
+
+    # Kernel.
 
     # ERROR: require does not look under current dir starting from 1.9.2.
     # Use `require_relative` for that.
@@ -3040,6 +3038,23 @@ EOF
 
       main3_f == 3 or raise
 
+  ##load
+
+    # Kernel.
+
+    # Very similar to require relative. Vs:
+    # <http://stackoverflow.com/questions/6051773/how-to-call-rake-tasks-that-are-defined-in-the-standard-rakefile-from-an-other-r>
+    # <http://stackoverflow.com/questions/804297/when-to-use-require-load-or-autoload-in-ruby>
+
+    # Vs require:
+
+      a = 0
+      A = 0
+      load('load.rb')
+      # warning: already initialized constant.
+      a == 0 or raise
+      A == 1 or raise
+
   ##autoload
 
     # Lazy module loading for constants.
@@ -3069,6 +3084,16 @@ EOF
       #else
         #raise
       #end
+
+  ##eval
+
+    # Kernel.
+
+    # Run string
+
+      a = 0
+      eval('a = 1')
+      a == 1 or raise
 
 ##Exception ##ensure
 

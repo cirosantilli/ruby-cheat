@@ -1,8 +1,9 @@
 # Rake
 
-Ruby make tool. Part of the Ruby stdlib.
+Ruby make tool. Part of the Ruby stdlib:
+<http://www.ruby-doc.org/stdlib-2.1.1/libdoc/rake/rdoc/>
 
 One major advantage of Rake is that Rakefiles are written in pure Ruby,
-much saner than makefile language.
+much saner than Makefile language + sh.
 
-Docs: <https://github.com/jimweirich/rake/blob/master/doc/rakefile.rdoc>
+[main.rb](main.rb) discusses how to call rake tasks programmatically.
