@@ -2,8 +2,17 @@
 
 require 'rack'
 
-App = Proc.new do |env|
-    ['200', {'Content-Type' => 'text/plain'}, ['A barebones rack app.']]
+app = Proc.new do |env|
+  [
+    200,
+    {
+      'Content-Type' => 'text/plain'
+    },
+    [
+      "PATH_INFO = #{env['PATH_INFO']}\n",
+      Time.now.to_s
+    ]
+  ]
 end
 
-Rack::Handler::WEBrick.run App
+Rack::Handler::WEBrick.run(app, Port: 4000)

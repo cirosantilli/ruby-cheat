@@ -1,4 +1,4 @@
-run Proc.new do |env|
+app = Proc.new do |env|
   [
     200,
     {
@@ -7,3 +7,5 @@ run Proc.new do |env|
     [Time.now.to_s]
   ]
 end
+
+run(app)

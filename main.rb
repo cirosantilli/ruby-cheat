@@ -56,22 +56,11 @@ require 'tempfile'
 
   # But:
 
-  # - method names can end in `?`, `!` or `=`. This has no syntatical value,
-  #   but each has a very well defined and followed convention.
+  # -   method names can end in `?`, `!` or `=`. This has no syntatical value,
+  #     but each has a very well defined and followed convention.
 
-  # - variable names that start with an Upper case letter are considered constants..
-  #   Attempting to modify them leads to a warning by default.
-
-      ii = 0
-      ii = 1
-
-    # Ok: definition
-
-      Ii = 0
-
-    # Warning: modifying constant
-
-      #Ii = 1
+  # -   variable names that start with an Upper case letter called constants
+  #     and behave specially in many ways.
 
   # - class names must start with an upper case character, or an error is generated.
 
@@ -84,6 +73,15 @@ require 'tempfile'
     not defined? not_yet_defined or raise
     a = 1
     defined? a or raise
+
+  # As a super dynamic language, variables are defined by `=`.
+
+  # Left side is defined first.
+
+    def f
+      (a = a) == nil or raise
+    end
+    f
 
   ##Built-in variables
 
@@ -152,11 +150,39 @@ require 'tempfile'
         puts('__FILE__ == $0')
       end
 
+##Constants
+
+  # Like regular variables, but start with upper case letter
+
+  # Constants are... somewaht constants:
+
+  # OK: definition:
+
+    Ii = 0
+
+  # Warning: modifying constant:
+
+    #Ii = 1
+
+  ##Constant lookup
+
+    # - Each entry in `Module.nesting1
+    # - Each entry in `Module.nesting.first.ancestors`
+    # - Each entry in `Object.ancestors` if `Module.nesting.first` is `nil` or a module.
+
+    # Tutorial: http://cirw.in/blog/constant-lookup.html
+
 ##Object
 
   # Base class of almost all types.
 
   # Includes the Kernel module, and inherits from `BaseObject`.
+
+  # The global scope executes inside Object:
+
+    self.class == Object or raise
+
+  # This is why Kernel methods are always included.
 
   ##inspect
 
@@ -170,6 +196,15 @@ require 'tempfile'
 
     # Same as Python `repr` relative to `str`.
 
+  ##tap
+
+    # Create a block, pass tapped object to it, and return the object in the end.
+
+    # Major applications: making your app harder to read:
+    # http://stackoverflow.com/questions/17493080/advantage-of-tap-method-in-ruby
+
+      1.tap { |x| 2 } == 1 or raise
+
 ##BaseObject
 
   # Base class of all classes.
@@ -180,18 +215,29 @@ require 'tempfile'
 
     # By default raises an exception, but can do anyhting.
 
-    # Don't ever use this to implement an interface (yes, I *have* seen it used):
-    # it is really hard to find out what is going on.
+    # Don't ever use this: it is really hard to find out
+    # where methods are being defined, hard to document, etc.
 
       class MethodMissing
         def method_missing(sym)
-          $sym = sym
+          sym
         end
       end
 
-      $sym = :''
-      MethodMissing.new.asdf
-      $sym == :asdf or raise
+      MethodMissing.new.asdf == :asdf or raise
+
+  ##const_missing
+
+    # `method_missing` for constants.
+
+    # Used by rails for on the fly constant lookup.
+
+      class ConstMissing
+        def self.const_missing(sym)
+          $sym = sym
+        end
+      end
+      ConstMissing::Asdf == :Asdf or raise
 
 ##Kernel
 
@@ -201,27 +247,51 @@ require 'tempfile'
 
 ##nil
 
+  # http://www.ruby-doc.org/core-2.1.3/NilClass.html
+
+    nil.class == NilClass or raise
+
+  # Does have some convertion metods to the triviel element of other classes:
+
     nil.to_i == 0 or raise
+    nil.to_s == '' or raise
 
   ##nil?
 
     nil.nil?       or raise
     not false.nil? or raise
 
-##int
+##Integer
 
-  # Underscore in integer literals are ignore. Use them for readability for long integers.
+  # http://www.ruby-doc.org/core-2.1.3/Integer.html
 
-    1_000_000 == 1000000 or raise
-    1_0_00_0_00 == 1000000 or raise
+  ##Underscores in integer literals
 
-  # Cannot start, end or have multiple consecutive underlines:
+    # Underscore in integer literals are ignored.
+    # Use them for readability for long integers.
 
-    #_1
-    #1_
-    #1__0
+      1_000_000 == 1000000 or raise
+      1_0_00_0_00 == 1000000 or raise
 
-##string
+    # Cannot start, end or have multiple consecutive underlines:
+
+      #_1
+      #1_
+      #1__0
+
+  # Immutable.
+
+##String
+
+  ##Strings are mutable
+
+    # Unlike Python, Ruby strings are mutable. Implicaiton: slow to compare for equality.
+
+    # Ruby has symbols which are immutable instead.
+
+      s = 'a'
+      s[0] = 'b'
+      s == 'b' or raise
 
   ##Literals
 
@@ -257,11 +327,11 @@ require 'tempfile'
           "\n" == %{\n}  or raise
           '\n' == %q{\n} or raise
 
-    ##multiline string literals
+    ##Multiline string literals
 
-      ##with newlines
+      ##With newlines
 
-        ##quotes or percent
+        ##Quotes or percent
 
             s = 'a
  b'
@@ -271,7 +341,7 @@ require 'tempfile'
  b}
             s == "a\n b" or raise
 
-        ##heredoc
+        ##Heredoc
 
           # Advantage over quotes: allows you to set a custom terminator
           # in case the content has quotes
@@ -308,7 +378,7 @@ a
 EOF
             a == ["a\n"] or raise
 
-  ##compare strings
+  ##Compare strings
 
       s1 = 'a'
       s2 = 'a'
@@ -325,11 +395,44 @@ EOF
 
       not s1.equal?(s2) or raise
 
-  # Concatenate:
+  ##Concatenate
 
-    'a' + 'b' == 'ab' or raise
+    # Create new:
 
-  ##format
+      a = 'ab'
+      'ab' + 'cd' == 'abcd' or raise
+      a == 'ab' or raise
+
+    # In place after:
+
+      a = 'ab'
+      b = a << 'cd'
+      b[0] = '0'
+      a == '0bcd' or raise
+
+    # Same but more verbose with `concat`.
+    # Note that the two methods are different for Array.
+
+      a = 'ab'
+      b = a.concat('cd')
+      b[0] = '0'
+      a == '0bcd' or raise
+
+    # In-place before:
+
+      a = 'ab'
+      b = a.prepend('cd')
+      b[0] = '0'
+      a == '0dab' or raise
+
+    # Same, less clean and more general with `insert(0`:
+
+      a = 'ab'
+      b = a.insert(0, 'cd')
+      b[0] = '0'
+      a == '0dab' or raise
+
+  ##Format
 
       s = 'bc'
       "a#{s}d" == 'abcd' or raise
@@ -549,13 +652,11 @@ EOF
       $` == 'a' or raise
       $' == 'd' or raise
 
-##symbols
+##Symbols
 
-  # Similar to strings but:
+  # Similar to strings but immutable.
   #
-  # - single instance
-  # - immutable
-  # - fast comparison by pointer
+  # Therefore faster to compare for equality.
   #
   # A common usage is as dict keys.
   #
@@ -594,7 +695,21 @@ EOF
 
   # Its cheat is currently not separated from that of Array TODO.
 
-##array
+##Array
+
+  ##Elements are references
+
+    # Like in Python, doing `=` always passes references.
+
+      l0 = [0]
+      l1 = l0
+      l1[0] = 1
+      l0 == [1] or raise
+
+      l0 = [0]
+      l1 = [l0]
+      l1[0][0] = 1
+      l0 == [1] or raise
 
   # Contains any number of objects of any type.
 
@@ -614,13 +729,15 @@ EOF
     Array.[](1, 2) == [1, 2] or raise
     Array[1, 2]    == [1, 2] or raise
 
-  ##percent array string literal ##%w
+  ##Percent array string literal ##%w
 
     # Literal for an array of strings without spaces,
     # not interpolated and interpolated:
 
       %w( ab cd \n ) == ['ab', 'cd', '\n'] or raise
       %W( ab cd \n ) == ['ab', 'cd', "\n"] or raise
+      %W( a#{'b'}c ) == ['abc'] or raise
+      %W( a#{'b c'}d ) == ['ab cd'] or raise
 
   # From range:
 
@@ -708,11 +825,14 @@ EOF
 
     ![0, 1].include?([0, 1]) or  raise
 
-  ##append inplace ##<<
+  ##Append ##<< ##push
 
-      a = [1]
-      a << 2 == [1, 2] or raise
-      a == [1, 2] or raise
+    # Single element in-place:
+
+      a = [0, 1]
+      b = a << 2
+      b[0] = -1
+      a == [-1, 1, 2] or raise
 
     # Returns reference to the array:
 
@@ -721,13 +841,50 @@ EOF
       b[0] = -1
       b == [-1, 2] or raise
 
-  ##concatenate
+    # Note how this differs from Strings, in which `<<` concatenates inplace! 
 
-    # Create new array.
+    # Same as push:
 
       a = [0, 1]
-      a + [2, 3] == (0..3).to_a or raise
+      b = a.push(2)
+      b[0] = -1
+      b == [-1, 1, 2] or raise
+
+  ##Concatenate
+
+    # Create new:
+
+      a = [0, 1]
+      (a + [2, 3]) == [0, 1, 2, 3] or raise
       a == [0, 1] or raise
+
+    # After in-place:
+
+      a = [0, 1]
+      b = a.concat([2, 3])
+      b[0] = -1
+      a == [-1, 1, 2, 3] or raise
+
+    # Same but less clean with `push(*`:
+
+      a = [0, 1]
+      b = a.push(*[2, 3])
+      b[0] = -1
+      a == [-1, 1, 2, 3] or raise
+
+    # Before in-place with `unshift(*`:
+
+      a = [0, 1]
+      b = a.unshift(*[2, 3])
+      b[0] = -1
+      a == [-1, 3, 0, 1] or raise
+
+    # Same but, less clean and more general with `insert(0, *`:
+
+      a = [0, 1]
+      b = a.insert(0, *[2, 3])
+      b[0] = -1
+      a == [-1, 3, 0, 1] or raise
 
   ##map method
 
@@ -870,7 +1027,7 @@ EOF
 
 ##hash ##map
 
-    m = {1=>'one', 2=>'two'}
+    m = { 1 => 'one', 2 => 'two' }
     m[1] == 'one' or raise
     m[2] == 'two' or raise
 
@@ -880,28 +1037,30 @@ EOF
       h[1]
     end
 
-    f(1=>'one', 2=>'two') == 'one' or raise
-    f 1=>'one', 2=>'two'  == 'one' or raise
+    f(1 => 'one', 2 => 'two') == 'one' or raise
+    f 1 => 'one', 2 => 'two'  == 'one' or raise
 
   # A new shorthand syntax was added in 1.9 for hashes with symbol keys
   # because this is a very common use case:
 
     if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('1.9')
-      m  = {:a=>1, :b=>2}
-      m2 = {a: 1, b: 2}
+      m  = { :a => 1, :b => 2 }
+      m2 = { a: 1, b: 2 }
       m == m2 or raise
     end
+
+  # bbatsov says you should use it whenever possible.
 
   # From array:
 
     a = [0, 1, 2]
-    Hash[a.collect{|v| [v, v*v]}] == {0=>0, 1=>1, 2=>4}
+    Hash[a.collect{|v| [v, v*v]}] == { 0 => 0, 1 => 1, 2 => 4 }
 
-  ##hash foreach iteration
+  ##Hash foreach iteration
 
     # Iteration order: random in 1.8, same as literal in 1.9.
 
-      m = {2=>'two', 1=>'one'}
+      m = { 2 => 'two', 1 => 'one'}
       keys = [2, 1]
       i = 0
       m.each do |k, v|
@@ -912,7 +1071,7 @@ EOF
         i += 1
       end
 
-  ##access missing key
+  ##Access missing key
 
     # Non existing keys simply return nil value, no exception:
 
@@ -946,9 +1105,9 @@ EOF
       h.delete(:a) == 0 or raise
       h == {b:1} or raise
 
-##operators
+##Operators
 
-  ##logic
+  ##Logic
 
     ##! vs not
 
@@ -1035,6 +1194,8 @@ EOF
 
     # For Object is the same as `==`, but certain stdlib classes override it,
     # notably: Regexp, Range and Proc to work well with `case` statements.
+
+    # Generally speaking, `===` menas a less strict match than `==`.
 
       input = ['a0', 3, 0]
       output = []
@@ -1263,24 +1424,24 @@ EOF
 
   # Only `false` and `nil` are falsy.
 
-  if false
-    raise
-  elsif true
-  else
-    raise
-  end
+    if false
+      raise
+    elsif true
+    else
+      raise
+    end
 
-  if nil
-    raise
-  else
-  end
+    if nil
+      raise
+    else
+    end
 
   # Even 0 is truthy:
 
-  if 0
-  else
-    raise
-  end
+    if 0
+    else
+      raise
+    end
 
   ##unless
 
@@ -1323,7 +1484,7 @@ EOF
 
   # Class:  http://www.ruby-doc.org/core-2.1.2/Method.html
 
-  ##return value
+  ##Return value
 
     # Like in Perl, is the value of the last statement.
 
@@ -1346,9 +1507,11 @@ EOF
 
       #1, 2
 
-  ##definition
+  ##Definition
 
     # Parenthesis are not mandatory.
+
+    # bbatsov says use them iff there are arguments.
 
       def f
         1
@@ -1380,6 +1543,125 @@ EOF
       end
       f == 3 or raise
 
+  ##Scope
+
+    # Local variables are not looked for outside methods
+    # (no closures like in Javascript):
+
+      a = 0
+      def f
+        begin
+          a
+        rescue NameError
+        else
+          raise
+        end
+      end
+      f
+
+    # Methods are different:
+
+      def g
+        0
+      end
+
+      def f
+        g
+      end
+
+      f == 0 or raise
+
+    # Multiple method defintions are overriden.
+
+      def f
+        0
+      end
+
+      f == 0 or raise
+
+      def f
+        1
+      end
+
+      f == 1 or raise
+
+    # If a variable has the same name as a method,
+    # the method becomes invisible unless you use self:
+
+      class MethodScope
+        def f
+          0
+        end
+
+        def g
+          f = 1
+          f == 1 or raise
+          self.f
+        end
+      end
+      MethodScope.new.g == 0 or raise
+
+    # Nested method defintions are not possible:
+    # http://stackoverflow.com/questions/4864191/is-it-possible-to-have-methods-inside-methods
+    # Nested definitions seem to work, but in fact they dynamically define the method for the class.
+    # This leads to method redefinition warnings.
+
+      class NestedMethod
+        def f
+          def g
+            0
+          end
+          g
+        end
+      end
+      begin
+        NestedMethod.new.g == 0 or raise
+      rescue NoMethodError
+      else
+        raise
+      end
+      NestedMethod.new.f == 0 or raise
+      NestedMethod.new.g == 0 or raise
+
+    ##Global variable
+
+      # Is looked for outside of methods.
+
+        $i = 1
+        i = 2
+        $i == 1 or raise
+
+        $i = 1
+        def f
+          $i
+        end
+        f == 1 or raise
+
+        $i = 1
+        def f
+          $i = 2
+        end
+        f
+        $i == 2 or raise
+
+        i = 1
+        def f
+          $i = 2
+        end
+        f
+        i == 1 or raise
+
+        i = 1
+        def f
+          i
+        end
+        begin
+          f
+        rescue NameError
+        else
+          raise
+        end
+
   ##call
 
     # Parenthesis are optional if no ambiguity is created.
@@ -1406,7 +1688,7 @@ EOF
       #f{a: 1} == {a: 1} or raise
       f({a: 1}) == {a: 1} or raise
 
-  ##parenthesis omission ambiguity
+  ##Parenthesis omission ambiguity
 
     # Calls without parenthesis could lead to potential ambiguities.
 
@@ -1431,12 +1713,12 @@ EOF
         0
       end
 
-    # Gets the return value:
+    # Get the return value:
 
       a = f
       a == 0 or raise
 
-    # Gets the function itself:
+    # Get the function itself:
 
       a = 1
       a = method(:f)
@@ -1506,7 +1788,7 @@ EOF
       o.int += 1
       o.int == 4 or raise
 
-  ##variable length argument list ##nargs ##varargs
+  ##Variable length argument list ##nargs ##varargs
 
     # `*args` becomes an `Array` object.
 
@@ -1536,22 +1818,57 @@ EOF
 
   ##Splat ##Unpack argument list
 
-    # Similar to Python argument lists unpacking.
+    # Can be used both on definition and call.
 
-    # The asterisk transforms an array into function argument list.
+    # On defintion, means variable number of arguments:
 
-      def sum(i, *is)
-        total = i
-        is.each do |i|
-          total += i
-        end
-        total
+      def f(i, *is)
+        i == 0 or raise
+        is == [1, 2] or raise
       end
-      sum(*[1, 2, 3]) == 6 or raise
+      f(0, 1, 2)
 
-    # Can be in the middle:
+    # On call transforms array into arguments:
 
-      sum(1, *[2, 3], 4) == 10 or raise
+      def f(i, j)
+        i == 0 or raise
+        j == 1 or raise
+      end
+      f(*[0, 1])
+
+    # On call can be used in the middle and as many times as you want:
+
+      def f(i, j, k, l, m, n)
+        i == 0 or raise
+        j == 1 or raise
+        k == 2 or raise
+        l == 3 or raise
+        m == 4 or raise
+        n == 5 or raise
+      end
+      f(0, *[1, 2], 3, *[4, 5])
+
+    # Both call and def splats can be combined:
+
+      def f(i, *is)
+        i == 0 or raise
+        is == [1, 2] or raise
+      end
+      f(*[0, 1, 2])
+
+    ##Naked asterisk
+
+      # You can also use the asterisk alone as a parameter.
+
+      # It eats up inputs just like a named asterisk,
+      # but the only way to access it is with `super` forwarding.
+
+        def f(i, *)
+          i
+        end
+
+        f(1) == 1 or raise
+        f(1, 2, 3) == 1 or raise
 
   ##Default values ##Optional arguments
 
@@ -1625,43 +1942,6 @@ EOF
       f(a:1, b:2)   == 3 or raise
       f           == 0 or raise
 
-  ##Global variable
-
-      $i = 1
-      i = 2
-      $i == 1 or raise
-
-      $i = 1
-      def f
-        $i
-      end
-      f == 1 or raise
-
-      $i = 1
-      def f
-        $i = 2
-      end
-      f
-      $i == 2 or raise
-
-      i = 1
-      def f
-        $i = 2
-      end
-      f
-      i == 1 or raise
-
-      i = 1
-      def f
-        i
-      end
-      begin
-        f
-      rescue NameError
-      else
-        raise
-      end
-
   ##Overload
 
     # Function overload does not exist.
@@ -1685,24 +1965,24 @@ EOF
     # - enforces correct number of arguments
     # - an explicit return statement does not stop caller (unlike Procs).
 
-      f = lambda {|x| x + 1 }
-      f.call(1) == 2 or raise
+      l = lambda {|x| x + 1 }
+      l.call(1) == 2 or raise
 
     if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('1.9')
       ##-> ##stabby lambda
 
         # Exact same as lambda, but new notation.
 
-          f = ->(x) { x + 1 }
-          f.call(1) == 2 or raise
+          l = ->(x) { x + 1 }
+          l.call(1) == 2 or raise
 
         # Parenthesis is optional:
 
-          f = -> x  { x + 1 }
-          f.call(1) == 2 or raise
+          l = -> x { x + 1 }
+          l.call(1) == 2 or raise
 
-          f = ->x  { x + 1 }
-          f.call(1) == 2 or raise
+          l = -> x { x + 1 }
+          l.call(1) == 2 or raise
     end
 
   ##__method__ ##__callee__
@@ -1720,6 +2000,19 @@ EOF
         __callee__  == :callee_var or raise
       end
       callee_var
+
+  ##Method class
+
+    # http://www.ruby-doc.org/core-2.1.2/Method.html
+
+    ##source_location
+
+      # Get the location on the source for a method definition.
+
+        def f
+        end
+
+        puts 'source_location = ' + method(:f).source_location.to_s
 
 ##alias
 
@@ -1778,13 +2071,16 @@ EOF
       end
       C.new.class == C or raise
 
-    # Classes implicitly inherit from the Object class:
+  ##Class class
 
-      class ClassNoBase
-      end
-      p ClassNoBase.class
-      # TODO
-      #ClassNoBase.class == Object or raise
+    # Classes are members of the Class class.
+
+      class ClassNoBase; end
+      ClassNoBase.class == Class or raise
+
+    # Class inherits from Module
+
+      Class.superclass == Module or raise
 
   # Define a class:
 
@@ -1918,24 +2214,36 @@ EOF
         a.both = -1
         a.both == -1 or raise
 
-  # It is possible to extend a class by adding new methods to an existing class
-  # after its initial declaration.
+  ##Redefine a class
 
-    class AddMethod
-      def m0
-        0
+    # It is possible to extend a class by adding new methods to an existing class
+    # after its initial declaration.
+
+      class AddMethod
+        def m0
+          0
+        end
       end
-    end
 
-    class AddMethod
-      def m1
-        1
+      class AddMethod
+        def m1
+          1
+        end
       end
-    end
 
-    c = AddMethod.new
-    c.m0 == 0 or raise
-    c.m1 == 1 or raise
+      c = AddMethod.new
+      c.m0 == 0 or raise
+      c.m1 == 1 or raise
+
+    # This make monkey patching extremly easy to do:
+
+      class Object
+        def monkey_patch
+          0
+        end
+      end
+
+      Object.new.monkey_patch == 0 or raise
 
   # It is possible to add methods to specific instances of a class.
   # This is exactly what happens when creating static class methods.
@@ -2216,6 +2524,8 @@ EOF
 
     ##superclass
 
+      # Get parent class.
+
         class Base
           def base_method
             return 1
@@ -2320,9 +2630,15 @@ EOF
       end
       Static.static == 0 or raise
 
-##module
+##Module
 
-  # Modules are namespaces.
+  # Modules work like namespaces.
+
+  # Modules are classes themselves:
+
+    module ModuleIsClass
+    end
+    ModuleIsClass.class == Module or raise
 
   # Modules are similar to classes execpt that:
 
@@ -2504,6 +2820,32 @@ EOF
       end
       IncludeExtendClass.new.f1 == 1 or raise
       IncludeExtendClass.f2     == 2 or raise
+
+  ##nesting
+
+    # Metadata o which module we are in.
+
+      $a = nil
+      module M1
+        module M2
+          module M3
+            $a = Module.nesting
+          end
+        end
+      end
+      $a == [M1::M2::M3, M1::M2, M1] or raise
+
+  module ModuleTest
+    extend self
+
+    def f
+      @a ||= 0
+      @a += 1
+    end
+  end
+
+  ModuleTest.f == 1 or raise
+  ModuleTest.f == 2 or raise
 
 ##closure
 
@@ -2831,7 +3173,7 @@ EOF
     f(p, p)
     i == 2 or raise
 
-  ##return statement inside procs
+  ##Return statement inside procs
 
     #http://stackoverflow.com/questions/17800629/unexpected-return-localjumperror
 
@@ -2902,7 +3244,7 @@ EOF
 
       puts "$0 = #{$0}"
 
-  ##command line arguments ##ARGV
+  ##Command line arguments ##ARGV
 
       puts('ARGV = ' + ARGV.join(', '))
 
@@ -2915,7 +3257,7 @@ EOF
 
         #input = ARGF.read
 
-  ##environment variables ##ENV
+  ##Environment variables ##ENV
 
     # Environment variables.
 
@@ -3095,7 +3437,7 @@ EOF
       eval('a = 1')
       a == 1 or raise
 
-##Exception ##ensure
+##Exception ##begin ##ensure
 
   # Basic example:
 
@@ -3117,6 +3459,16 @@ EOF
       begin
         raise('msg')
       rescue RuntimeError => ex
+        ex.message == 'msg' or raise
+      else
+        raise
+      end
+
+    # Same syntax for empty exception type:
+
+      begin
+        raise('msg')
+      rescue => ex
         ex.message == 'msg' or raise
       else
         raise
@@ -3217,7 +3569,19 @@ EOF
 
     # Alias to `raise`.
 
-  ##Built-in exception classes
+  ##Empty begin end
+
+    # Some people use that to replace parenthesis because they think it looks better.
+
+    # TODO Behaves exactly like parenthesis?
+    # <http://stackoverflow.com/questions/13279217/are-there-unintended-consequences-of-rubys-begin-end-without-rescue-use>
+
+      a = begin
+            0
+          end
+      a == 0 or raise
+
+  ##Built-in exceptions
 
     # Used throughout the standard library and built-in classes.
 
@@ -3243,6 +3607,31 @@ EOF
 
       # Parent class: `StandardError`. Therefore exceptions raised with an empty `raise`
       # can be caught by an empty `rescue`.
+
+    ##SystemExit
+
+      # Raise by `System.exit`.
+
+      # Indicates that the code wants to terminate the program.
+
+      # Can be caught like any other exception, but magic for:
+      #
+      # - Ruby, since no stack trace is printed for it
+      # - IRB, since it exists if that exception reaches the top level
+
+    ##SystemStackError
+
+      # Stack level too deep, often infinite recursion.
+
+        begin
+          def stack_overflow
+            stack_overflow
+          end
+          stack_overflow
+        rescue SystemStackError
+        else
+          raise
+        end
 
 ##throw ##catch
 
@@ -3400,20 +3789,92 @@ EOF
 
       #Dir.rmdir('.')
 
-  ##getwd ##pwd
+  ##pwd
 
-      puts 'pwd = ' + Dir.pwd
+  ##getwd
+
+    # Same.
+
+      puts 'pwd =   ' + Dir.pwd
       puts 'getwd = ' + Dir.getwd
 
-##process
+##Process
 
-  ##id of current process ##$$
+  ##exit
 
+    # Exit program with given status.
+
+    # Same as `System.exit`.
+
+    # Inherited by Kernel.
+
+    # Does not exit immediately, but rather raises `SystemExit`.
+    # This exception can be caught like any other.
+
+      begin
+        Process.exit(0)
+      rescue SystemExit
+      else
+        raise
+      end
+
+##External Processes
+
+  # Good article with all options: <http://blog.bigbinary.com/2012/10/18/backtick-system-exec-in-ruby.html>
+
+  # TD;DR:
+
+  # - use `system *W()` whenever you can because it does not use shell expansion and is rather sane.
+  # - if you need quick stdout and stderr, use ``. bbatsov says use `` instead of %X().
+  # - use popen if you need full control.
+
+  ##PID ##ID of current process ##$$
+
+      puts "Process.pid = #{Process.pid}"
       puts "$$ = #{$$}"
+
+  ##system
+
+    # Kernel.
+
+    # Replaces current process, thus ends the program when execution ends.
+
+    # Call types:
+
+    # Expand:
+
+      #system('echo *')
+
+    # Don't use a shell:
+
+      #system(*%W(echo *))
+
+    # In particular:
+
+    # - don't expand stuff like `*`
+    # - don't interpret stuff like || and &&
+
+    # Return value: True on exit statut 0, False on not-zero, `nil` on problems (signals?).
+
+    # STDIN, STDOUT and STDERR are bound to the current terminal, so you cannot get them out.
+
+      system("ruby -e 'puts \"#system\"'")
+
+  ##spawn
+
+    # Similar to system but does not wait for child to terminate.
+
+    # Parent must explicitly wait for it to terminate with `wait`:
+    # otherwise zombie process are accumulated:
+    # children are kept around so that the parent can read their exit status.
+
+  ##fork
+
+    # Analogous to POSIX fork. Not implemented on Windows.
 
   ##backticks
 
-    # Short to write, but the most flexible method.
+    # Short to write, but not the most flexible method.
 
       o = `ruby -e 'print 1'`
       o == '1' or raise
@@ -3429,7 +3890,17 @@ EOF
       o = `ruby -e 'puts "a\n\n"'`
       o == "a\n\n" or raise
 
+    ##exec
+
+      # Kernel.
+
+      # Replaces current process, thus ends the program when execution ends.
+
     ##$?
+
+      # Contains an object with information about the last called and waited external command.
+
+      # Set by ``.
 
       # Sets the `$?` variable.
 
@@ -3444,12 +3915,6 @@ EOF
 
       o = %x(ruby -e 'print 1')
       o == '1' or raise
-
-  ##system
-
-    # Binds STDIN, STDOUT and STDERR to current terminal.
-
-      system("ruby -e 'puts \"#system\"'")
 
   ##popen3
 

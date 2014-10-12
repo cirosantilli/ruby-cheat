@@ -1,27 +1,31 @@
 # Rack
 
-Standard Ruby SGI interface.
+Rack is two things:
 
-Implementing gem: <https://github.com/rack/rack>
+-   the de-facto standard Ruby SGI interface.
 
-Protocol specification: <https://github.com/rack/rack/blob/master/SPEC>
+    It has several implementations, including a WEBrick (stdlib), adapter on the Gem
+    Apache modules, Nginx modules, Phusion, Litespeed, Mongrel, etc.
 
-TODO what are Phusion Passenger, Litespeed, Mongrel, Thin, Ebb, WEBrick etc.
-and why are they needed with Rack?
+    Used by all major Ruby web frameworks: Rails, Sinatra, etc.
 
-Main Gem that implements the Rack standard: <https://github.com/rack/rack>
+    The advantage of the standard is obvious: programs you write can then be with in any server.
 
-## Usage
+-   a Gem which implements lot's of convenience functionality for Rack.
 
-One liner sanity check:
+    For instance, the Gem adapts Rack IO to WEBrick, the stdlib server.
 
-    ruby -Ilib lib/rack/lobster.rb
+Both the gem and the protocol are maintained at: <https://github.com/rack/rack>
 
 ### rackup
 
 ### config.ru
 
-Configuration file for `rackup`:
+`rackup` is a command provided by the `rack` gem to conveniently start a Rack application.
+
+`config.ru` is the configuration file for `rackup`:
+
+Try it out with:
 
     bundle exec rackup &
     firefox localhost:9292
@@ -29,7 +33,3 @@ Configuration file for `rackup`:
 This is called a *rackup file*.
 
 This is a convenient way to start a server from the command line.
-
-## WEBrick
-
-Part of the stdlib: <http://ruby-doc.org/stdlib-2.1.2/libdoc/webrick/rdoc/WEBrick.html>

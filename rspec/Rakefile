@@ -1,8 +1,5 @@
 task :default do
-  # Same as running `rspec` with command given options.
-  require 'rspec'
-  #RSpec::Core::Runner.run(['main.rb'])
-  #RSpec::Core::Runner.run(['spec'])
+  require_relative 'main'
 
   # TODO Run all files that end in `_spec.rb` under `./spec`.
   #begin

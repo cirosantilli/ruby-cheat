@@ -1,0 +1,4 @@
+task :default do
+  # system is even used on the spinach-rails gem...
+  system('spinach')
+end

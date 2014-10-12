@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-ruby '2.1.1'
+#ruby '2.1.1'
 
 gem 'rake', '10.3.2'
 gem 'erubis', '2.7.0'

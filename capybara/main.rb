@@ -29,6 +29,9 @@ class CapybaraTest
       # Class that contains most of the most useful methods!
       # <http://rubydoc.info/github/jnicklas/capybara/master/Capybara/Session>
 
+      # Delegates some methods to:
+      # <http://rubydoc.info/github/jnicklas/capybara/master/Capybara/Node/Matchers>
+
       ##page
 
       ##curent_session
@@ -233,6 +236,8 @@ class CapybaraTest
         ##has methods
 
           # Each one has a `has_no` which is the negation.
+          # Most, if not all are under:
+          # <http://rubydoc.info/github/jnicklas/capybara/master/Capybara/Node/Matchers>
 
             has_selector?('div') or raise
             has_no_selector?('asdf') or raise
@@ -253,10 +258,25 @@ class CapybaraTest
 
           ##has_content
 
-            # Stripts tags. Can also consider visibility with extra options.
+            # Strips tags. Can also consider visibility with extra options.
 
-              has_content?('has_content') or raise
-              !has_content?('<div>') or raise
+              within('#has-content-tags') do
+                has_content?('abc') or raise
+                has_content?('ab') or raise
+                !has_content?('ac') or raise
+                !has_content?('A') or raise
+                !has_content?('<i>') or raise
+              end
+
+            # Normalizes multiple whitespace to a single space:
+
+              within('#has-content-spaces') do
+                has_content?('a b c') or raise
+              end
+
+          ##has_text
+
+            # Same as `has_content`.
 
         ##xpath
 
@@ -339,7 +359,7 @@ class CapybaraTest
 
         ##click_link
 
-          # Finds either of:
+          # Find `a` elements by either of:
 
           # - case sensitive innerHTML substring
           # - id
@@ -370,6 +390,10 @@ class CapybaraTest
             else
               raise
             end
+
+        ##click_button
+
+          # Similar to `click_link`, but finds `button` and `input type="submit"` buttons.
 
         ##check
 
@@ -466,10 +490,37 @@ class CapybaraTest
           # PhantomJS is also webkit based, but lower level and more optimized to the web app testing task:
           # <http://stackoverflow.com/questions/23951381/how-do-poltergeist-phantomjs-and-capybara-webkit-differ>
 
-          # This is probably the best option when testing Javascript features.
+          # This is probably the best option when testing Javascript features,
+          # so Js features will be cheated under it.
 
             if true
               Capybara.current_driver = :poltergeist
+
+              ##default_wait_time
+
+                # When using a Js driver, every finder method keeps trying to find
+                # for a given ammount of time.
+
+                # This configures that timeout. Default: 2 seconds.
+
+                  #Capybara.default_wait_time = 10
+
+                ##Only Capybara finders get rerun
+
+                  # Tests that use Capybara finders will wait:
+                  # if you use stuff like `page.html.include?` Capybara will not wait.
+
+                  # TODO can anything be done in that case?
+
+                  ##wait_until
+
+                    # There used to be `wait_until` but it was removed:
+                    # http://www.elabs.se/blog/53-why-wait_until-was-removed-from-capybara
+
+                  ##synchronize
+
+                    # There is now `synchronize`, which gets re-run if a descentand of ElementNotFound gets raised:
+                    # http://rubydoc.info/github/jnicklas/capybara/Capybara/Node/Base#synchronize-instance_method
 
               # js works:
 
@@ -505,8 +556,8 @@ class CapybaraTest
 
                   # TODO can it work or not? <https://github.com/teampoltergeist/poltergeist/issues/220>
 
-                    visit('/')
-                    execute_script("window.location.replace('/2');")
+                    #visit('/')
+                    #execute_script("window.location.replace('/2');")
                     #current_path == '/2' or raise
 
               ##evaluate_script

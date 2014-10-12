@@ -9,6 +9,24 @@ see [this](https://github.com/cirosantilli/rails-cheat).
 
 All runnable Ruby files are meant to be run with `bundle exec ruby <filename>`.
 
+Most important files:
+
+-   [main.rb](main.rb): will contain every testable thing that:
+
+    -   is in the Language Core or Stdlib
+
+    -   does not slow running down considerably:
+
+        - user input
+        - network
+        - profiling
+
+    -   does not produce large ammounts of output
+
+-   [capybara/](capybara/)
+
+-   [bundler/](bundler/)
+
 ## Implementations
 
 Ruby has a few major implementations.
@@ -138,6 +156,18 @@ The most notable ones are:
     Uses RuboCop on the backend.
 
 -   ruby-lint: <https://github.com/YorickPeterse/ruby-lint>
+
+-   <https://github.com/troessner/reek>
+
+-   <https://github.com/seattlerb/flog>
+
+-   <https://github.com/metricfu/metric_fu/>
+
+    Seems to integrate many other tools into a single output.
+
+-   <https://github.com/roodi/roodi>
+
+    Focused on object structure.
 
 Duplication finders:
 

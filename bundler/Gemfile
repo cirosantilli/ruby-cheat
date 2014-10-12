@@ -16,7 +16,7 @@ source 'https://rubygems.org'
   #
   # It seems that it is not possible to use modifiers such as `>=`
   # to specify the ruby version: one specific version must be specified.
-  ruby '2.1.1'
+  #ruby '2.1.1'
 
   # Require a specific Ruby implementation (engine):
   #ruby '1.9.3', :engine => 'jruby', :engine_version => '1.6.7'
