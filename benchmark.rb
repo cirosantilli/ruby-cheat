@@ -6,8 +6,7 @@ N = 10000
 
 ##bm
 
-  # Must be at least as large as the longest description:
-
+    # Must be at least as large as the longest description.
     first_col_width = 16
 
     Benchmark.bm(first_col_width) do |benchmark|
@@ -31,6 +30,11 @@ N = 10000
         N.times { a.push(*[0, 1]) }
       end
 
+      benchmark.report('concatenate') do
+        a = []
+        N.times { a.concat([0, 1]) }
+      end
+
       benchmark.report('+= "ab"') do
         a = ''
         N.times { a += 'ab' }
@@ -41,3 +45,9 @@ N = 10000
         N.times { a << 'ab' }
       end
     end
+
+##bmbm
+
+  # Run benchmark twice to minimize garbage collection instability effects.
+
+  # Always use it.

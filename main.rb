@@ -1509,6 +1509,8 @@ EOF
 
   ##Definition
 
+  ##def
+
     # Parenthesis are not mandatory.
 
     # bbatsov says use them iff there are arguments.
@@ -1523,7 +1525,7 @@ EOF
       end
       f == 1 or raise
 
-      def f i
+      def f(i)
         i
       end
       f(1) == 1 or raise
@@ -1533,19 +1535,23 @@ EOF
       end
       f(1) == 1 or raise
 
-      def f i, j
+      def f(i, j)
         i + j
       end
       f(1, 1) == 2 or raise
 
-      def f i = 1, j = 2
+      def f(i = 1, j = 2)
         i + j
       end
       f == 3 or raise
 
+    # The definition returns a symbol:
+
+      def f; end == :f or raise
+
   ##Scope
 
-    # Local variables are not looked for outside methods
+    # Local variables are not looked for outside methods:
     # (no closures like in Javascript):
 
       a = 0
@@ -2847,18 +2853,7 @@ EOF
   ModuleTest.f == 1 or raise
   ModuleTest.f == 2 or raise
 
-##closure
-
-  # Ruby has 4 closure types:
-
-  # - blocks
-  # - Procs
-  # - lambdas
-  # - Methods
-
 ##block ##yield ##iterator ##do
-
-  # Implement closures: functions + data.
 
   # yield calls the bock that has been passed to the function:
 
@@ -2891,25 +2886,33 @@ EOF
     i == 2 or raise
 
   # There seems to not be any semantical difference between the two of them,
-  # except precedence and different usage convention: <http://stackoverflow.com/questions/2122380/using-do-block-vs-brackets>
+  # except precedence and different usage convention:
+  # <http://stackoverflow.com/questions/2122380/using-do-block-vs-brackets>
 
   ##Chaining syntax
 
-    # Chain directly. Parenthesis mandatory on call if there are other parameters.
+    # Although ugly, it is possible to call a function
+    # on the return of a function that takes a block.
 
-      def f(x)
-        x + yield
+      def f
+        yield
       end
 
-      f(1) {1}.to_s       == '2' or raise
-      f(1) do 1; end.to_s == '2' or raise
+      f { 1 }.to_s     == '1' or raise
+      f do 1; end.to_s == '1' or raise
 
-  ##scope
+  # Pass arguments to yield:
 
-    # Note how the local variable `i` is modified  inside `f` by `yield`.
-    # This is because the block is not just a function: it is a *closure*,
-    # so it also "contains" variables. This could not be achieved by passing
-    # a simple function as argument:
+    def f(i, j)
+      yield(i, j)
+    end
+    f(2, 3) { |i, j| i * j } == 6 or raise
+
+  ##Scope
+
+    # Unlike methods, blocks are closuers.
+
+    # Therefore they can modify variables from the scope where they are defined.
 
     # Works because block:
 
@@ -2923,14 +2926,8 @@ EOF
       end
       i == 1 or raise
 
-      i = 0
-      f do
-        i += 1
-      end
-      i == 1 or raise
-
-    # However, to be part of the closure the variable has to be defined outside,
-    # or else it is a local variable. Very confusing.
+    # As any closure, the variable has to be defined outside,
+    # or else it is considired a local variable:
 
       f do
         not_yet_defined = 1
@@ -2951,26 +2948,6 @@ EOF
         i += 1
       end
       i == 0 or raise
-
-  # Pass arguments:
-
-    $i = 0
-    def f(i, j)
-      yield(i, j)
-      yield(i, j)
-    end
-    f(1, 2) { |i, j| $i += i * j }
-    $i == 4 or raise
-
-  # Get return values:
-
-    $i = 0
-    def f
-      $i += yield
-      $i += yield
-    end
-    f { 1 }
-    $i == 2 or raise
 
   ##block context
 
@@ -3034,7 +3011,7 @@ EOF
         #self_method      #=> undefined
       end
 
-  ##optional block
+  ##Optional block
 
     # If `yield` is used in a function, it is mandatory to pass a block to the function,
     # or this yields a runtime error.
@@ -3043,68 +3020,110 @@ EOF
         yield
       end
 
-    # Doing:
+    # The block is mandatory:
 
-      #f
-
-    # Would give:
-
-      #`f': no block given (yield) (LocalJumpError)
-
-    # But the following is fine:
-
-      def f
-        true or yield
+      begin
+        f
+      rescue LocalJumpError
+      else
+        raise
       end
 
-      f
+    # The block may depend on a parameter:
 
-    # It is possible to detect if a block was passed or not:
-
-      def f
-        if block_given?
-          return yield
+      def f(has_block = false)
+        if has_block
+          yield
         else
-          return 0
+          0
         end
       end
 
-      f()     == 0 or raise
+      f             == 0 or raise
+      f(true) { 1 } == 1 or raise
+
+    ##block_given?
+
+      # Generally the best option.
+
+        def f
+          if block_given?
+            return yield
+          else
+            return 0
+          end
+        end
+
+        f       == 0 or raise
+        f { 1 } == 1 or raise
+
+  ##Forward a block
+
+  ##Convert a proc to a block
+
+    # Does not forward by default:
+
+      def f
+        g
+      end
+
+      def g
+        yield
+      end
+
+      begin
+        f { 1 }
+      rescue LocalJumpError
+      else
+        raise
+      end
+
+    # TODO: what is the best way to forward and still allow both `f` and g` to receive a block as in:
+
+      #f { 1 } == 1 or raise
+      #g { 1 } == 1 or raise
+
+    # The best I could find was:
+
+      def f(&block)
+        g { block.call }
+      end
+
+      def g(&block)
+        block.call
+      end
+
+      f { 1 } == 1 or raise
+      g { 1 } == 1 or raise
+
+    # but this is ugly because it creates a new dummy block.
+
+  ##Ampersand argument syntax ##&block
+
+    # If the last argument starts with ampersand,
+    # captures the block into a Proc so you can explicitly access it.
+
+    # Any argument name is fine, but `block` is the conventional one.
+
+      def f(&block)
+        # The block is a proc.
+        block.class == Proc or raise
+        block.call
+      end
+
       f { 1 } == 1 or raise
 
-  ##ampersand syntax
+    # `yield` still works:
 
-      def f(&code)
-        code.call == 2 or raise
+      def f(&block)
+        block.call
+        yield
       end
 
-      i = 0
-      f do
-        i += 1
-        2
-      end
-      i == 1 or raise
+      f { 1 } == 1 or raise
 
-      i = 0
-      f {
-        i += 1
-        2
-      }
-      i == 1 or raise
+    # The ampersand argument parameter must be the last one.
 
-    # With arguments:
-
-      def f(i, j, &code)
-        i == 1
-        code.call == 2 or raise
-        j == 3
-      end
-      i = 0
-      f(1, 3) do
-        2
-      end
-
-    # The ampersand can only be the last function argument.
     # This excludes functions with multiple ampersand parameters.
 
     # `i` is the last:
@@ -3115,7 +3134,11 @@ EOF
 
       #def f(&code, &code2) end
 
-    ##ampersand block
+    ##Application: TODO
+
+    ##Ampersand symbol syntax ##&:
+
+      # Shorthand for creating a block that calls a method of it's input.
 
         class AmpersandBlock
           attr_accessor :i
@@ -3123,6 +3146,8 @@ EOF
             @i = i
           end
         end
+
+      # TODO use own class instead of Array
 
         a = [0, 1, 2]
         a2 = a.map { |x| AmpersandBlock.new(x) }

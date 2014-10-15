@@ -9,7 +9,7 @@ Feature: Feature One
     Then f
 
   Scenario: fail
-    Then Fail
+    Then fail
 
   Scenario: pending
     Then pending test
@@ -19,3 +19,10 @@ Feature: Feature One
 
   Scenario: explicit fail
     Then explicit fail
+
+  # TODO
+  #Scenario: multi
+            #line
+            #scenario
+            #name
+    #Then fail

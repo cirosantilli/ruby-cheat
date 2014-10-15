@@ -18,6 +18,9 @@ class Spinach::Features::FeatureOne < Spinach::FeatureSteps
     pending('msg')
   end
 
+  step 'pass' do
+  end
+
   step 'fail' do
     if DO_FAIL
       assert(false)

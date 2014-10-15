@@ -21,7 +21,7 @@ Most important files:
         - network
         - profiling
 
-    -   does not produce large ammounts of output
+    -   does not produce large amounts of output
 
 -   [capybara/](capybara/)
 
@@ -81,6 +81,16 @@ Advantages of Python:
         so `!` which has lower precedence is more general
         (you can always add precedence with parenthesis, but not remove it)
     - `raise` vs `fail`
+    - `Proc` vs methods: why have both? Complicates everything.
+
+    If you are the poetic type, this comparison between programming languages
+    and cars puts it beautifully <http://users.cms.caltech.edu/~mvanier/hacking/rants/cars.html>:
+
+    > Ruby is a car that was formed when the Perl, Python and Smalltalk cars were involved in a three-way collision.
+    > A Japanese mechanic found the pieces and put together a car which many drivers think is better than the sum of
+    > the parts. Other drivers, however, grumble that a lot of the controls of the Ruby car have been duplicated or
+    > triplicated, with some of the duplicate controls doing slightly different things in odd circumstances,
+    > making the car harder to drive than it ought to be. A redesign is rumored to be in the works.
 
 -   requires of requires are also required.
 
@@ -181,17 +191,22 @@ Interactive REPL interface: `irb`.
 
 Repeat last command: `<up>`
 
+### Persistent history
+
 Enable persistent history:
+
 <http://stackoverflow.com/questions/10465251/can-i-get-the-ruby-on-rails-console-to-remember-my-command-history-umm-better>:
 
-    echo 'require "irb/ext/save-history"
-    IRB.conf[:SAVE_HISTORY] = 200
-    IRB.conf[:HISTORY_FILE] = "#{ENV['HOME']}/.irb-history"
-    ' > ~/.irbrc
+<http://stackoverflow.com/questions/2065923/irb-history-not-working>
+
+    printf "require 'irb/ext/save-history'
+    IRB.conf[:SAVE_HISTORY] = 1000
+    IRB.conf[:HISTORY_FILE] = \"#{ENV['HOME']}/.irb_history\"
+    " >> ~/.irbrc
 
 Note that RVM has a default `.irbrc` that does that for you automatically.
 
-### Reading the prompt
+### Understanding the prompt
 
     irb(main):001:0>
     ^^^ ^^^^  ^^^ ^^

@@ -5,8 +5,28 @@ require 'tempfile'
 require 'capybara'
 require 'capybara/poltergeist'
 
+# false because very slow
+TEST_SELENIUM = false
+
 Capybara.app = Proc.new do |env|
   ['200', {'Content-Type' => 'text/html'}, [File.read('index.html')]]
+end
+
+def poltergeist(&block)
+  current_driver(:poltergeist, block)
+end
+
+def selenium(&block)
+  if TEST_SELENIUM
+    current_driver(:selenium, block)
+  end
+end
+
+def current_driver(driver, block)
+  Capybara.current_driver = driver
+  visit('/')
+  block.call
+  Capybara.use_default_driver
 end
 
 class CapybaraTest
@@ -132,13 +152,15 @@ class CapybaraTest
           #save_and_open_page(path)
           #File.unlink(path)
 
-      ##querying
+      ##title
 
-        ##title
+        # Content of the head title element:
 
-          # Content of the head title element:
+          title == 'Capybara Cheat Title' or raise
 
-            title == 'Capybara Cheat Title' or raise
+      ##Finders
+
+        # <http://www.rubydoc.info/github/jnicklas/capybara/master/Capybara/Node/Finders>
 
         ##all
 
@@ -173,7 +195,7 @@ class CapybaraTest
 
             # Does not see HTML tags, but does see text inside inner elements.
 
-               all('#all-text', text: 'ab<i>cd</i>ef').empty? or raise
+                all('#all-text', text: 'ab<i>cd</i>ef').empty? or raise
                !all('#all-text', text: 'cd').empty? or raise
 
             # There is not driver portable way of doing that:
@@ -183,33 +205,57 @@ class CapybaraTest
             # Text node elements separated by HTML tags are seen as contiguous.
 
                !all('#all-text', text: 'abcdef').empty? or raise
-               all('#all-text', text: 'abef').empty? or raise
+                all('#all-text', text: 'abef').empty? or raise
 
             # The start and end of regexp matches corresponds to the cncatented string:
 
                !all('#all-text', text: /^a/).empty? or raise
-               all('#all-text', text: /^b/).empty? or raise
-               all('#all-text', text: /^e/).empty? or raise
+                all('#all-text', text: /^b/).empty? or raise
+                all('#all-text', text: /^e/).empty? or raise
 
             # Trailing and heading whitespaces are removed:
 
                !all('#all-text-whitespace', text: /^a$/).empty? or raise
-               all('#all-text-whitespace', text: ' a ').empty? or raise
+                all('#all-text-whitespace', text: ' a ').empty? or raise
 
           ##visible
 
-            # Not very portable. If true, only visible are found.
+            # If true, only visible are found.
 
             # If false, **both** visible and invisible
+
+            # Default: false.
 
             # Invisible means: TODO `visible:false`? `display:none`?
             # Seems to depend on Driver: on RackTest only uses `display:none` set on parent node.
 
-            # Default: false.
+            # Not very driver-portable.
+
+              !all('#visible-empty',                 visible: true).empty? or raise
+              !all('#visible-empty-background',      visible: true).empty? or raise
+              !all('#visible-empty-background-same', visible: true).empty? or raise
+              !all('#visible-visibility-hidden',     visible: true).empty? or raise
+               all('#visible-display-none',          visible: true).empty? or raise
+
+              poltergeist do
+                !all('#visible-empty',                 visible: true).empty? or raise
+                !all('#visible-empty-background',      visible: true).empty? or raise
+                !all('#visible-empty-background-same', visible: true).empty? or raise
+                !all('#visible-visibility-hidden',     visible: true).empty? or raise
+                 all('#visible-display-none',          visible: true).empty? or raise
+              end
+
+              selenium do
+                 all('#visible-empty',                 visible: true).empty? or raise
+                !all('#visible-empty-background',      visible: true).empty? or raise
+                !all('#visible-empty-background-same', visible: true).empty? or raise
+                 all('#visible-visibility-hidden',     visible: true).empty? or raise
+                 all('#visible-display-none',          visible: true).empty? or raise
+              end
 
         ##find
 
-          # `all()[0]`. Raise if none or multiple matches.
+          # `all(...)[0]`. Raise if none or multiple matches.
 
         ##find_link
 
@@ -218,6 +264,50 @@ class CapybaraTest
         ##find_by_id
 
           # `find("##{id}")
+
+        ##find_field
+
+          # `find(:field, ...)`
+
+          # Finds any form control.
+
+          ##disabled
+
+            # Option enabled by the `:field` kind.
+
+              !all(:field, 'disabled-false',    disabled: false).empty? or raise
+               all(:field, 'disabled-false',    disabled: true ).empty? or raise
+               all(:field, 'disabled-true',     disabled: false).empty? or raise
+              !all(:field, 'disabled-true',     disabled: true ).empty? or raise
+               all(:field, 'disabled-js-true',  disabled: true ).empty? or raise
+               all(:field, 'disabled-js-false', disabled: false).empty? or raise
+
+              poltergeist do
+                !all(:field, 'disabled-false',    disabled: false).empty? or raise
+                 all(:field, 'disabled-false',    disabled: true ).empty? or raise
+                 all(:field, 'disabled-true',     disabled: false).empty? or raise
+                !all(:field, 'disabled-true',     disabled: true ).empty? or raise
+                !all(:field, 'disabled-js-true',  disabled: true ).empty? or raise
+                !all(:field, 'disabled-js-false', disabled: false).empty? or raise
+              end
+
+          ##with
+
+            # Find any type of input field: input text, textarea, checkboxes, etc.
+
+            # `with`: the current (possibly Js modified) `.value` of the field.
+
+              !all(:field, 'with',    with: 'a').empty? or raise
+               all(:field, 'with',    with: 'b').empty? or raise
+               all(:field, 'with-js', with: 'a').empty? or raise
+               all(:field, 'with-js', with: 'b').empty? or raise
+
+              poltergeist do
+                !all(:field, 'with',    with: 'a').empty? or raise
+                 all(:field, 'with',    with: 'b').empty? or raise
+                 all(:field, 'with-js', with: 'a').empty? or raise
+                !all(:field, 'with-js', with: 'b').empty? or raise
+              end
 
         ##within
 
@@ -232,51 +322,6 @@ class CapybaraTest
           # For single inner searches, use multiple finds instead:
 
             #find('#id').find(:css, '.class')
-
-        ##has methods
-
-          # Each one has a `has_no` which is the negation.
-          # Most, if not all are under:
-          # <http://rubydoc.info/github/jnicklas/capybara/master/Capybara/Node/Matchers>
-
-            has_selector?('div') or raise
-            has_no_selector?('asdf') or raise
-
-          # Kind of useless since it golfs worse and is less readable than `!has`.
-
-          ##has_selector?
-
-            # !all(...).empty?
-
-          ##has_xpath?
-
-            # has_selector(:xpath, ...)
-
-          ##has_css?
-
-            # has_selector(:css, ...)
-
-          ##has_content
-
-            # Strips tags. Can also consider visibility with extra options.
-
-              within('#has-content-tags') do
-                has_content?('abc') or raise
-                has_content?('ab') or raise
-                !has_content?('ac') or raise
-                !has_content?('A') or raise
-                !has_content?('<i>') or raise
-              end
-
-            # Normalizes multiple whitespace to a single space:
-
-              within('#has-content-spaces') do
-                has_content?('a b c') or raise
-              end
-
-          ##has_text
-
-            # Same as `has_content`.
 
         ##xpath
 
@@ -350,6 +395,57 @@ class CapybaraTest
               #//*[contains(concat(' ', normalize-space(@class), ' '), ' atag ')]
 
             # Or just use CSS.
+
+      ##Matchers
+
+      ##has methods
+
+        # Useful for unit tests assertions with RSpec `expect`.
+
+        # Convenience only as all are thin wrappers on top of finders.
+
+          has_selector?('div') or raise
+          has_no_selector?('asdf') or raise
+
+        # Kind of useless since it golfs worse and is less readable than `!has`.
+
+        ##has_selector?
+
+          # !all(...).empty?
+
+        ##has_xpath?
+
+          # has_selector(:xpath, ...)
+
+        ##has_css?
+
+          # has_selector(:css, ...)
+
+        ##has_content
+
+          # Strips tags. Can also consider visibility with extra options.
+
+            within('#has-content-tags') do
+              has_content?('abc') or raise
+              has_content?('ab') or raise
+              !has_content?('ac') or raise
+              !has_content?('A') or raise
+              !has_content?('<i>') or raise
+            end
+
+          # Normalizes multiple whitespace to a single space:
+
+            within('#has-content-spaces') do
+              has_content?('a b c') or raise
+            end
+
+        ##has_text
+
+          # Same as `has_content`.
+
+        ##has_field
+
+          # See `find_field`.
 
       ##User interaction
 
@@ -467,9 +563,9 @@ class CapybaraTest
 
           # Most reproductible and slow since it actually opens browser windows (not headless).
 
-            # false because very slow
-            if false
+            if TEST_SELENIUM
               Capybara.current_driver = :selenium
+              # You MUST visit pages after changing the driver.
               visit('/')
               !has_css?('#js-click-target', text: 'clicked') or raise
               find('#js-click').click
@@ -522,7 +618,7 @@ class CapybaraTest
                     # There is now `synchronize`, which gets re-run if a descentand of ElementNotFound gets raised:
                     # http://rubydoc.info/github/jnicklas/capybara/Capybara/Node/Base#synchronize-instance_method
 
-              # js works:
+              # Js works:
 
                 visit('/')
                 !has_css?('#js-click-target', text: 'clicked') or raise
@@ -531,7 +627,7 @@ class CapybaraTest
 
               ##execute_script
 
-                # Run Javascript on current page.
+                # Run given Javascript on current page.
 
                   visit('/')
                   !has_css?('#js-click-target', text: 'clicked') or raise
@@ -563,13 +659,14 @@ class CapybaraTest
               ##evaluate_script
 
                 # Can also get return values from Javascript.
-                # TODO how Js -> Ruby conversion done exactly?
+
+                # TODO how is Js -> Ruby conversion done exactly?
 
                 # Slower and more flexible. Only use if you need the return.
 
                   evaluate_script('1') == 1 or raise
 
-              ##url encoding
+              ##URL encoding
 
                 # The behaviour is inconsistent with that of the RackTest driver!
                 # This double encodes the URL.

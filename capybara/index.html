@@ -12,6 +12,35 @@
   <div id="all-text">ab<i>cd</i>ef</div>
   <div id="all-text-whitespace"> a </div>
 
+  <h2>#visible</h2>
+
+    <div id="visible-empty"                                                                   ></div>
+    <div id="visible-empty-background"      style="width:10px; height:10px; background:black;"></div>
+    <div id="visible-empty-background-same" style="width:10px; height:10px; background:white;"></div>
+    <div id="visible-visibility-hidden"     style="visibility:hidden;"                        >a</div>
+    <div id="visible-display-none"          style="display:none;"                             >a</div>
+
+  <h2>#field</h2>
+
+    <h3>#disabled</h3>
+
+      <input type="text" id="disabled-false"            ></div>
+      <input type="text" id="disabled-true"     disabled></div>
+      <input type="text" id="disabled-js-true"          ></div>
+      <input type="text" id="disabled-js-false" disabled></div>
+      <script>
+        document.getElementById('disabled-js-true').disabled = true
+        document.getElementById('disabled-js-false').disabled = false
+      </script>
+
+    <h3>#with</h3>
+
+      <input type="text" id="with"    value="a"></div>
+      <input type="text" id="with-js"          ></div>
+      <script>
+        document.getElementById('with-js').value = 'b'
+      </script>
+
 <h2>#has_content</h2>
 
   <div id="has-content-tags">a<i>b</i>c</div>

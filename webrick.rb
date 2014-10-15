@@ -14,6 +14,13 @@ port = 4000
 #
 # Not directly Rack compatible, but the rack gem has an adapter which allows
 # to use it as a rack compatible interface.
+#
+# You can run WEBrick conveniently from the command line with:
+#
+#     ruby -run -e httpd . -p 9090
+#
+# This works because `-r` loads the `un` convenience library which offers the `httpd` function
+# <http://ruby-doc.org/stdlib-2.1.3/libdoc/un/rdoc/index.html>
 
 case '##automatic'
 #case '##interactive'
@@ -31,8 +38,29 @@ when '##automatic'
   body = 'thebody'
   status = 200
 
-  server = WEBrick::HTTPServer.new(Port: port,
-    AccessLog: [], Logger: WEBrick::Log.new('/dev/null'))
+  ##HTTPServer
+
+    # This command will already bind to the port:
+
+      server = WEBrick::HTTPServer.new(Port: port, BindAddress: '0.0.0.0',
+        AccessLog: [], Logger: WEBrick::Log.new('/dev/null'))
+
+    # Options:
+
+    # -  Make WEBrick silent:
+    #    <http://stackoverflow.com/questions/6387087/disabling-echo-from-webrick>
+    #
+    #        AccessLog: [], Logger: WEBrick::Log.new('/dev/null')
+    #
+    # -  If you don't set a bind port, then the server will listen both on
+    #    '0.0.0.0' (IPv4) and ':::0' (IPv6). It will only raise if both are occupied.
+    #
+    # The best way get a list of all options is to look at the source:
+    # docs are currently incomplete.
+
+  # WEBrick binds to both TCP and TCP6 ports by default.
+  # If both of them are occupied, then it raises.
+  # If only one of them is occupied, it does not raise.
 
   ## Stop the server
 
@@ -52,15 +80,6 @@ when '##automatic'
     ##mount_proc
 
     ##GCI
-
-      # This will already bind to the port.
-
-      # Options:
-
-      # -  Make WEBrick silent:
-      #    <http://stackoverflow.com/questions/6387087/disabling-echo-from-webrick>
-      #
-      #        AccessLog: [], Logger: WEBrick::Log.new('/dev/null')
     server.mount_proc('/') do |req, res|
       res.status = status
       res.body = body

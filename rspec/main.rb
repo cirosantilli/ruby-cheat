@@ -44,8 +44,9 @@ RSpec.describe 'desc0' do
 
   ##describe
 
-    # Can impact tests:
+    # The argument can impact tests
 
+    # - `subject` is implicitly set as the argument, and `is_expected` referenes it
     # - with rspec-rails controller tests, the controller is taken from describe
 
     # Any object can be passed to describe, and the class being tested is often passed.
@@ -177,18 +178,64 @@ RSpec.describe 'desc0' do
     # Define certain variables before each test.
     # They are not persistent across tests.
 
+    # The result is memoized after the first run, so that:
+    #
+    # - if a database query is run to create the object, it is only run once
+    # - if the object is not used in a test it costs nothing
+
     # Vs instance variables: <http://stackoverflow.com/questions/5359558/when-to-use-rspec-let>
 
-      let(:a) { 0 }
+      let(:a) { [] }
 
       it 'eq 0' do
-        expect(a).to eq(0)
-        a = 1
+        expect(a).to eq([])
+
+        a << 0
+        expect(a).to eq([0])
       end
 
-      it 'eq 1' do
-        expect(a).to eq(0)
+      describe 'memoize' do
+        let(:time) { Time.now }
+
+        it 'is memoized' do
+          last_time = time
+          # If the block were run every time,
+          # there would be some time ellapsed between the last statement.
+          expect(last_time).to eq(time)
+        end
       end
+  end
+
+  describe '##subject' do
+    it 'is taken from describe by default' do
+      expect(subject).to eq('##subject')
+    end
+
+    describe 'set' do
+      it 'can be explicitly set for the entire block' do
+        is_expected.to eq(0)
+      end
+
+      subject { 0 }
+    end
+
+    describe 'set works with block and let' do
+      let(:a) { [] }
+      subject { a.length }
+
+      it 'really does' do
+        is_expected.to eq(0)
+        a << 1
+        # TODO why?
+        is_expected.to eq(0)
+      end
+    end
+
+    describe '##is_expected' do
+      it 'wraps an expect to around subject' do
+        is_expected.to eq('##is_expected')
+      end
+    end
   end
 
   ##Real usage example
