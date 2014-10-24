@@ -105,12 +105,14 @@ RSpec.describe 'desc0' do
       end
   end
 
-  it '##expect ##to' do
+  describe '##expect ##to' do
 
     # Replaces should on 2.11. Should be used instead of should.
-    # Less insane than `should`, but still insaner than Minitest asserts.
 
-    ##eq
+    # Less insane than `should` since no monkey patch,
+    # but still insaner than Minitest asserts.
+
+    it '##eq' do
 
       # Calls `==`.
 
@@ -124,16 +126,30 @@ RSpec.describe 'desc0' do
         if do_fail
           expect(1).to == 1
         end
+    end
 
-    ##define a matcher
+    it '##Automatically defined matchers' do
 
-        RSpec::Matchers.define :be_eq do |expected|
+      # More insanity in the name of readability.
+
+      # Matchers of the form `have_x` are automatically converted to `.has_x?` methods:
+
+        expect(Testee.new).to have_x
+
+      # Matchers of the form `be_x` are converted to `x?`:
+
+        expect(Testee.new).to be_x
+    end
+
+    it '##Create a matcher' do
+        RSpec::Matchers.define :new_eq do |expected|
           match do |actual|
             actual == expected
           end
         end
 
-        expect(1).to be_eq(1)
+        expect(1).to new_eq(1)
+    end
   end
 
   describe '##before ##after' do

@@ -22,15 +22,26 @@
 
   <h2>#field</h2>
 
+    <h3>#checked</h3>
+
+      <input type="checkbox" id="checked-false"           ></div>
+      <input type="checkbox" id="checked-true"     checked></div>
+      <input type="checkbox" id="checked-js-false" checked></div>
+      <input type="checkbox" id="checked-js-true"         ></div>
+      <script>
+        document.getElementById('checked-js-false').checked = false
+        document.getElementById('checked-js-true').checked = true
+      </script>
+
     <h3>#disabled</h3>
 
       <input type="text" id="disabled-false"            ></div>
       <input type="text" id="disabled-true"     disabled></div>
-      <input type="text" id="disabled-js-true"          ></div>
       <input type="text" id="disabled-js-false" disabled></div>
+      <input type="text" id="disabled-js-true"          ></div>
       <script>
-        document.getElementById('disabled-js-true').disabled = true
         document.getElementById('disabled-js-false').disabled = false
+        document.getElementById('disabled-js-true').disabled = true
       </script>
 
     <h3>#with</h3>

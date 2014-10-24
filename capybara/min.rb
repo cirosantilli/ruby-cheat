@@ -6,13 +6,14 @@ require 'capybara'
 require 'capybara/poltergeist'
 
 Capybara.app = Proc.new do |env|
-  ['200', {'Content-Type' => 'text/html'}, [File.read('index.html')]]
+  ['200', {'Content-Type' => 'text/html'}, [File.read('index-min.html')]]
 end
 
 class CapybaraTest
   include Capybara::DSL
 
   def run
+    #Capybara.current_driver = :poltergeist
   end
 end
 

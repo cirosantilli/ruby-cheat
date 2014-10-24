@@ -44,6 +44,14 @@ N = 10000
         a = []
         N.times { a << 'ab' }
       end
+
+      benchmark.report('match(/b$/)') do
+        N.times { 'ab'.match(/b$/) }
+      end
+
+      benchmark.report('end_with?(b)') do
+        N.times { 'ab'.end_with?('b') }
+      end
     end
 
 ##bmbm

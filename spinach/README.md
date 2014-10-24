@@ -34,3 +34,11 @@ The class name *must* match the feature name converted to camel case.
 Run all tests under `/feature`:
 
     spinach
+
+Run a single test file:
+
+    spinach features/path/file.feature
+
+Run a single test at given line:
+
+    spinach features/path/file.feature:123

@@ -1,6 +1,20 @@
 #!/usr/bin/env ruby
 
+require 'stringio'
 require 'tempfile'
+
+##Helpers
+
+    def capture_stdout
+      begin
+        old_stdout = $stdout
+        $stdout = StringIO.new('', 'w')
+        yield
+        $stdout.string
+      ensure
+        $stdout = old_stdout
+      end
+    end
 
 ##Comments
 
@@ -87,11 +101,12 @@ require 'tempfile'
 
     # TODO Where are they documented??
 
-    ##FILE
+    ##__FILE__
 
-      # Relative path to file being run:
+      # Relative String path to file being run:
 
         puts("##__FILE__ = #{__FILE__}")
+        __FILE__.class == String or raise
 
       # Sample outputs:
 
@@ -204,6 +219,48 @@ require 'tempfile'
     # http://stackoverflow.com/questions/17493080/advantage-of-tap-method-in-ruby
 
       1.tap { |x| 2 } == 1 or raise
+
+  ##clone
+
+  ##dup
+
+    # In general:
+
+    # - `clone` copies everything, including "internal" flags like frozen
+    # - `dup` copies only the objet's main data
+
+    # Example with freeze:
+
+      s = 'a'.freeze
+
+      sdup = s.dup
+      sdup[0] = 'b'
+
+      sclone = s.clone
+      begin
+        sclone[0] = 'b'
+      rescue RuntimeError
+      else
+        raise
+      end
+
+  ##freeze
+
+  ##frozen?
+
+    # Prevent object modification. Raise if attempted.
+    # Impossible to undo.
+
+      s = 'a'
+      !s.frozen? or raise
+      s.freeze
+      s.frozen? or raise
+      begin
+        s[0] = 'b'
+      rescue RuntimeError
+      else
+        raise
+      end
 
 ##BaseObject
 
@@ -327,6 +384,56 @@ require 'tempfile'
           "\n" == %{\n}  or raise
           '\n' == %q{\n} or raise
 
+  ##Format
+
+  ##Interpolation
+
+      s = 'bc'
+      "a#{s}d" == 'abcd' or raise
+
+    # Only works for double quoted strings:
+
+      s = 'a'
+      '#{s}' == '#{s}' or raise
+
+    # Arbitrary delimier:
+
+      s = 'a'
+      '#{s}' == '#{s}' or raise
+
+    # Escape:
+
+      s = 'a'
+      "\#{s}" == '#{s}' or raise
+
+    # Brackets are required:
+
+      s = 'a'
+      "#s" == '#s' or raise
+
+    # Brackets not required for instance and class variables:
+
+      class C
+        @@i = 0
+        def initialize
+          @i = 1
+        end
+        def method
+          "#@@i#@i"
+        end
+      end
+      c = C.new
+      c.method == "01" or raise
+
+    # Anything can be formatted (TODO what does it have to implement?)
+
+      "#{1}"          == '1' or raise
+      "#{[1, 2, 3]}"  == '[1, 2, 3]' or raise
+      "#{1..3}"       == '1..3' or raise
+      h = {1=>'one', 2=>'two'}
+      "#{h}"          == '{1=>"one", 2=>"two"}' or raise
+
+
     ##Multiline string literals
 
       ##With newlines
@@ -346,10 +453,10 @@ require 'tempfile'
           # Advantage over quotes: allows you to set a custom terminator
           # in case the content has quotes
 
-            s = <<EOF
+            s = <<EOS
  a
   b
-EOF
+EOS
             s == " a\n  b\n" or raise
 
             s = <<ANY_STRING_OK
@@ -363,20 +470,32 @@ b
             MINUS_MEANS_TERMINATOR_CAN_HAVE_SPACE_BEFORE
             s == "a\nb\n" or raise
 
-          # The EOF can be anywhere in the line, not necessarily at the end:
+          # The EOS can be anywhere in the line, not necessarily at the end:
 
-            s = <<EOF == "a\nb\n" or raise
+            s = <<EOS == "a\nb\n" or raise
 a
 b
-EOF
+EOS
 
           # Very ugly, but allows you to place the string literal anywhere.
           # E.g.: heredoc string inside array:
 
-            a = [<<EOF]
+            a = [<<EOS]
 a
-EOF
+EOS
             a == ["a\n"] or raise
+
+          # HEREDOC interpolates by default:
+
+            <<EOS == "a\nb\n" or raise
+a\nb
+EOS
+
+          # HEREDOC without interpolation:
+
+            <<'EOS' == "a\\nb\n" or raise
+a\nb
+EOS
 
   ##Compare strings
 
@@ -432,53 +551,6 @@ EOF
       b[0] = '0'
       a == '0dab' or raise
 
-  ##Format
-
-      s = 'bc'
-      "a#{s}d" == 'abcd' or raise
-
-    # Only works for double quoted strings:
-
-      s = 'a'
-      '#{s}' == '#' + '{s}' or raise
-
-    # Arbitrary delimier:
-
-      s = 'a'
-      '#{s}' == '#' + '{s}' or raise
-
-    # Escape:
-
-      s = 'a'
-      "\#{s}" == '#' + '{s}' or raise
-
-    # Brackets required:
-
-      s = 'a'
-      "#s" == '#s' or raise
-
-    # Brackets not required for instance and class variables:
-
-      class C
-        @@i = 0
-        def initialize
-          @i = 1
-        end
-        def method
-          "#@@i#@i"
-        end
-      end
-      c = C.new
-      c.method == "01" or raise
-
-    # Anything can be formatted (TODO what does it have to implement?)
-
-      "#{1}"          == '1' or raise
-      "#{[1, 2, 3]}"  == '[1, 2, 3]' or raise
-      "#{1..3}"       == '1..3' or raise
-      h = {1=>'one', 2=>'two'}
-      "#{h}"          == '{1=>"one", 2=>"two"}' or raise
-
   ##match
 
     # Regexp match:
@@ -527,7 +599,9 @@ EOF
 
   ##gsub
 
-    # Regex find and replace multiple non overlapping times:
+    # Regex find and replace multiple non overlapping times.
+
+    # `g` is for Global: there is just `sub` for replacing only the first match.
 
       'aa'.gsub(/./, 'b') == 'bb' or raise
 
@@ -553,15 +627,43 @@ EOF
 
       'a0-b1-c2'.scan(/(\w)(\d)/) == [['a', '0'], ['b', '1'], ['c', '2']] or raise
 
-  ##start_with?
+  ##start and end
 
-      'abc'.start_with?('ab') or raise
+    # Convenience methods.
+
+    # Some of those could also be achieved with `match` or `sub` and regexes,
+    # but these special case functions are faster and more readable,
+    # so just always use them.
+
+    ##start_with?
+
+        'abcd'.start_with?('ab') or raise
+
+    ##end_with?
+
+        'abcd'.end_with?('cd') or raise
+
+    ##chomp
+
+      # Remove suffix from string if present.
+
+        'abcd'.chomp('cd') == 'ab'   or raise
+        'abcd'.chomp('c')  == 'abcd' or raise
+
+    ##chop
+
+      # Remove single character or `\n\r` from end of string.
+
+    ##chomp from start
+
+      # Not directly possible:
+      # <http://stackoverflow.com/questions/9238785/in-ruby-whats-the-easiest-way-to-chomp-at-the-start-of-a-string-instead-of-t>
 
   ##encoding
 
 ##regexp
 
-  ##literal
+  ##Literal
 
     # Like in Perl, regexps have literals in Ruby.
 
@@ -591,12 +693,12 @@ EOF
 
       # -   `^` and `$` start / end of string or after / before newline
       #
-      # -   `\A`, `\Z` and `\z`: like `^` and `$` but not around newlines
+      # -   `\A`, `\Z` and `\z`: like `^` and `$` but not around newlines.
       #
-      #     Use them instead for input validation as they are more strict:
-      #     `me@example.com\n<script>dangerous_stuff;</script>`
+      #     You almost always want to use `A`, `Z` and z because
+      #     `^` and `$` are an invitation to injection attacks.
       #
-      #     `\z` matche includes the newline, `\Z` excludes it.
+      #     `\z` match includes the newline, `\Z` excludes it.
 
   ##=~
 
@@ -675,13 +777,19 @@ EOF
 
     (:'a$b').to_s == 'a$b' or raise
 
-  # Symbols can also end in `=`, `?` or `!` without quotes like methods:
+  # Symbols can also end in `=`, `?` or `!` without quotes like methods,
+  # or start with `@` or `@@`:
 
     (:a?).to_s == 'a?' or raise
     (:a!).to_s == 'a!' or raise
     (:a=).to_s == 'a=' or raise
+    (:@a).to_s == '@a' or raise
+    (:@@a).to_s == '@@a' or raise
+    (:@@a).to_s == '@@a' or raise
 
   # This is useful together with the `send` method.
+
+  # Only valid identifiers can be used without quotes. E.g., `@@@a` won't work.
 
 ##list
 
@@ -806,11 +914,13 @@ EOF
     (0..4).to_a[2, 2] == (2..3).to_a or raise
     (0..4).to_a[2, 0] == [] or raise
 
-  # Unpack:
+  ##Unpack Array
 
-    i, j = [0, 1]
-    i == 0 or raise
-    j == 1 or raise
+      k = -1
+      i, j, k = [0, 1]
+      i == 0 or raise
+      j == 1 or raise
+      k == nil or raise
 
   # Array to string:
 
@@ -2329,6 +2439,8 @@ EOF
           @@class_i2 == 2 or raise
           class_method2 == 2 or raise
 
+          self == ClassMethod or raise
+
           begin
             private_klass_method
           rescue NameError
@@ -2576,18 +2688,14 @@ EOF
 
       #puts ReflectionDerived.instance_methods
 
-    ##respond_to
-
-      # TODO
-
-        ReflectionDerived.new.respond_to?(:m) or raise
-
     # Exclude inherited methods:
 
       puts 'instance_methods = '
       puts ReflectionDerived.instance_methods(false).sort
 
     ##send
+
+    ##public_send
 
       # Inherited from object.
 
@@ -2603,9 +2711,40 @@ EOF
           def add=
             1
           end
+
+          private
+
+          def private
+            2
+          end
         end
 
+        Send.new.send(:add, 1, 2) == 3 or raise
         Send.new.send(:add=) == 1 or raise
+
+      # `send` ignores public or privateness:
+
+        Send.new.send(:private) == 2 or raise
+
+      # For this reason you should use `public_send` whenever possible:
+
+        begin
+          Send.new.public_send(:private)
+        rescue NoMethodError
+        else
+          raise
+        end
+
+      # A possible use case for `send` then is to test private methods on specs.
+
+    ##respond_to?
+
+      # Check if object has a method.
+
+      # private and protected are excluded by default,
+      # can be included with `respond_to(:s, true)`.
+
+        ReflectionDerived.new.respond_to?(:m) or raise
 
   ##<< for classes
 
@@ -3292,11 +3431,13 @@ EOF
         #puts("ENV[#{k}] = #{v}")
       end
 
+    # ENV keys are frozen strings so you cannot modify them inplace.
+
 ##instance_eval ##class_eval
 
   # Useful for DSL like interfaces.
 
-  # instance_eval: Evaluates inside the same scope as instances of the class.
+  # instance_eval: Evaluates inside the same scope as instance methods of the class.
 
     class InstanceEval
       def initialize
@@ -3732,20 +3873,61 @@ EOF
       STDERR.puts('stderr')
       $stderr.puts('stderr')
 
+    ##Redirect stdout to string
+
+      # <http://stackoverflow.com/questions/14987362/how-can-i-capture-stdout-to-a-string>
+
+        require 'stringio'
+        old_stdout = $stdout
+        $stdout = StringIO.new
+        printf 'a'
+        $stdout.string == 'a' or raise
+        printf 'b'
+        $stdout.string == 'ab' or raise
+        $stdout = old_stdout
+
 ##File ##file IO
+
+  # <http://www.ruby-doc.org/core-2.1.2/File.html>
 
   # File and pathname operations.
 
-  # Generate a temporaty file path for tests:
+  # Generate a temporaty file path for the tests:
 
-    file = Tempfile.new('abc')
+    file = Tempfile.new('ruby-cheat')
     path = file.path
     file.unlink
 
+  # File objects must exist at creation:
+
+    begin
+      File.new('not-file')
+    rescue Errno::ENOENT
+    else
+      raise
+    end
+
+  ##path
+
+  ##to_path
+
+    # File objects are not strings:
+
+      File.new(__FILE__) != __FILE__ or raise
+
+    # Convert:
+
+      File.new(__FILE__).path    == __FILE__ or raise
+      File.new(__FILE__).to_path == __FILE__ or raise
+
   ##Read and write entire file at once
 
-    # `File.read(path)` and `File.write(path)`, inherited from `IO`.
+    # `File.read(path)` and `File.write(path, string, opts)`, inherited from `IO`.
     # Convenience methods over `File.new.read` + `file.close`.
+
+    # Append to file:
+
+      #File.write(path, string, {mode: 'a'})
 
   ##Path operations
 
@@ -3756,6 +3938,16 @@ EOF
     ##basename
 
         File.basename(File.join('a', 'b', 'c')) == 'c' or raise
+
+    ##dirname
+
+        File.dirname(File.join('a', 'b', 'c')) == File.join('a', 'b') or raise
+
+    ##split
+
+      # basename + dirname at once:
+
+        File.split(File.join('a', 'b', 'c')) == [File.join('a', 'b'), 'c'] or raise
 
     ##unlink ##delete
 
@@ -3847,10 +4039,10 @@ EOF
 
   # Good article with all options: <http://blog.bigbinary.com/2012/10/18/backtick-system-exec-in-ruby.html>
 
-  # TD;DR:
+  # TD;LR:
 
   # - use `system *W()` whenever you can because it does not use shell expansion and is rather sane.
-  # - if you need quick stdout and stderr, use ``. bbatsov says use `` instead of %X().
+  # - if you need stdout and stderr as a string, use ``. bbatsov says use `` instead of the equivalent %X().
   # - use popen if you need full control.
 
   ##PID ##ID of current process ##$$
@@ -3866,24 +4058,27 @@ EOF
 
     # Call types:
 
-    # Expand:
+    # Single string: uses shell and expands:
 
       #system('echo *')
 
-    # Don't use a shell:
+    # Not portable because of the shell, so never use this.
 
-      #system(*%W(echo *))
+    # Multiple arguments: don't use shell, pass arguments directly to executable:
+
+      #system(*%w(echo *))
 
     # In particular:
 
     # - don't expand stuff like `*`
-    # - don't interpret stuff like || and &&
+    # - don't interpret stuff like `||` and `&&`
 
-    # Return value: True on exit statut 0, False on not-zero, `nil` on problems (signals?).
+    # Return value: True on exit status 0, False on not-zero, `nil` on problems (signals?).
 
-    # STDIN, STDOUT and STDERR are bound to the current terminal, so you cannot get them out.
+    # STDIN, STDOUT and STDERR are bound to the current terminal,
+    # so it is not convenient to get them to strings.
 
-      system("ruby -e 'puts \"#system\"'")
+      system(*%w[ruby -e puts('#system')])
 
   ##spawn
 

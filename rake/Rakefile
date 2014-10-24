@@ -168,9 +168,14 @@
 
   ##sh
 
-    # Execute command on default shell.
+    # Execute command on default shell. Same as system, but aborts the task if the return is 1.
 
-      #sh('ls')
+      task(:sh) do
+        sh(*%w[ruby -e puts('sh')])
+        sh('false')
+        # Never reached.
+        sh(*%w[ruby -e puts('after false')])
+      end
 
   ##file
 

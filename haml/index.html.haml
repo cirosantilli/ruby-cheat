@@ -35,14 +35,15 @@ No tag
   = "b"
 %p
   Mix code and HTML:
-  = "code"
-%p Single line / inline code + HTML: #{"code"}
+  = 'code'
+%p Single line / inline code + HTML: #{'code'}
 %h3 #html_safe #!
 %p
   The html_safe behaviour of = depends on the
   %code escape_html
-  option. By default, it is off, and strings automatically get
+  option. By default, it is off, and strings are left alone, and thus remain
   %code html_safe
+  = '<>'
 %p
   %code &=
   always escapes:

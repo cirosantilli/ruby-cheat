@@ -164,23 +164,33 @@ class CapybaraTest
 
         ##all
 
-          # http://rubydoc.info/github/jnicklas/capybara/master/Capybara/Node/Finders#all-instance_method
+          # <http://rubydoc.info/github/jnicklas/capybara/master/Capybara/Node/Finders#all-instance_method>
 
           # Most general find method. All others are convenience on top of this.
 
-          # Returns Capyabara::Result, which is an Enumerable containing [Elements](http://rubydoc.info/github/jnicklas/capybara/master/Capybara/Node/Element)
+          # Returns Capyabara::Result, which is an Enumerable containing
+          # [Elements](http://rubydoc.info/github/jnicklas/capybara/master/Capybara/Node/Element)
 
-          # If given, the first argument specifyies the query type:
+          ##Locator type
 
-            #page.find(:xpath, '//div[contains(., "bar")]')
-            #page.find(:css, '#foo.class')
+            # If given, the first argument specifyies the query type:
 
-          # If not, uses an option which defaults to `:css`. So always specify.
-          # to prevent breaks.
+              #page.find(:xpath, '//div[contains(., "bar")]')
+              #page.find(:css, '#foo.class')
 
-            #page.find(:css, '#foo.class')
+            # If not, uses an option which defaults to `:css`. So always specify.
+            # to prevent breaks.
 
-          # Options:
+              #page.find(:css, '#foo.class')
+
+            # There are also some Capybara defined locator types which are more magic,
+            # e.g. `:field` which only matches form controls.
+
+            # Depending on the locator type, more options can accepted than the default ones,
+            # e.g. `:field` enables `checked` and `disabled`.
+
+            # There are many `find` named helpers which already include the type on their names,
+            # e.g. `find_field` and so on.
 
           ##text
 
@@ -265,15 +275,35 @@ class CapybaraTest
 
           # `find("##{id}")
 
+        ##field
+
         ##find_field
 
           # `find(:field, ...)`
 
-          # Finds any form control.
+          # Find any type of input field: input text, textarea, checkboxes, etc.
+
+          # The following options are only available in field matchers.
+
+          ##checked
+
+              !all(:field, 'checked-false',    checked: false).empty? or raise
+               all(:field, 'checked-false',    checked: true ).empty? or raise
+               all(:field, 'checked-true',     checked: false).empty? or raise
+              !all(:field, 'checked-true',     checked: true ).empty? or raise
+               all(:field, 'checked-js-true',  checked: true ).empty? or raise
+               all(:field, 'checked-js-false', checked: false).empty? or raise
+
+              poltergeist do
+                !all(:field, 'checked-false',    checked: false).empty? or raise
+                 all(:field, 'checked-false',    checked: true ).empty? or raise
+                 all(:field, 'checked-true',     checked: false).empty? or raise
+                !all(:field, 'checked-true',     checked: true ).empty? or raise
+                !all(:field, 'checked-js-true',  checked: true ).empty? or raise
+                !all(:field, 'checked-js-false', checked: false).empty? or raise
+              end
 
           ##disabled
-
-            # Option enabled by the `:field` kind.
 
               !all(:field, 'disabled-false',    disabled: false).empty? or raise
                all(:field, 'disabled-false',    disabled: true ).empty? or raise
@@ -293,9 +323,7 @@ class CapybaraTest
 
           ##with
 
-            # Find any type of input field: input text, textarea, checkboxes, etc.
-
-            # `with`: the current (possibly Js modified) `.value` of the field.
+            # Js `.value` of the field.
 
               !all(:field, 'with',    with: 'a').empty? or raise
                all(:field, 'with',    with: 'b').empty? or raise
