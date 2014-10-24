@@ -1,5 +1,15 @@
 #!/usr/bin/env ruby
 
+# This file will contain every test Core Language and Stdlib test that does not:
+#
+# - slow execution for a perceptible ammount of time:
+#
+#     - user input
+#     - network
+#     - profiling
+#
+# - produce large amounts of hard to assert GUI-like output, e.g. MiniTest.
+
 require 'stringio'
 require 'tempfile'
 
