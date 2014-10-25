@@ -372,7 +372,7 @@ require 'tempfile'
         '\\' == "\\" or raise
         '\'' == "'"  or raise
 
-      ##arbitrary delimier ##percent string literls ##%Q
+      ##Arbitrary delimier ##Percent string literls ##%Q
 
         # The percent allows to use many delimiter characters:
 
@@ -390,9 +390,9 @@ require 'tempfile'
 
         # `q` is for non-interpolated.
 
-          "\n" == %Q{\n} or raise
-          "\n" == %{\n}  or raise
-          '\n' == %q{\n} or raise
+          "\n" == %Q(\n) or raise
+          "\n" == %(\n)  or raise
+          '\n' == %q(\n) or raise
 
   ##Format
 
@@ -783,23 +783,29 @@ EOS
     (not 'abc'.equal?('abc')) or raise
     :abc.equal?(:abc) or raise
 
-  # Literals can include invalid id chars by using the following syntax:
+  ##Literals
 
-    (:'a$b').to_s == 'a$b' or raise
+    # Literals can include any character that can be used on strings with the quoting syntax
 
-  # Symbols can also end in `=`, `?` or `!` without quotes like methods,
-  # or start with `@` or `@@`:
+      (:'a $b').to_s == 'a $b' or raise
+      s = 'a $b'
+      (:"#{s}").to_s == s or raise
 
-    (:a?).to_s == 'a?' or raise
-    (:a!).to_s == 'a!' or raise
-    (:a=).to_s == 'a=' or raise
-    (:@a).to_s == '@a' or raise
-    (:@@a).to_s == '@@a' or raise
-    (:@@a).to_s == '@@a' or raise
+    # There is also a percent syntax for symbols:
 
-  # This is useful together with the `send` method.
+    # Symbol literals can also end in `=`, `?` or `!` without quotes like methods,
+    # or start with `@` or `@@`:
 
-  # Only valid identifiers can be used without quotes. E.g., `@@@a` won't work.
+      (:a?).to_s == 'a?' or raise
+      (:a!).to_s == 'a!' or raise
+      (:a=).to_s == 'a=' or raise
+      (:@a).to_s == '@a' or raise
+      (:@@a).to_s == '@@a' or raise
+      (:@@a).to_s == '@@a' or raise
+
+    # This is useful together with the `send` method.
+
+    # Only valid identifiers can be used without quotes. E.g., `@@@a` won't work.
 
 ##list
 
@@ -3511,7 +3517,7 @@ EOS
 
     ##$LOAD_PATH ##$:
 
-      # require search path
+      # Require search path.
 
         puts('require search path:')
         puts($LOAD_PATH)
@@ -3959,6 +3965,12 @@ EOS
 
         File.split(File.join('a', 'b', 'c')) == [File.join('a', 'b'), 'c'] or raise
 
+    ##extension
+
+        File.extname('a.b') == '.b' or raise
+        File.extname('ab')  == ''   or raise
+        File.extname('.b')  == ''   or raise
+
     ##unlink ##delete
 
       # Delete file.
@@ -4221,10 +4233,15 @@ EOS
 
   ##fileutils
 
+      require 'fileutils'
+
     ##rm_rf
 
-        require 'fileutils'
-        #FileUtils.rm_rf(dir)
+        #FileUtils.rm_rf('dir')
+
+    ##cp_r
+
+        #FileUtils.cp_r(src, dst)
 
   ##Tempfile
 

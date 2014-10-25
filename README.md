@@ -1,4 +1,4 @@
-# ![Ruby logo](ruby-logo.png) Ruby Cheat
+# ![logo](logo.png) Ruby Cheat
 
 [![Build Status](https://travis-ci.org/cirosantilli/ruby-cheat.svg?branch=master)](https://travis-ci.org/cirosantilli/ruby-cheat)
 
@@ -12,7 +12,7 @@ Most important files:
 - [Implementations](implementations.md)
 - [Gems](gems.md)
 - [Version managers](version-managers.md): RVM, rbenv.
-- [Ruby vs Python](ruby-vs-python.md)
+- [Ruby vs Python](vs-python.md)
 - [Notable uses](notable-uses.md)
 - [Lint tools and Style guides](lint-tools.md)
 - [Capybara](capybara/)
