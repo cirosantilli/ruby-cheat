@@ -8,6 +8,7 @@ require 'rspec/autorun'
 require_relative 'testee'
 
 do_fail = false
+#do_fail = true
 
 $before_suite = 0
 $after_suite = 0
@@ -44,6 +45,8 @@ RSpec.describe 'desc0' do
 
   ##describe
 
+    # https://www.relishapp.com/rspec/rspec-core/v/3-1/docs/example-groups/shared-examples
+
     # The argument can impact tests
 
     # - `subject` is implicitly set as the argument, and `is_expected` referenes it
@@ -52,6 +55,8 @@ RSpec.describe 'desc0' do
     # Any object can be passed to describe, and the class being tested is often passed.
 
   ##it
+
+    # https://www.relishapp.com/rspec/rspec-core/v/3-1/docs/example-groups/shared-examples
 
     # Basic test unit.
 
@@ -90,6 +95,14 @@ RSpec.describe 'desc0' do
             expect(1).to eq(1)
           end
         end
+
+    ##Programatically define tests
+
+        [0, 1].each do |i|
+          it "got defined #{i}" do
+            expect(1).to eq(1)
+          end
+        end
   end
 
   it '##should' do
@@ -106,6 +119,8 @@ RSpec.describe 'desc0' do
   end
 
   describe '##expect ##to' do
+
+    # Part of the <https://github.com/rspec/rspec-expectations> submodule
 
     # Replaces should on 2.11. Should be used instead of should.
 
@@ -128,6 +143,30 @@ RSpec.describe 'desc0' do
         end
     end
 
+    it '##raise' do
+      # Raise any exception.
+
+        (expect { 0 }).not_to raise_error
+        (expect { raise }).to raise_error
+
+        if do_fail
+          (expect { raise }).not_to raise_error
+        end
+
+      # RSpec forbids you from doing `not_to raise_error(argument)`:
+      # you must use `not_to raise_error` without argument (TODO why?)
+
+        #(expect { raise Exception }).not_to raise_error(RuntimeError)
+
+      # Base classes are also caught unlike in Minitest's `assert_raise`.
+
+        (expect { raise RuntimeError }).to raise_error(Exception)
+
+      # If the argument is a string, catch by message:
+
+        (expect { raise Exception.new('abc') }).to raise_error('abc')
+    end
+
     it '##Automatically defined matchers' do
 
       # More insanity in the name of readability.
@@ -139,9 +178,12 @@ RSpec.describe 'desc0' do
       # Matchers of the form `be_x` are converted to `x?`:
 
         expect(Testee.new).to be_x
+
+      # For this reason you should seldom use `be_true` or `be_false`:
+      # add a `has_X?` or `X?` method to the class and use automatic matchers.
     end
 
-    it '##Create a matcher' do
+    it '##Create a new matcher' do
         RSpec::Matchers.define :new_eq do |expected|
           match do |actual|
             actual == expected
@@ -223,8 +265,17 @@ RSpec.describe 'desc0' do
   end
 
   describe '##subject' do
-    it 'is taken from describe by default' do
+
+    # See also: `described_class`.
+
+    it 'is taken directly from the innermost describe if it is not a class object' do
       expect(subject).to eq('##subject')
+    end
+
+    describe Array do
+      it 'is an instance of the innermost describe if it is a class object' do
+        expect(subject).to eq([])
+      end
     end
 
     describe 'set' do
@@ -248,9 +299,14 @@ RSpec.describe 'desc0' do
     end
 
     describe '##is_expected' do
-      it 'wraps an expect to around subject' do
+      it 'wraps expect(subject).to' do
         is_expected.to eq('##is_expected')
       end
+    end
+  end
+
+  describe '##double' do
+    it 'TODO' do
     end
   end
 
@@ -264,8 +320,101 @@ RSpec.describe 'desc0' do
         end
       end
 
-  describe '##double' do
-    it 'TODO' do
-    end
-  end
 end
+
+##described_class
+
+    RSpec.describe Array do
+      describe String do
+        it 'equals the innermost described object' do
+          expect(described_class).to eq(String)
+        end
+      end
+    end
+
+  # Same if it is not a Class object.
+
+    RSpec.describe String do
+      describe 0 do
+        it 'a' do
+          expect(described_class).to eq(0)
+        end
+      end
+    end
+
+##shared_examples
+
+  # https://www.relishapp.com/rspec/rspec-core/v/3-1/docs/example-groups/shared-examples
+
+  # Insert given tests at multiple locations.
+
+  ##it_behaves_like
+
+    RSpec.shared_examples '0 or 1' do
+      it 'is either 0 or 1' do
+        expect([0, 1]).to be_include(subject)
+      end
+    end
+
+    RSpec.describe 0 do
+      it_behaves_like '0 or 1'
+    end
+
+    RSpec.describe 1 do
+      it_behaves_like '0 or 1'
+    end
+
+  ##include_examples
+
+  ##should_behave_like
+
+    # <http://stackoverflow.com/questions/19556296/whats-the-difference-between-include-examples-and-it-behaves-like>
+
+    # TODO alias to `it_behaves_like`?
+
+      RSpec.describe 0 do
+        include_examples '0 or 1'
+      end
+
+      RSpec.describe 1 do
+        include_examples '0 or 1'
+      end
+
+      if do_fail
+        RSpec.describe 2 do
+          include_examples '0 or 1'
+        end
+      end
+
+  # Helpers, `let`, can be overridden on derived tests.
+
+    RSpec.shared_examples 'helper eq 1' do
+      it 'helper eq 1' do
+        expect(helper).to eq(1)
+      end
+
+      def helper
+        0
+      end
+    end
+
+    if do_fail
+      RSpec.describe 0 do
+        include_examples 'helper eq 1'
+      end
+    end
+
+    RSpec.describe 1 do
+      include_examples 'helper eq 1'
+
+      def helper
+        1
+      end
+    end
+
+##shared_context
+
+  # https://www.relishapp.com/rspec/rspec-core/v/3-1/docs/example-groups/shared-context
+
+  # Similar to `shared_examples`, but only used to share context like
+  # `before` hooks, `let`, `subject` or helpers.

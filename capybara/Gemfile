@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 #ruby '2.1.1'
 
+gem 'pry'
 gem 'capybara', '2.4.3'
 # Required webkit driver. Installation will compile webkit!
 #gem 'capybara-webkit', '1.3.0'

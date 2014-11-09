@@ -1,0 +1,13 @@
+require 'fileutils'
+
+task :default do
+  sh('ruby conf.rb')
+  # TODO why does it fail with this?
+  #require_relative('conf')
+  sh('make')
+  require_relative('main')
+end
+
+task :clean do
+  FileUtils.rm_f(Dir.glob('*.{o,so}') << 'Makefile')
+end

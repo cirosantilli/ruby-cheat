@@ -3,22 +3,52 @@
 <head>
   <meta charset="utf-8"/>
   <title>Capybara Cheat Title</title>
+  <style>
+    #visible-display-none-external,
+    #visible-display-none-external-parent {
+      display: none;
+    }
+  </style>
+
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/ace.js"></script>
+  <style>
+    .editor {
+      border: 1px solid black;
+      margin-bottom: 5px;
+      height: 200px;
+      /* Required in theory: */
+      /*position: absolute;*/
+      width: 300px;
+    }
+  </style>
 </head>
 <body>
 <h1>Capybara Cheat</h1>
 
 <h2>#all</h2>
 
-  <div id="all-text">ab<i>cd</i>ef</div>
-  <div id="all-text-whitespace"> a </div>
+  <div id="text">ab<i>cd</i>ef</div>
+  <div id="text-whitespace"> a &nbsp;
+  b </div>
 
   <h2>#visible</h2>
 
-    <div id="visible-empty"                                                                   ></div>
-    <div id="visible-empty-background"      style="width:10px; height:10px; background:black;"></div>
-    <div id="visible-empty-background-same" style="width:10px; height:10px; background:white;"></div>
-    <div id="visible-visibility-hidden"     style="visibility:hidden;"                        >a</div>
-    <div id="visible-display-none"          style="display:none;"                             >a</div>
+    <div id="visible-empty"                                                                          ></div>
+    <div id="visible-empty-background"             style="width:10px; height:10px; background:black;"></div>
+    <div id="visible-empty-background-same"        style="width:10px; height:10px; background:white;"></div>
+    <div id="visible-visibility-hidden"            style="visibility:hidden;"                        >a</div>
+    <div id="visible-display-none"                 style="display:none;"                             >a</div>
+    <div                                           style="display:none;"                             >
+      <div id="visible-display-none-child">a</div>
+    </div>
+    <div id="visible-display-none-external"                                                   >a</div>
+    <div id="visible-display-none-external-parent"                                            >
+      <div id="visible-display-none-external-child">a</div>
+    </div>
+    <div id="visible-display-none-js">a</div>
+    <script>
+      document.getElementById('visible-display-none-js').style.display = 'none'
+    </script>
 
   <h2>#field</h2>
 
@@ -91,5 +121,12 @@
       }
     )
   </script>
+
+  <h3>#ACE</h3>
+
+    <div class="editor" id="ace">#default</div>
+    <script>
+      var editor = ace.edit('ace')
+    </script>
 </body>
 </html>

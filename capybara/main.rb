@@ -29,6 +29,16 @@ def current_driver(driver, block)
   Capybara.use_default_driver
 end
 
+##register_driver
+
+  ##inspector
+
+    # Enables `page.driver.debug`:
+
+      Capybara.register_driver :poltergeist do |app|
+        Capybara::Poltergeist::Driver.new(app, inspector: true)
+      end
+
 class CapybaraTest
   include Capybara::DSL
 
@@ -117,7 +127,8 @@ class CapybaraTest
 
           puts 'current_url = ' + current_url
 
-        # The domain was `http://example.com`.
+        # The domain was `http://example.com`, so it does not represent where
+        # Capybara is actually serving.
 
       ##current_host
 
@@ -184,13 +195,13 @@ class CapybaraTest
               #page.find(:css, '#foo.class')
 
             # There are also some Capybara defined locator types which are more magic,
-            # e.g. `:field` which only matches form controls.
+            # e.g. `:field` which only matches form controls by either ID or label.
 
             # Depending on the locator type, more options can accepted than the default ones,
             # e.g. `:field` enables `checked` and `disabled`.
 
-            # There are many `find` named helpers which already include the type on their names,
-            # e.g. `find_field` and so on.
+            # There are `find_X` and `has_X?` named helpers which already include the type
+            # on their names, e.g. `find_field` and so on.
 
           ##text
 
@@ -199,14 +210,14 @@ class CapybaraTest
 
             # Possible in native xpath, but not CSS3, and this options makes up for it.
 
-               !all('#all-text', text: 'a' ).empty? or raise
-               !all('#all-text', text: 'ab').empty? or raise
-               !all('#all-text', text: 'ef').empty? or raise
+               !all('#text', text: 'a' ).empty? or raise
+               !all('#text', text: 'ab').empty? or raise
+               !all('#text', text: 'ef').empty? or raise
 
             # Does not see HTML tags, but does see text inside inner elements.
 
-                all('#all-text', text: 'ab<i>cd</i>ef').empty? or raise
-               !all('#all-text', text: 'cd').empty? or raise
+                all('#text', text: 'ab<i>cd</i>ef').empty? or raise
+               !all('#text', text: 'cd')           .empty? or raise
 
             # There is not driver portable way of doing that:
             # http://stackoverflow.com/questions/15981820/capybara-should-have-html-content
@@ -214,19 +225,23 @@ class CapybaraTest
 
             # Text node elements separated by HTML tags are seen as contiguous.
 
-               !all('#all-text', text: 'abcdef').empty? or raise
-                all('#all-text', text: 'abef').empty? or raise
+               !all('#text', text: 'abcdef').empty? or raise
+                all('#text', text: 'abef')  .empty? or raise
 
             # The start and end of regexp matches corresponds to the cncatented string:
 
-               !all('#all-text', text: /^a/).empty? or raise
-                all('#all-text', text: /^b/).empty? or raise
-                all('#all-text', text: /^e/).empty? or raise
+               !all('#text', text: /\Aa/).empty? or raise
+                all('#text', text: /\Ab/).empty? or raise
+                all('#text', text: /\Ae/).empty? or raise
 
-            # Trailing and heading whitespaces are removed:
+            # `text` whitespace is normalized:
+            #
+            # - non-space whitespaces are converted to spaces
+            # - trailing and heading whitespaces are removed
+            # - multiple consecutive whitespaces are converted to a single whitespace
 
-               !all('#all-text-whitespace', text: /^a$/).empty? or raise
-                all('#all-text-whitespace', text: ' a ').empty? or raise
+               !all('#text-whitespace', text: /\Aa b\Z/).empty? or raise
+                all('#text-whitespace', text: ' a b ').empty? or raise
 
           ##visible
 
@@ -234,25 +249,65 @@ class CapybaraTest
 
             # If false, **both** visible and invisible
 
-            # Default: false.
+            # Default: `true` (but used to be `false` at some point,
+            # so always set it explicity when visibility matters.
+            # This default is controlled by the `Capybara.ignore_hidden_elements` variable
 
-            # Invisible means: TODO `visible:false`? `display:none`?
-            # Seems to depend on Driver: on RackTest only uses `display:none` set on parent node.
+            ##ignore_hidden_elements
 
-            # Not very driver-portable.
+              # Nevation of the default value of `visible`.
 
-              !all('#visible-empty',                 visible: true).empty? or raise
-              !all('#visible-empty-background',      visible: true).empty? or raise
-              !all('#visible-empty-background-same', visible: true).empty? or raise
-              !all('#visible-visibility-hidden',     visible: true).empty? or raise
-               all('#visible-display-none',          visible: true).empty? or raise
+            # Not very driver-portable..
+
+            # The only thing RackTest checks for is an inline `display:none`
+            # on the element or it's parents since it cannot do CSS selectors:
+
+              def check_visibility(ids, optionss, foundss)
+                optionss.zip(foundss).each do |options, founds|
+                  ids.zip(founds).each do |id, found|
+                    all(id, options).empty? != found or raise
+                  end
+                end
+              end
+
+              ids = [
+                '#visible-empty',
+                '#visible-empty-background',
+                '#visible-empty-background-same',
+                '#visible-visibility-hidden',
+
+                '#visible-display-none',
+                '#visible-display-none-child',
+                '#visible-display-none-external',
+                '#visible-display-none-external-child',
+
+                '#visible-display-none-js',
+              ]
+
+              optionss = [
+                {visible: true},
+                {},
+                {visible: false},
+              ]
+
+              foundss = [
+                [true, true, true, true,    false, false, true, true,    true,],
+                [true, true, true, true,    false, false, true, true,    true,],
+                [true, true, true, true,    true,  true,  true, true,    true,],
+              ]
+
+              check_visibility(ids, optionss, foundss)
+
+            # Poltergeits only detects display: none, but is capable of detecting it
+            # if se from CSS selection or Javascript.
 
               poltergeist do
-                !all('#visible-empty',                 visible: true).empty? or raise
-                !all('#visible-empty-background',      visible: true).empty? or raise
-                !all('#visible-empty-background-same', visible: true).empty? or raise
-                !all('#visible-visibility-hidden',     visible: true).empty? or raise
-                 all('#visible-display-none',          visible: true).empty? or raise
+                foundss = [
+                  [true, true, true, true,    false, false, false, false,    false,],
+                  [true, true, true, true,    false, false, false, false,    false,],
+                  [true, true, true, true,    true,  true,  true,  true,     true, ],
+                ]
+                check_visibility(ids, optionss, foundss)
               end
 
               selenium do
@@ -263,13 +318,22 @@ class CapybaraTest
                  all('#visible-display-none',          visible: true).empty? or raise
               end
 
+            # To checkthat an element is present but invisible,
+            # use `find` + the `#visible?` node method:
+
+               find('#visible-empty',                 visible: false).visible? or raise
+               find('#visible-empty-background',      visible: false).visible? or raise
+               find('#visible-empty-background-same', visible: false).visible? or raise
+               find('#visible-visibility-hidden',     visible: false).visible? or raise
+              !find('#visible-display-none',          visible: false).visible? or raise
+
         ##find
 
           # `all(...)[0]`. Raise if none or multiple matches.
 
         ##find_link
 
-          # `find('a', text: text)`
+          # `find(:a, text: text)`
 
         ##find_by_id
 
@@ -401,7 +465,7 @@ class CapybaraTest
             # #@*='cd'  for any property = `cd`
             # #[@ab]    any element with the property `ab`
 
-          ##text() for first inner non tag content:
+          ##text for first inner non tag content:
 
             has_xpath?("//div[@id='xpath-text' and text()='div']") or raise
 
@@ -662,7 +726,8 @@ class CapybaraTest
                   execute_script("document.getElementById('js-click-target').innerHTML = 'clicked'")
                   has_css?('#js-click-target', text: 'clicked') or raise
 
-                # Javascript errors generate Ruby exceptions by default:
+                # Javascript errors generate Ruby exceptions by default unless you set the
+                # `js_errors` config to `false` (default `true`):
 
                   begin
                     execute_script('not_defined;')
@@ -694,6 +759,11 @@ class CapybaraTest
 
                   evaluate_script('1') == 1 or raise
 
+              ##ACE
+
+                  execute_script('editor.setValue("a\n")')
+                  evaluate_script('editor.getValue()') == "a\n" or raise
+
               ##URL encoding
 
                 # The behaviour is inconsistent with that of the RackTest driver!
@@ -701,6 +771,25 @@ class CapybaraTest
 
                   visit('/2?a%5Bb%5D=c')
                   URI.parse(current_url).request_uri == '/2?a%255Bb%255D=c' or raise
+
+            ##Inspect page with CSS and Js
+
+              ##page.driver.debug
+
+                # Pause Capybara and open the page on Chromium with all Javascript
+                # evaluated and loaded.
+
+                  #page.driver.debug
+
+                # Requires `inspector: true`.
+
+                # Opens up a remote debugging mode as with the `--remote-debugging-port` option,
+                # so you cannot see the rendered tree, only the DOM.
+
+              # TODO how to get the current URL? This method is not showing it.
+
+                #puts current_url
+                #require 'pry'; binding.pry
 
               Capybara.use_default_driver
             end

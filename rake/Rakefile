@@ -172,6 +172,9 @@
 
       task(:sh) do
         sh(*%w[ruby -e puts('sh')])
+      end
+
+      task(:sh_fail) do
         sh('false')
         # Never reached.
         sh(*%w[ruby -e puts('after false')])

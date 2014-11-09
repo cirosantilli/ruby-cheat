@@ -65,9 +65,9 @@ r('%p a') == "<p>a</p>\n" or raise
   #%p a
 #EOF
 
-##Pre
+##pre
 
-##Textarea
+##textarea
 
   # Those tags are magic: <http://haml.info/docs/yardoc/file.REFERENCE.html#whitespace_preservation>
 
@@ -77,8 +77,29 @@ r('%p a') == "<p>a</p>\n" or raise
   = 'b'
 EOF
 
+  p r(<<EOF)
+%pre= "a\n\n"
+EOF
+
     r(<<EOF) == "<div>\n  a\n  b\n</div>\n" or raise
 %div
   = 'a'
   = 'b'
+EOF
+
+##Line contiuation
+
+  # Possible:
+  #
+  # - after commas
+  # - adding extra pipes `|` for all lines, including the last one.
+
+    r(<<EOF) == "<p a='0' b='1'></p>\n" or raise
+%p{a: 0,
+   b: 1}
+EOF
+
+    r(<<EOF) == "2\n" or raise
+= 1 + |
+  1   |
 EOF

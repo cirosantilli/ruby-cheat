@@ -71,6 +71,13 @@ DO_FAIL = false
       def test_instance_var
         assert_equal @a, 0
       end
+
+      ##assertions
+      def test_assertions
+        assert_raises(Exception) {raise Exception}
+        # TODO assert raises descendant?
+        # TODO refute raises?
+      end
     end
 
   # TODO how to run something before / after the entire suite?

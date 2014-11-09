@@ -10,21 +10,21 @@
 #
 # - produce large amounts of hard to assert GUI-like output, e.g. MiniTest.
 
-require 'stringio'
-require 'tempfile'
+#Test helpers.
 
-##Helpers
+  require 'stringio'
+  require 'tempfile'
 
-    def capture_stdout
-      begin
-        old_stdout = $stdout
-        $stdout = StringIO.new('', 'w')
-        yield
-        $stdout.string
-      ensure
-        $stdout = old_stdout
-      end
+  def capture_stdout
+    begin
+      old_stdout = $stdout
+      $stdout = StringIO.new('', 'w')
+      yield
+      $stdout.string
+    ensure
+      $stdout = old_stdout
     end
+  end
 
 ##Comments
 
@@ -70,7 +70,7 @@ require 'tempfile'
     'a' \
     'b' == 'ab' or raise
 
-  # This is the only use case recommende by bbatsov style.
+  # This is the only use case recommended by bbatsov.
 
   # Spaces may disambiguate certain statements. See function.
 
@@ -82,6 +82,9 @@ require 'tempfile'
 
   # -   method names can end in `?`, `!` or `=`. This has no syntatical value,
   #     but each has a very well defined and followed convention.
+  #
+  #     Also on the back-end there seems to be no restriction to method names
+  #     you can define and call with `define_method` + `send`.
 
   # -   variable names that start with an Upper case letter called constants
   #     and behave specially in many ways.
@@ -272,6 +275,24 @@ require 'tempfile'
         raise
       end
 
+  ##SAFE
+
+  ##taint
+
+  ##trust
+
+    # <http://stackoverflow.com/questions/12165664/what-are-the-rubys-objecttaint-and-objecttrust-methods>
+
+      puts 'SAFE = ' + $SAFE.to_s
+
+      s = 'a'
+      !s.tainted? or raise
+
+      home = ENV['HOME']
+      home.tainted? or raise
+
+      (s + home).tainted? or raise
+
 ##BaseObject
 
   # Base class of all classes.
@@ -328,9 +349,17 @@ require 'tempfile'
     nil.nil?       or raise
     not false.nil? or raise
 
+##TrueClass
+
+##FalseClass
+
+    true.class == TrueClass
+    true.class.superclass == Object
+    false.class == FalseClass
+
 ##Integer
 
-  # http://www.ruby-doc.org/core-2.1.3/Integer.html
+  # <http://www.ruby-doc.org/core-2.1.3/Integer.html>
 
   ##Underscores in integer literals
 
@@ -347,6 +376,27 @@ require 'tempfile'
       #1__0
 
   # Immutable.
+
+  ##Fixnum
+
+  ##Bignum
+
+  ##Integer range
+
+    # <http://www.ruby-doc.org/core-2.1.3/Fixnum.html>
+    # <http://www.ruby-doc.org/core-2.1.3/Bignum.html>
+
+    # Like in Python and Js, there is no bound on number size in Ruby:
+
+      a = 2**10000
+      a.class == Integer
+
+    # Internally, Ruby automatically decides which representation to use:
+    #
+    # - Fixnum native processor integer if small enough
+    # - Bignum lower arbitrary precision class otherwise
+
+    # TODO how to explicitly deal with Fixnum and Bignum?
 
 ##String
 
@@ -372,7 +422,15 @@ require 'tempfile'
         '\\' == "\\" or raise
         '\'' == "'"  or raise
 
-      ##Arbitrary delimier ##Percent string literls ##%Q
+      ##Arbitrary delimier
+
+      ##Percent string literls
+
+      ##%Q
+
+      ##%q
+
+      ##%()
 
         # The percent allows to use many delimiter characters:
 
@@ -393,6 +451,9 @@ require 'tempfile'
           "\n" == %Q(\n) or raise
           "\n" == %(\n)  or raise
           '\n' == %q(\n) or raise
+
+        # bbatsov recommends `()` by default for all percent literals unless they contain `()`.
+        # A common case for that are regular expression literals.
 
   ##Format
 
@@ -671,7 +732,9 @@ EOS
 
   ##encoding
 
-##regexp
+##Regexp
+
+  # <http://www.ruby-doc.org/core-2.1.4/Regexp.html>
 
   ##Literal
 
@@ -699,6 +762,11 @@ EOS
       s = '.c'
       /a#{s}/ =~ 'a0c' or raise
 
+    # Substituted characters are magic as usual, except that you don't need to escape `/`:
+
+      /#{'/'}/ =~ '/' or raise
+      /#{'.'}/ =~ 'a' or raise
+
     # Character classes:
 
       # -   `^` and `$` start / end of string or after / before newline
@@ -725,9 +793,13 @@ EOS
 
       /a/ !~ 'b' or raise
 
-  ##$1 ##$2 ##capture groups
+  ##Capture groups
 
-    # Unintuitivelly, $1, ... are not argv (since $0 is the program name), but capturing groups of the last regex.
+  ##$1
+
+  ##$2
+
+    # Unintuitivelly, `$1`, ... are not argv (since $0 is the program name), but capturing groups of the last regex.
 
     # Keep the last regexp matching group.
 
@@ -738,16 +810,12 @@ EOS
 
       #$1 = 1
 
-  ##$~
-
-    # MatchData from previous successful match.
-
   ##$&
 
     # Matched string from the previous successful pattern match:
 
-    'abcd'.match(/b.d/)
-    $& == 'bcd'
+      'abcd'.match(/b.d/)
+      $& == 'bcd'
 
   ##$+
 
@@ -763,6 +831,24 @@ EOS
       'abcd'.match(/b./)
       $` == 'a' or raise
       $' == 'd' or raise
+
+  ##$~
+
+    # `MatchData` from previous successful match.
+
+  ##MatchData
+
+    # <http://www.ruby-doc.org/core-2.1.4/MatchData.html>
+
+    # Represents the result of a match operation.
+
+    # Returned from `match`, and automatically put into `$~` from last match.
+
+      match_data = 'ab'.match(/(.)(.)/)
+
+    ##captures
+
+      match_data.captures == ['a', 'b'] or raise
 
 ##Symbols
 
@@ -792,6 +878,11 @@ EOS
       (:"#{s}").to_s == s or raise
 
     # There is also a percent syntax for symbols:
+
+      %s(a b) == :'a b' or raise
+
+    # But bbatsov says use `' '` when needed unless your literal contains `"` and `'`.
+    # There is no interpolated version of `%s`.
 
     # Symbol literals can also end in `=`, `?` or `!` without quotes like methods,
     # or start with `@` or `@@`:
@@ -1604,7 +1695,11 @@ EOS
   # Objects are evaluated according to the `===` operator and not the `==` operator!
   # See `===` for more info.
 
-##method ##function
+##def
+
+##method
+
+##function
 
   # Syntax: http://www.ruby-doc.org/core-2.1.2/doc/syntax/methods_rdoc.html
 
@@ -1856,7 +1951,9 @@ EOS
       a = method(:f)
       a.call == 0 or raise
 
-  ##Allowed identifier characters
+  ##Valid method names
+
+    # http://stackoverflow.com/questions/10542354/what-are-the-restrictions-for-method-names-in-ruby
 
     # Besides the usual alphanumeric characters,
     # the last character of a method name can also be either a question mark `?`
@@ -1919,6 +2016,16 @@ EOS
 
       o.int += 1
       o.int == 4 or raise
+
+    ##Valid method names with define_method and send
+
+      # Anything.
+
+        define_method(:'$% ^&') { 0 }
+        define_method(:'你好') { 1 }
+
+        send(:'$% ^&') == 0 or raise
+        send(:'你好') == 1 or raise
 
   ##Variable length argument list ##nargs ##varargs
 
@@ -2133,7 +2240,7 @@ EOS
       end
       callee_var
 
-  ##Method class
+  ##Method
 
     # http://www.ruby-doc.org/core-2.1.2/Method.html
 
@@ -2145,6 +2252,13 @@ EOS
         end
 
         puts 'source_location = ' + method(:f).source_location.to_s
+
+      # Does not exist for Class:
+      # http://stackoverflow.com/questions/13012109/get-class-location-from-class-object
+
+  ##UnboundMethod
+
+    # http://www.ruby-doc.org/core-2.1.2/UnboundMethod.html
 
 ##alias
 
@@ -2377,33 +2491,35 @@ EOS
 
       Object.new.monkey_patch == 0 or raise
 
-  # It is possible to add methods to specific instances of a class.
-  # This is exactly what happens when creating static class methods.
+  ##Singleton method
 
-    class AddMethodToInstance
-    end
+    # It is possible to add methods to specific instances of a class.
+    # This is exactly what happens when creating static class methods.
 
-    c = AddMethodToInstance.new
-    def c.m0
-      0
-    end
-    c.m0 == 0 or raise
+      class AddMethodToInstance
+      end
 
-    d = AddMethodToInstance.new
-    begin
-      d.m0
-    rescue NameError
-    else
-      raise
-    end
+      c = AddMethodToInstance.new
+      def c.m0
+        0
+      end
+      c.m0 == 0 or raise
 
-  # Trying to do it outside defines a new class method:
+      d = AddMethodToInstance.new
+      begin
+        d.m0
+      rescue NameError
+      else
+        raise
+      end
 
-    def C.method4
-      return 4
-    end
+    # Trying to do it outside defines a new class method for every object of the class
 
-    C.method4 == 4 or raise # ERROR
+      def C.method4
+        return 4
+      end
+
+      C.method4 == 4 or raise # ERROR
 
   ##self
 
@@ -2433,11 +2549,34 @@ EOS
 
       class ClassMethod
 
-        # Instance variable for the class object.
-        @class_i   = 1
+        # ##static variable
+        #
+        #   Instance variable for the class object.
+        #
+        #   The best match for the concept of static variable
+        #   in other languages.
 
-        # TODO difference from above
-        @@class_i2 = 2
+              @class_i = 1
+
+              class << self
+                attr_accessor :class_i
+
+                # or the lazy memoized version:
+                #
+                # def class_i
+                #   @class_i ||= 1
+                # end
+              end
+
+        # ##@@
+        #
+        # ##Class hierarchy variable
+        #
+        #   Same for all derived class.
+        #
+        #   You should avoid them at all cost since they lead to unexpected behavior.
+
+              @@class_i2 = 2
 
         def private_klass_method
           0
@@ -2488,9 +2627,17 @@ EOS
         end
 
         def initialize
-          ClassMethod.class_method
-          #class_method             #=> ERROR
-          #@class_i   == 1 or raise #=> ERROR: @class_i is the instance member
+
+          begin
+            class_method
+          rescue NameError
+          else
+            raise
+          end
+          self.class.class_method  == 1 or raise
+
+          self.class.class_i == 1 or raise #=> ERROR: @class_i is the instance member
+
           @@class_i2 == 2 or raise
         end
       end
@@ -2713,7 +2860,7 @@ EOS
 
     ##public_send
 
-      # Inherited from object.
+      # Inherited from Object.
 
       # Call method by symbol.
 
@@ -2762,6 +2909,26 @@ EOS
 
         ReflectionDerived.new.respond_to?(:m) or raise
 
+    ##instance_variable_get
+
+    ##instance_variable_set
+
+      # Breaks encapsulation.
+
+        class InstanceVariableGet
+          def initialize
+            @a = 0
+          end
+        end
+
+        o = InstanceVariableGet.new
+        o.instance_variable_get(:@a) == 0 or raise
+
+    ##Local variable from string name
+
+      # Not possible:
+      # http://stackoverflow.com/questions/5920841/use-a-string-to-access-a-local-variable-by-name
+
   ##<< for classes
 
     # <http://stackoverflow.com/questions/2505067/class-self-idiom-in-ruby>
@@ -2801,7 +2968,9 @@ EOS
     end
     ModuleIsClass.class == Module or raise
 
-  # Modules are similar to classes execpt that:
+  # The `Class` class inherits from `Module`.
+
+  # Modules are similar to classes except that:
 
   # - it is not possible to instantiate them
   # - it is possible to get a multiple inheritance effect by including many modules
@@ -2956,6 +3125,38 @@ EOS
       ExtendClassMethod.extend(IncludeModule)
       ExtendClassMethod.f2 == 2 or raise
 
+    ##extend self
+
+      # Allows to use the module methods directly.
+
+      # Good way to make a singleton class.
+
+        module ModuleExtendSelf
+          extend self
+
+          def f
+            @a ||= 0
+            @a += 1
+          end
+        end
+
+        ModuleExtendSelf.f == 1 or raise
+        ModuleExtendSelf.f == 2 or raise
+
+      # TODO vs `class << self`?
+
+        module ModuleClassSelf
+          class << self
+            def f
+              @a ||= 0
+              @a += 1
+            end
+          end
+        end
+
+        ModuleClassSelf.f == 1 or raise
+        ModuleClassSelf.f == 2 or raise
+
   ##include and extend at the same time
 
     # The following common pattern exists.
@@ -2996,17 +3197,20 @@ EOS
       end
       $a == [M1::M2::M3, M1::M2, M1] or raise
 
-  module ModuleTest
-    extend self
+  ##define_method
 
-    def f
-      @a ||= 0
-      @a += 1
+    class DefineMethod
+      def initialize
+        @a = 0
+      end
+      define_method(:f) { @a + 1 }
+      define_method(:'$% ^&') { @a + 2 }
+      define_method(:'你好') { @a + 3 }
     end
-  end
 
-  ModuleTest.f == 1 or raise
-  ModuleTest.f == 2 or raise
+  ##instance_method
+
+    # Get an instance_method
 
 ##block ##yield ##iterator ##do
 
@@ -3510,34 +3714,21 @@ EOS
 
     # Kernel.
 
-    # ERROR: require does not look under current dir starting from 1.9.2.
-    # Use `require_relative` for that.
-
-      #require 'main2'
-
-    ##$LOAD_PATH ##$:
-
-      # Require search path.
-
-        puts('require search path:')
-        puts($LOAD_PATH)
-        $LOAD_PATH == $: or raise
-
-  ##RUBYLIB
-
-    # append to require path from environment variable:
-
-    # RUBYLIB:          Additional search path for Ruby programs ($SAFE must be 0).
-    # DLN_LIBRARY_PATH: Search path for dynamically loaded modules.
-
-  ##require_relative
+    # If the required thing is a:
+    #
+    # - relative path starting with `./`
+    # - absolute path starting with `/`
+    #
+    # Require that path and fail if not present.
+    #
+    # Otherwise, look in `$:`.
 
     # Requires file `main2.rb`:
 
-      require_relative('main2')
+      require('./main2')
 
       begin
-        require_relative('i_dont_exist')
+        require('./i_dont_exist')
       rescue LoadError
       else
         raise
@@ -3562,22 +3753,95 @@ EOS
 
       main3_f == 3 or raise
 
+    ##$LOAD_PATH ##$:
+
+      # Require search path.
+
+        puts '$LOAD_PATH = ' + $LOAD_PATH.inspect
+        $LOAD_PATH == $: or raise
+
+      # Starting on Ruby 1.9.2, does not contain `./` anymore.
+      # So `require 'lib'` will fail for a lib in the current directory:
+
+        begin
+          require('main2')
+        rescue LoadError
+        else
+          raise
+        end
+
+    ##RUBYLIB
+
+      # - `RUBYLIB`: colon separated list of paths that gets prepended to `LOAD_PATH` (`man ruby`)
+
+    ##$LOADED_FEATURES ##$"
+
+      # `require` adds the required path to those arrays.
+
+      # If already present, they are not loaded again and `require` returns false.
+      # Otherwise, `require` returns true.
+
+        puts '$LOADED_FEATURES = ' + $LOADED_FEATURES.inspect
+        $LOADED_FEATURES == $" or raise
+
+        require('./main2')
+        !require('./main2') or raise
+
+  ##require_relative
+
+    # http://stackoverflow.com/questions/3672586/what-is-the-difference-between-require-relative-and-require-in-ruby
+
+    # Basically the same as:
+
+      #require(File.expand_path('path', File.dirname(__FILE__)))
+
+    # Except that it raises if there is no current path, e.g. in an eval:
+
+      begin
+        eval("require_relative('main2')")
+      rescue LoadError
+      else
+        raise
+      end
+
   ##load
 
     # Kernel.
 
-    # Very similar to require relative. Vs:
+    # Basically the lower level backend for `require`.
+    # You should almost never use it and prefer require instead.
+
     # <http://stackoverflow.com/questions/6051773/how-to-call-rake-tasks-that-are-defined-in-the-standard-rakefile-from-an-other-r>
     # <http://stackoverflow.com/questions/804297/when-to-use-require-load-or-autoload-in-ruby>
 
-    # Vs require:
-
       a = 0
-      A = 0
+      Load = 0
       load('load.rb')
-      # warning: already initialized constant.
       a == 0 or raise
-      A == 1 or raise
+      Load == 1 or raise
+
+    # Does not use the search path:
+
+      begin
+        load('stringio')
+      rescue LoadError
+      else
+        raise
+      end
+
+    # Does not append `.rb`:
+
+      begin
+        load('load')
+      rescue LoadError
+      else
+        raise
+      end
+
+    # Ignores `$LOADED_FEATURES`, thus reloads the file every time:
+
+      load('load.rb')
+      load('load.rb')
 
   ##autoload
 
@@ -3613,11 +3877,18 @@ EOS
 
     # Kernel.
 
-    # Run string
+    # Run string as if it were pasted in the source.
+    # Returns whatever would be returned by the piece of code.
 
       a = 0
-      eval('a = 1')
+      eval('0; a = 1') == 1 or raise
       a == 1 or raise
+
+    # `__FILE__` has a magic value inside eval:
+
+      eval('__FILE__') == '(eval)' or raise
+
+    # Inside irb, the value is `(irb)` and Pry `(pry)`.
 
 ##Exception ##begin ##ensure
 
@@ -3986,6 +4257,16 @@ EOS
         File.unlink(path)
         !File.exists?(path) or raise
 
+    ##absolute_path
+
+      # Get cannonical absolute path from relative path.
+
+      # Does not expand `~`.
+
+    ##expand_path
+
+      # Same as `absolute_path` but expands `~`. TODO check: any other differences?
+
   ##open ##write ##read ##write
 
     # Must use `'b'` if there will be non ASCII chars.
@@ -4041,9 +4322,11 @@ EOS
 
   ##exit
 
+    # Kernel: <http://www.ruby-doc.org/core-2.1.4/Kernel.html#method-i-exit>
+
     # Exit program with given status.
 
-    # Same as `System.exit`.
+    # Same as `Kernel.exit`.
 
     # Inherited by Kernel.
 
@@ -4057,6 +4340,15 @@ EOS
         raise
       end
 
+  ##PID ##ID of current process ##$$
+
+      puts "Process.pid = #{Process.pid}"
+      puts "$$ = #{$$}"
+
+  ##Current user ##uid
+
+      puts 'Process.euid = ' + Process.euid.to_s
+
 ##External Processes
 
   # Good article with all options: <http://blog.bigbinary.com/2012/10/18/backtick-system-exec-in-ruby.html>
@@ -4066,11 +4358,6 @@ EOS
   # - use `system *W()` whenever you can because it does not use shell expansion and is rather sane.
   # - if you need stdout and stderr as a string, use ``. bbatsov says use `` instead of the equivalent %X().
   # - use popen if you need full control.
-
-  ##PID ##ID of current process ##$$
-
-      puts "Process.pid = #{Process.pid}"
-      puts "$$ = #{$$}"
 
   ##system
 
@@ -4095,7 +4382,15 @@ EOS
     # - don't expand stuff like `*`
     # - don't interpret stuff like `||` and `&&`
 
-    # Return value: True on exit status 0, False on not-zero, `nil` on problems (signals?).
+    # Return value: `true` on exit status 0, `false` on not-zero, `nil` on problems (signals?).
+
+      system(*%w[ruby -e Kernel.exit(0)])   == true  or raise
+      system(*%w[ruby -e Kernel.exit(1)])   == false or raise
+      system(*%w[ruby -e Kernel.exit(2)])   == false or raise
+      system(*%w[ruby -e Kernel.exit(127)]) == false or raise
+      system(*%w[not-a-command])            == nil   or raise
+
+    # TODO how does it differentiate `not-a-command` eand `exit(127)`?
 
     # STDIN, STDOUT and STDERR are bound to the current terminal,
     # so it is not convenient to get them to strings.
@@ -4114,7 +4409,7 @@ EOS
 
     # Analogous to POSIX fork. Not implemented on Windows.
 
-  ##backticks
+  ##backticks ##``
 
     # Short to write, but not the most flexible method.
 
@@ -4148,23 +4443,64 @@ EOS
 
         # puts $?.exitstatus
 
-  ##%x(date)
+  ##%x
 
     # Same as backticks percent style.
 
     # bbatsov says use backticks unless your command
     # contains backticks (which is unlikely).
 
-      o = %x(ruby -e 'print 1')
+      s = '1'
+      o = %x(ruby -e 'print #{s}')
       o == '1' or raise
+
+  ##popen
+
+    # <http://www.ruby-doc.org/core-2.1.4/IO.html#method-c-popen>
+
+    # <http://pubs.opengroup.org/onlinepubs/9699919799/functions/popen.html>
+
+    # If a block is given it auto-closes IO object and waits for the child:
+    # this is generally what we want:
+
+      IO.popen(['ruby', '-e', 'print 1']) do |f|
+        f.read == '1' or raise
+      end
+      $?.exitstatus == 0 or raise
+
+    # You must read the output even if you don't care about it,
+    # or else the pipe buffer might get filled,
+    # and things will block. Another option is to write it to `/dev/null`.
+
+    # Stderr is not captured and gets ignored:
+
+      IO.popen(['ruby', '-e', 'STDERR.print 1']) do |f|
+        f.read == '' or raise
+      end
+      $?.exitstatus == 0 or raise
+
+    ##close popen
+
+      # If you don't use a block, you must close explicitly:
+
+        io = IO.popen(['ruby', '-e', 'print 1'])
+        io.close
+        $?.exitstatus == 0 or raise
+
+      # TODO: confirm that this:
+      #
+      # - reads everything without blocking
+      # - waits. Docs say that is sets `$?`, so it probably does.
+
+  ##dev/null
+
+    # TODO how to discard IO content? Does popen do it?
 
   ##popen3
 
-    # More general process IO.
+    # <http://ruby-doc.org/stdlib-2.1.1/libdoc/open3/rdoc/Open3.html#method-c-popen3>
 
-  ##current user ##uid
-
-      puts 'Process.euid = ' + Process.euid.to_s
+    # The most neat and process IO.
 
 ##time date
 
@@ -4206,6 +4542,7 @@ EOS
     # String that looks like a file to do IO tests.
 
       require 'stringio'
+
       file = StringIO.new
       file.write('a')
       file.flush

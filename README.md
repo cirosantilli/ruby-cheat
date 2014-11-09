@@ -48,6 +48,26 @@ Most important files:
 
 -   <http://www.ruby-doc.org/stdlib-2.1.3/> Stdlib docs.
 
+    Tips on reading `ruby-doc.org`:
+
+    -   on the left sidebar:
+
+        - `#foo`: means instance method `foo`
+        - `::foo`: means class method `foo`
+
+    -   when on a library (e.g. <http://ruby-doc.org/stdlib-2.1.0/libdoc/mkmf/rdoc/index.html>),
+        look for general introductory information on the documentation on the top-level module
+        (<http://ruby-doc.org/stdlib-2.1.0/libdoc/mkmf/rdoc/MakeMakefile.html>)
+
+    -   Many parts of Ruby are under-documented, in particular the stdlib.
+
+        The only way to get around that is to look at the source (click on `Toggle source`.
+
+        For the Core, this will open the C code: for it to make any sense you
+        need to have some understanding of Ruby internals or extensions.
+
+        Also keep a clone of the source code handy at all times with an up-to-date generated `tags` file.
+
 -   <https://github.com/rubyspec/rubyspec>
     Executable specification for the Ruby language:
     tons of unit tests asserting it's behavior.
