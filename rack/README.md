@@ -2,10 +2,11 @@
 
 Rack is two things:
 
--   the de-facto standard Ruby SGI interface.
+-   the de-facto standard Ruby to webserver interface.
 
-    It has several implementations, including a WEBrick (stdlib), adapter on the Gem
-    Apache modules, Nginx modules, Phusion, Litespeed, Mongrel, etc.
+    It has several implementations listed under
+    <https://github.com/rack/rack/tree/dc53a8c26dc55d21240233b3d83d36efdef6e924/lib/rack/handler>,
+    including a WEBrick (stdlib), CGI, FastCGI, etc.
 
     Used by all major Ruby web frameworks: Rails, Sinatra, etc.
 
@@ -17,9 +18,9 @@ Rack is two things:
 
 Both the gem and the protocol are maintained at: <https://github.com/rack/rack>
 
-### rackup
+## rackup
 
-### config.ru
+## config.ru
 
 `rackup` is a command provided by the `rack` gem to conveniently start a Rack application.
 
@@ -33,3 +34,43 @@ Try it out with:
 This is called a *rackup file*.
 
 This is a convenient way to start a server from the command line.
+
+## use
+
+## Middleware
+
+<http://www.rubydoc.info/github/rack/rack/Rack/Builder#use-instance_method>
+
+<http://stackoverflow.com/questions/2256569/what-is-rack-middleware>
+
+A rack app that wraps the main app. It can therefore pre and post process request and response from the main app.
+
+Called middleware because it stands in the middle of the Ruby application and the server.
+
+Advantage: functionality can be reused with any Rack framework, i.e. all important Ruby frameworks. This is the case for instance of Sprockets: <https://github.com/sstephenson/sprockets>
+
+## Unicorn
+
+<http://unicorn.bogomips.org/>
+
+TODO who made it?
+
+Popular Rack HTTP server.
+
+Often used in production together behind Nginx.
+
+Good for fast clients, Nginx deals with slow clients when on top of it.
+
+POSIX only, as the POSIX API is critical for performance.
+
+Introductory architecture review: <http://sirupsen.com/setting-up-unicorn-with-nginx/>
+
+Start:
+
+    bundle exec unicorn
+
+Will read the `config.ru`.
+
+Configuration file:
+
+    bundle exec unicorn -c config/unicorn.rb

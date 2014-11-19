@@ -1042,7 +1042,11 @@ EOS
 
     ![0, 1].include?([0, 1]) or  raise
 
-  ##Append ##<< ##push
+  ##<<
+
+  ##Append
+
+  ##push
 
     # Single element in-place:
 
@@ -1242,7 +1246,13 @@ EOS
 
       not 2 === (1..3) or raise
 
-##hash ##map
+##Hash
+
+##Map
+
+##dict
+
+  # http://www.ruby-doc.org/core-2.1.5/Hash.html
 
     m = { 1 => 'one', 2 => 'two' }
     m[1] == 'one' or raise
@@ -1321,6 +1331,15 @@ EOS
       h = {a:0, b:1}
       h.delete(:a) == 0 or raise
       h == {b:1} or raise
+
+  ##select
+
+    # Filter elements fromthe hash:
+
+      {a:0, b:1}.select {|k,v| k == :a} == {a:0} or raise
+
+    # The specific case of equality has a monkey-patch shortcut in Rails: `slice`.
+    # <http://stackoverflow.com/questions/7430343/ruby-easiest-way-to-filter-hash-keys>
 
 ##Operators
 
@@ -3019,10 +3038,74 @@ EOS
     M.f1 == 1 or raise
     M.f1_2 == 1 or raise
 
-  # Inner methods are invisible:
+  ##Make module functions visible like static methods
 
-    #M::f2 == 2 or raise
-    #f2 == 2 or raise
+  ##module_function
+
+      module ModuleFunction
+        def no
+          0
+        end
+
+        def a_module_function
+          0
+        end
+
+        module_function :a_module_function
+
+        def self.self_function
+          0
+        end
+      end
+
+    # Inner methods are invisible by default
+
+      begin
+        ModuleFunction.no
+      rescue NoMethodError
+      else
+        raise
+      end
+
+    # `module_function` makes them visible:
+
+      ModuleFunction.a_module_function == 0 or raise
+      ModuleFunction.self_function     == 0 or raise
+
+    # TODO vs `extend_self`:
+    # http://stackoverflow.com/questions/2353498/is-extend-self-the-same-as-module-function
+
+    ##extend self
+
+      # Allows to use the module methods directly.
+
+      # Good way to make a singleton class.
+
+        module ModuleExtendSelf
+          extend self
+
+          def f
+            @a ||= 0
+            @a += 1
+          end
+        end
+
+        ModuleExtendSelf.f == 1 or raise
+        ModuleExtendSelf.f == 2 or raise
+
+      # TODO vs `class << self`?
+
+        module ModuleClassSelf
+          class << self
+            def f
+              @a ||= 0
+              @a += 1
+            end
+          end
+        end
+
+        ModuleClassSelf.f == 1 or raise
+        ModuleClassSelf.f == 2 or raise
 
   ##dot vs double colons
 
@@ -3124,38 +3207,6 @@ EOS
       class ExtendClassMethod; end
       ExtendClassMethod.extend(IncludeModule)
       ExtendClassMethod.f2 == 2 or raise
-
-    ##extend self
-
-      # Allows to use the module methods directly.
-
-      # Good way to make a singleton class.
-
-        module ModuleExtendSelf
-          extend self
-
-          def f
-            @a ||= 0
-            @a += 1
-          end
-        end
-
-        ModuleExtendSelf.f == 1 or raise
-        ModuleExtendSelf.f == 2 or raise
-
-      # TODO vs `class << self`?
-
-        module ModuleClassSelf
-          class << self
-            def f
-              @a ||= 0
-              @a += 1
-            end
-          end
-        end
-
-        ModuleClassSelf.f == 1 or raise
-        ModuleClassSelf.f == 2 or raise
 
   ##include and extend at the same time
 
@@ -3614,7 +3665,9 @@ EOS
   # The main lanauge feature used to implement such Ruby DSL is `instance_eval`,
   # or `class_eval`
 
-##special ##predefined variables
+##Special variables
+
+##Predefined variables
 
   # Very insane. Good list: <http://www.zenspider.com/Languages/Ruby/QuickRef.html#pre-defined-variables>
 
@@ -3628,7 +3681,9 @@ EOS
 
       puts "$0 = #{$0}"
 
-  ##Command line arguments ##ARGV
+  ##Command line arguments
+
+  ##ARGV
 
       puts('ARGV = ' + ARGV.join(', '))
 
@@ -3641,7 +3696,9 @@ EOS
 
         #input = ARGF.read
 
-  ##Environment variables ##ENV
+  ##Environment variables
+
+  ##ENV
 
     # Environment variables.
 
@@ -3653,7 +3710,13 @@ EOS
 
     # ENV keys are frozen strings so you cannot modify them inplace.
 
-##instance_eval ##class_eval
+    # Does not work with symbols:
+
+      #ENV[:HOME]
+
+##instance_eval
+
+##class_eval
 
   # Useful for DSL like interfaces.
 
@@ -4633,6 +4696,23 @@ EOS
         ser_obj = Marshal.dump(obj)
         puts 'Marshal.dump = ' + ser_obj
         obj == Marshal.load(ser_obj) or raise
+
+  ##shellwords
+
+      require 'shellwords'
+
+    # http://ruby-doc.org/stdlib-2.1.5/libdoc/shellwords/rdoc/index.html
+
+    # Shell escaping and word splitting utilities.
+
+    # Escape string so that it will be counted as a single shell word.
+    # *Not* meant to be quoted.
+
+    # This module is generally not needed when running `system` like commands
+    # since there you can use the `Array` form which automatically escapes.
+
+      s = 'a $\;'
+      system("a=#{Shellwords.escape(s)}; [ \"$a\" = 'a $\\;' ]") or raise
 
 # Finalization:
 

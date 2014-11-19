@@ -80,12 +80,13 @@ when '##automatic'
     ##mount_proc
 
     ##GCI
-    server.mount_proc('/') do |req, res|
-      res.status = status
-      res.body = body
-    end
-    server.start
-    Process.exit(0)
+
+      server.mount_proc('/') do |req, res|
+        res.status = status
+        res.body = body
+      end
+      server.start
+      Process.exit(0)
   end
 
   # Make sure that the server will be killed
