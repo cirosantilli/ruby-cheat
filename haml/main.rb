@@ -18,8 +18,8 @@ EOF
 
     Haml::Engine.new('= a').render(Object.new, {a: 0}) == "0\n" or raise
 
-def r(input, locals = {}, instance = Object.new)
-  Haml::Engine.new(input).render(instance, locals)
+def r(input, locals = {}, instance = Object.new, engine_options = {})
+  Haml::Engine.new(input, engine_options).render(instance, locals)
 end
 
 r('%p a') == "<p>a</p>\n" or raise
@@ -77,10 +77,6 @@ r('%p a') == "<p>a</p>\n" or raise
   = 'b'
 EOF
 
-  p r(<<EOF)
-%pre= "a\n\n"
-EOF
-
     r(<<EOF) == "<div>\n  a\n  b\n</div>\n" or raise
 %div
   = 'a'
@@ -102,4 +98,47 @@ EOF
     r(<<EOF) == "2\n" or raise
 = 1 + |
   1   |
+EOF
+
+##XSS
+
+##XSS
+
+  # Plain tags never get escaped:
+
+    r(<<EOF, {}, Object.new, {escape_html: false}) == "<br>\n" or raise
+<br>
+EOF
+
+    r(<<EOF, {}, Object.new, {escape_html: true}) == "<br>\n" or raise
+<br>
+EOF
+
+  # What `=` and `#{}` do is determined by `escape_html`.
+
+    r(<<'EOF', {}, Object.new, {escape_html: false}) == "<br>\n" or raise
+#{'<br>'}
+EOF
+
+    r(<<'EOF', {}, Object.new, {escape_html: true}) == "&lt;br&gt;\n" or raise
+#{'<br>'}
+EOF
+
+  # `:preserve` ignores `escape_html` so it is a threat zone.
+
+    r(<<'EOF', {}, Object.new, {escape_html: true}) == "<br>\n" or raise
+:preserve
+  #{'<br>'}
+EOF
+
+  # `%pre` and `preserve` are not affected:
+
+    p r(<<'EOF', {}, Object.new, {escape_html: true}) == "<br>\n" or raise
+!= preserve do
+  #{'<br>'}
+EOF
+
+    r(<<'EOF', {}, Object.new, {escape_html: true}) == "<br>\n" or raise
+%pre
+  #{'<br>'}
 EOF

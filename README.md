@@ -1,4 +1,4 @@
-# ![logo](logo.png) Ruby Cheat
+# Ruby Cheat ![logo](logo.png)
 
 [![Build Status](https://travis-ci.org/cirosantilli/ruby-cheat.svg?branch=master)](https://travis-ci.org/cirosantilli/ruby-cheat)
 

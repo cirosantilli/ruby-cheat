@@ -767,16 +767,33 @@ EOS
       /#{'/'}/ =~ '/' or raise
       /#{'.'}/ =~ 'a' or raise
 
-    # Character classes:
+    ##Character classes:
 
       # -   `^` and `$` start / end of string or after / before newline
-      #
+
       # -   `\A`, `\Z` and `\z`: like `^` and `$` but not around newlines.
-      #
-      #     You almost always want to use `A`, `Z` and z because
-      #     `^` and `$` are an invitation to injection attacks.
-      #
-      #     `\z` match includes the newline, `\Z` excludes it.
+
+          # You almost always want to use `A`, `Z` and z because
+          # `^` and `$` are an invitation to injection attacks.
+
+          # `\z` match includes the newline, `\Z` excludes it.
+
+      ##\h
+
+        # Matches any hexadecimal digit: `[0-9a-fA-F]`
+
+          '0aF' =~ /\h\h\h/ or raise
+          'g' !~ /\h/ or raise
+
+      ##.
+
+        # Only matches newline `\n` if `/m` is given.
+
+          "\n" !~ /./ or raise
+          "\n" =~ /./m or raise
+          "\r" =~ /./ or raise
+
+        # TODO is this sytem dependent? Does it match "\r\n" on Windows?
 
   ##=~
 
