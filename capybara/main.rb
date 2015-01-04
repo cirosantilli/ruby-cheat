@@ -257,7 +257,7 @@ class CapybaraTest
 
               # Nevation of the default value of `visible`.
 
-            # Not very driver-portable..
+            # Not very driver-portable.
 
             # The only thing RackTest checks for is an inline `display:none`
             # on the element or it's parents since it cannot do CSS selectors:

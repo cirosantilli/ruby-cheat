@@ -1720,16 +1720,47 @@ EOS
 
 ##case ##switch
 
+    pass = false
     case 0
     when 0
+      pass = true
     when 1
       raise
     else
       raise
     end
+    pass or raise
 
   # Objects are evaluated according to the `===` operator and not the `==` operator!
-  # See `===` for more info.
+  # See `===` for more info. One particularly important use case if for regexes.
+
+  # Multiple conditions with the same action can be achieved with the `comma` operator:
+
+    [0, 1].each do |x|
+      pass = false
+      case x
+      when 0, 1
+        pass = true
+      when 2
+        raise
+      else
+        raise
+      end
+      pass or raise
+    end
+
+  # No input parameter: same as `if` `elsif`... so never use it.
+
+    pass = false
+    case
+    when true
+      pass = true
+    when false
+      raise
+    else
+      raise
+    end
+    pass or raise
 
 ##def
 
