@@ -915,10 +915,6 @@ EOS
 
     # Only valid identifiers can be used without quotes. E.g., `@@@a` won't work.
 
-##list
-
-  # See array.
-
 ##Enumerable
 
   # Module.
@@ -926,6 +922,8 @@ EOS
   # The most prototypical includer ir Array.
 
   # Its cheat is currently not separated from that of Array TODO.
+
+##list
 
 ##Array
 
